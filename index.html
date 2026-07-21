@@ -296,6 +296,13 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
 .cam-badge{position:absolute;right:-3px;bottom:-3px;width:19px;height:19px;border-radius:50%;background:var(--card);box-shadow:var(--shadow), 0 0 0 1px var(--ring);display:flex;align-items:center;justify-content:center;color:var(--mut);pointer-events:none}
 .cam-badge svg{width:10px;height:10px}
 
+/* ===== ПОВТОРЫ ===== */
+.rep-stepper{display:flex;align-items:center;gap:10px;margin-top:9px;background:var(--card);border-radius:99px;padding:5px;box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);width:max-content}
+.rep-stepper button{width:32px;height:32px;border-radius:50%;background:var(--soft);font-size:16px;font-weight:800;color:var(--mut);transition:transform .2s var(--spring)}
+.rep-stepper button:active{transform:scale(.85);color:var(--acc)}
+.rep-stepper b{min-width:24px;text-align:center;font-size:14px}
+.rep-stepper span{font-size:11px;color:var(--mut);padding-right:9px}
+
 /* ===== СИНХРОНИЗАЦИЯ ===== */
 .sync-box{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow);margin-bottom:16px}
 .sync-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
@@ -440,6 +447,15 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
             <button data-dl="clear">Убрать</button>
           </div>
         </div>
+        <div class="fgroup">
+          <span class="label-cap">Повтор</span>
+          <div class="pool" id="f-repeat"></div>
+          <div class="rep-stepper hidden" id="f-rep-stepper">
+            <button type="button" data-repstep="-1">−</button>
+            <b id="f-rep-n">2</b><span>дн.</span>
+            <button type="button" data-repstep="1">+</button>
+          </div>
+        </div>
       </div>
 
       <div id="f-note-fields" class="fgroup hidden">
@@ -484,6 +500,7 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
     </div>
     <div class="fam-body">
       <div id="sync-card"></div>
+      <div id="notif-card"></div>
       <div id="fam-list"></div>
       <div class="fam-add">
         <span class="label-cap">Новый член семьи</span>
@@ -526,6 +543,17 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
       <p>Дело перейдёт в статус «В работе»</p>
       <div class="who-grid" id="who-grid"></div>
       <button class="btn btn-soft" data-close="who-overlay">Отмена</button>
+    </div>
+  </div>
+
+  <!-- ПОВТОРЯЮЩЕЕСЯ ДЕЛО: КАК ВЫПОЛНИТЬ -->
+  <div class="overlay hidden" id="repeat-overlay">
+    <div class="modal">
+      <h3>Повторяющееся дело</h3>
+      <p id="rep-done-msg"></p>
+      <button class="btn btn-acc" data-repdone="next" style="margin-bottom:9px">✓ Готово до следующего раза</button>
+      <button class="btn btn-dark" data-repdone="all" style="margin-bottom:9px">Завершить насовсем</button>
+      <button class="btn btn-soft" data-close="repeat-overlay">Отмена</button>
     </div>
   </div>
 
@@ -710,6 +738,96 @@ async function deleteTaskImages(t){
 function blobToB64(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); }); }
 function b64toBlob(b64){ const bin=atob(b64); const a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new Blob([a],{type:'image/jpeg'}); }
 function queuePendingImg(id){ S.pendingImg = S.pendingImg||[]; if(!S.pendingImg.includes(id)) S.pendingImg.push(id); persistLocal(); }
+const REPEAT_OPTS = [
+  {k:'',        label:'Без повтора'},
+  {k:'daily',   label:'Каждый день'},
+  {k:'weekdays',label:'По будням'},
+  {k:'weekly',  label:'Каждую неделю'},
+  {k:'monthly', label:'Каждый месяц'},
+  {k:'yearly',  label:'Каждый год'},
+  {k:'custom',  label:'Каждые N дней'},
+];
+function repLabel(rp){
+  if(!rp) return '';
+  return {daily:'Каждый день', weekdays:'По будням', weekly:'Каждую неделю',
+          monthly:'Каждый месяц', yearly:'Каждый год'}[rp.freq] || ('Каждые '+(rp.interval||2)+' дн.');
+}
+function repShort(rp){
+  if(!rp) return '';
+  return {daily:'ежедневно', weekdays:'будни', weekly:'еженедельно',
+          monthly:'ежемесячно', yearly:'ежегодно'}[rp.freq] || ((rp.interval||2)+' дн.');
+}
+function fmtLocal(d){
+  const p = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function nextOccurrence(dlStr, rp){
+  let d = new Date(dlStr); if(isNaN(d)) d = new Date();
+  const now = new Date();
+  const iv = Math.max(1, rp.interval||1);
+  const step = ()=>{
+    if(rp.freq==='weekdays'){ do{ d.setDate(d.getDate()+1); }while(d.getDay()===0 || d.getDay()===6); }
+    else if(rp.freq==='weekly') d.setDate(d.getDate()+7*iv);
+    else if(rp.freq==='monthly'){ const day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+iv);
+      const mx=new Date(d.getFullYear(), d.getMonth()+1, 0).getDate(); d.setDate(Math.min(day,mx)); }
+    else if(rp.freq==='yearly') d.setFullYear(d.getFullYear()+iv);
+    else d.setDate(d.getDate()+iv);   // daily / custom
+  };
+  let g = 0;
+  do{ step(); g++; }while(d <= now && g < 800);
+  return fmtLocal(d);
+}
+
+/* ============ УВЕДОМЛЕНИЯ ============ */
+const NOTIFIED = new Set(JSON.parse(localStorage.getItem('hub_notified')||'[]'));
+function markNotified(k){
+  NOTIFIED.add(k);
+  localStorage.setItem('hub_notified', JSON.stringify([...NOTIFIED].slice(-300)));
+}
+async function notify(title, body, tag){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  try{
+    const reg = await navigator.serviceWorker?.getRegistration?.();
+    if(reg && reg.showNotification) reg.showNotification(title, {body, tag, icon:'icon-192.png', badge:'icon-192.png'});
+    else new Notification(title, {body, tag, icon:'icon-192.png'});
+  }catch(e){ try{ new Notification(title, {body}); }catch(_){} }
+}
+function checkDeadlines(){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  const now = Date.now();
+  liveTasks().forEach(t=>{
+    if(t.type!=='tasks' || t.completed || t.isDraft || !t.deadline) return;
+    const d = new Date(t.deadline).getTime(); if(isNaN(d)) return;
+    const kS = 's'+t.id+'|'+t.deadline, kD = 'd'+t.id+'|'+t.deadline;
+    const time = new Date(d).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    if(d-now > 0 && d-now <= 30*60e3 && !NOTIFIED.has(kS)){
+      markNotified(kS); notify('⏰ Скоро дедлайн', `${t.title} — в ${time}`, kS);
+    }
+    if(now >= d && now-d < 24*36e5 && !NOTIFIED.has(kD)){
+      markNotified(kD); notify('🔥 Дедлайн наступил', t.title + (t.repeat ? ' ('+repShort(t.repeat)+')' : ''), kD);
+    }
+  });
+}
+function renderNotifCard(){
+  const el = $('notif-card'); if(!el) return;
+  const box = (dot,title,text,btn='')=>`<div class="sync-box">
+    <div class="sync-head"><span class="sync-dot ${dot}"></span><b>${title}</b></div>
+    <p>${text}</p>${btn}</div>`;
+  if(!('Notification' in window)){
+    el.innerHTML = box('off','Уведомления недоступны','Этот браузер их не поддерживает. На iPhone добавьте приложение на экран «Домой».');
+    return;
+  }
+  const p = Notification.permission;
+  if(p==='granted') el.innerHTML = box('on','Уведомления включены',
+    'Это устройство получает сигналы о дедлайнах, новых и назначенных делах. Включите то же на остальных устройствах семьи.',
+    '<button class="btn btn-soft" data-notif="test">Проверить уведомление</button>');
+  else if(p==='denied') el.innerHTML = box('err','Уведомления запрещены',
+    'Разрешите уведомления для этого сайта в настройках браузера, затем вернитесь сюда.');
+  else el.innerHTML = box('off','Уведомления выключены',
+    'Дедлайны, новые и назначенные вам дела будут приходить пушем на это устройство.',
+    '<button class="btn btn-acc" data-notif="on">🔔 Включить на этом устройстве</button>');
+}
+
 function genFamilyCode(){ const A='ABCDEFGHJKMNPQRSTVWXYZ23456789'; return Array.from(crypto.getRandomValues(new Uint8Array(12))).map(b=>A[b%A.length]).join(''); }
 
 /* ---------- Миграция из старого localStorage ---------- */
@@ -781,7 +899,7 @@ function rerender(){
   updateNav();
 }
 const SYNC = {
-  cid: uid('c_'), client:null, chan:null, timer:null, pushTimer:null,
+  cid: uid('c_'), client:null, chan:null, timer:null, pushTimer:null, seeded:false,
   lastSent:'', pulling:false, pushing:false,
   enabled(){ return !!(SB_URL && SB_KEY && S.familyCode && window.supabase); },
   start(){
@@ -821,19 +939,44 @@ const SYNC = {
     try{
       const d = await this.rpc('hub_pull', {p_fid:S.familyCode});
       if(d && d.state) this.applyRemote(d.state, d.rev);
-      else { S.syncRev = 0; this.push(); }   // в облаке пусто — заливаем своё
+      else { S.syncRev = 0; this.seeded = true; this.push(); }   // в облаке пусто — заливаем своё
       setSyncStatus('on');
       this.flushImages();
     }catch(e){ console.warn('sync pull', e); setSyncStatus('err'); }
     this.pulling = false;
   },
   applyRemote(remote, rev){
+    const before = new Map(S.tasks.map(t=>[t.id, {u:t.updatedAt||0, a:t.assignedTo, c:!!t.completed, del:!!t.deleted}]));
     const merged = mergeStates(this.snapshot(), remote);
     S.members = merged.members; S.labels = merged.labels;
     S.tasks = merged.tasks; S.metaUpdatedAt = merged.metaUpdatedAt;
     S.syncRev = rev;
     if(S.currentUser && !member(S.currentUser)) S.currentUser = null;
     persistLocal(); rerender();
+
+    /* пуш о новостях с других устройств (кроме самого первого слияния) */
+    if(this.seeded){
+      const news = [];
+      S.tasks.forEach(t=>{
+        if(t.deleted || t.isDraft) return;
+        const b = before.get(t.id);
+        const who = member(t.updatedBy)?.name || member(t.createdBy)?.name || '';
+        if(!b || b.del){
+          if(t.createdBy !== S.currentUser)
+            news.push([t.type==='tasks'?'🆕 Новое дело':'🆕 Новая заметка', t.title + (who?` — ${who}`:'')]);
+        } else if((t.updatedAt||0) > b.u && t.updatedBy !== S.currentUser){
+          if(t.assignedTo === S.currentUser && b.a !== S.currentUser)
+            news.push(['👉 Вам назначено', t.title + (who?` — ${who}`:'')]);
+          else if(t.completed && !b.c)
+            news.push(['✅ Выполнено', t.title + (who?` — ${who}`:'')]);
+        }
+      });
+      if(news.length > 3) notify('Семейный Хаб', 'Обновлений от семьи: '+news.length, 'batch');
+      else news.forEach(([a,b],i)=>notify(a, b, 'n'+Date.now()+i));
+      if(news.length) checkDeadlines();
+    }
+    this.seeded = true;
+
     if(JSON.stringify(merged) !== JSON.stringify(normSnap(remote))) this.onLocalChange();
     else this.lastSent = JSON.stringify(merged);
   },
@@ -1020,6 +1163,7 @@ function cardHTML(t){
     const r = relDeadline(t.deadline);
     if(r) chips += `<span class="chip ${r.over?'soft-rose':r.soon?'soft-amber':'soft-gray'}">${r.text}</span>`;
   }
+  if(t.type==='tasks' && t.repeat && !t.completed) chips += `<span class="chip soft-green">↻ ${repShort(t.repeat)}</span>`;
   let meta = `Автор: <b>${esc(author?.name||'—')}</b>`;
   const ch = t.checklist||[];
   if(ch.length){
@@ -1156,8 +1300,26 @@ function confirmDelete(id){
     activeScreen==='detail' ? show('main') : renderMain();
   });
 }
+let repDoneId = null;
+function openRepeatDone(id){
+  const t = task(id); if(!t) return;
+  repDoneId = id;
+  $('rep-done-msg').textContent = `«${t.title}» повторяется (${repLabel(t.repeat).toLowerCase()}). Выполнить только на этот раз — или закрыть серию, чтобы напоминания прекратились?`;
+  $('repeat-overlay').classList.remove('hidden');
+}
+function completeOccurrence(id){
+  const t = task(id); if(!t || !t.repeat) return;
+  t.deadline = nextOccurrence(t.deadline, t.repeat);
+  (t.checklist||[]).forEach(c=>c.done=false);
+  t.status = 'pending'; t.updatedBy = S.currentUser; touch(t);
+  persist();
+  const r = relDeadline(t.deadline);
+  toast('Готово! Следующий раз: '+(r?r.text:new Date(t.deadline).toLocaleDateString('ru-RU')),'↻');
+  activeScreen==='detail' ? renderDetail() : renderMain();
+}
 function toggleComplete(id){
   const t = task(id); if(!t) return;
+  if(!t.completed && t.repeat && !t.isDraft){ openRepeatDone(id); return; }
   if(!t.completed){
     t.completed = true; t.updatedBy = S.currentUser; touch(t);
     persist(); toast('Дело выполнено! 🎉','✓');
@@ -1193,6 +1355,7 @@ function renderDetail(){
     info = `<div class="info-grid">
       <div class="info-cell"><div class="k">Исполнитель</div><div class="v">${asg?avaHTML(asg,'ava-xs')+esc(asg.name):'✦ Общее дело'}</div></div>
       <div class="info-cell"><div class="k">Дедлайн</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text)+(r.over?' ⚠️':'') : '—'}</div></div>
+      ${t.repeat?`<div class="info-cell wide"><div class="k">↻ Повтор</div><div class="v">${repLabel(t.repeat)}${t.deadline?` · далее: ${new Date(t.deadline).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}</div></div>`:''}
     </div>`;
   } else {
     const vis = (t.visibleTo||[]);
@@ -1290,7 +1453,7 @@ function lbNav(d){ lbIdx = (lbIdx + d + lbImgs.length) % lbImgs.length; updateLB
 function newFormBuffer(){
   return { editingId:null, type:'tasks',
     label:S.labels[0]?.name||'Сделать', labelColor:S.labels[0]?.color||'green',
-    newLabelColor:'green', labelEdit:false, assignee:null, imageIds:[], removedImageIds:[],
+    newLabelColor:'green', labelEdit:false, assignee:null, repeat:null, imageIds:[], removedImageIds:[],
     visibility:S.members.map(m=>m.id) };
 }
 function openForm(editId){
@@ -1299,7 +1462,8 @@ function openForm(editId){
     const t = task(editId); if(!t) return;
     F.editingId = editId; F.type = t.type;
     F.label = t.label; F.labelColor = t.labelColor||'green';
-    F.assignee = t.assignedTo; F.imageIds = [...(t.imageIds||[])];
+    F.assignee = t.assignedTo; F.repeat = t.repeat ? {...t.repeat} : null;
+    F.imageIds = [...(t.imageIds||[])];
     F.visibility = (t.visibleTo||[]).length ? [...t.visibleTo] : S.members.map(m=>m.id);
     $('f-title').value = t.title||'';
     $('f-desc').value = t.description||'';
@@ -1347,6 +1511,17 @@ function renderFormSelectors(){
     ${avaHTML(m,'em-ava')}<span>${esc(m.name)}</span></button>`).join('');
   $('f-assignee').innerHTML = mh;
   hydrateImages($('f-assignee'));
+  renderRepeat();
+}
+function renderRepeat(){
+  $('f-repeat').innerHTML = REPEAT_OPTS.map(o=>{
+    const sel = (!F.repeat && o.k==='') || (F.repeat && F.repeat.freq===o.k);
+    const label = (o.k==='custom' && F.repeat?.freq==='custom') ? 'Каждые '+F.repeat.interval+' дн.' : o.label;
+    return `<button type="button" class="p-chip ${sel?'sel':''}" data-rep="${o.k}" style="--lc:var(--acc)">${o.k?'↻ ':''}${label}</button>`;
+  }).join('');
+  const st = $('f-rep-stepper');
+  st.classList.toggle('hidden', F.repeat?.freq !== 'custom');
+  if(F.repeat?.freq === 'custom') $('f-rep-n').textContent = F.repeat.interval;
 }
 function renderVisibility(){
   $('f-visibility').innerHTML = S.members.map(m=>`
@@ -1402,7 +1577,15 @@ async function saveForm(asDraft){
     checklist.push({ id: inp.dataset.chkId || (Date.now()+''+i), text:v, done: !!inp.dataset.chkDone });
   });
   const desc = $('f-desc').value.trim();
-  const dl = $('f-deadline').value;
+  let dl = $('f-deadline').value;
+  const rp = F.type==='tasks' ? F.repeat : null;
+  if(rp && !dl){
+    const d = new Date();
+    if(d.getHours() >= 9) d.setDate(d.getDate()+1);
+    d.setHours(9,0,0,0);
+    dl = fmtLocal(d);
+    toast('Повтору нужен дедлайн — поставил '+(relDeadline(dl)?.text||'завтра 09:00'),'🕘');
+  }
 
   if(F.editingId){
     const t = task(F.editingId); if(!t) return;
@@ -1410,7 +1593,7 @@ async function saveForm(asDraft){
     for(const id of F.removedImageIds){ try{ await DB.del('img', id); }catch(e){} urlCache.delete(id); SYNC.imgDel(id); }
     /* сохранить done для неизменённых пунктов чек-листа по тексту */
     checklist.forEach(n=>{ if(!n.done){ const m=(t.checklist||[]).find(o=>o.text===n.text); if(m) n.done=m.done; } });
-    Object.assign(t, { title, description:desc, deadline:dl,
+    Object.assign(t, { title, description:desc, deadline:dl, repeat:rp,
       label:F.label, labelColor:F.labelColor, assignedTo:F.type==='tasks'?F.assignee:null,
       visibleTo:F.type==='notes'?[...F.visibility]:[], imageIds:[...F.imageIds],
       checklist, updatedBy:S.currentUser, updatedAt:Date.now() });
@@ -1418,7 +1601,7 @@ async function saveForm(asDraft){
     activeTaskId = t.id; show('detail');
   } else {
     S.tasks.push({
-      id:Date.now(), type:F.type, title, description:desc, deadline:dl,
+      id:Date.now(), type:F.type, title, description:desc, deadline:dl, repeat:rp,
       label:F.label, labelColor:F.labelColor,
       assignedTo:F.type==='tasks'?F.assignee:null, status:'pending', completed:false,
       visibleTo:F.type==='notes'?[...F.visibility]:[],
@@ -1498,6 +1681,7 @@ function renderFamily(){
   }).join('');
   hydrateImages($('fam-list'));
   renderSyncCard();
+  renderNotifCard();
   const pv = $('fam-new-ava');
   pv.innerHTML = famNewAvatarId ? `<img data-img="${famNewAvatarId}" alt="">` : '+';
   if(famNewAvatarId) hydrateImages(pv.parentElement);
@@ -1589,6 +1773,17 @@ document.addEventListener('click', e=>{
   if(x = el('[data-act]')){ ctxAction(x.dataset.act); return; }
   if(el('#ctx-overlay') && !el('.sheet')){ $('ctx-overlay').classList.add('hidden'); return; }
   if(x = el('[data-who]')){ assignWork(x.dataset.who); return; }
+  if(x = el('[data-repdone]')){
+    $('repeat-overlay').classList.add('hidden');
+    const id = repDoneId; repDoneId = null;
+    const t = task(id); if(!t) return;
+    if(x.dataset.repdone === 'next') completeOccurrence(id);
+    else {
+      t.completed = true; t.updatedBy = S.currentUser; touch(t);
+      persist(); toast('Серия завершена — напоминаний больше не будет','✓');
+      activeScreen==='detail' ? renderDetail() : renderMain();
+    }
+    return; }
   if(x = el('[data-close]')){ $(x.dataset.close).classList.add('hidden'); return; }
   if(el('#cf-ok')){ $('confirm-overlay').classList.add('hidden'); if(cfCallback) cfCallback(); return; }
   if(el('#confirm-overlay') && !el('.modal')){ $('confirm-overlay').classList.add('hidden'); return; }
@@ -1615,6 +1810,18 @@ document.addEventListener('click', e=>{
     F.visibility.includes(id) ? F.visibility=F.visibility.filter(v=>v!==id) : F.visibility.push(id);
     if(!F.visibility.length) F.visibility=[S.currentUser];
     renderVisibility(); return; }
+  if(x = el('[data-rep]')){
+    const k = x.dataset.rep;
+    if(!k) F.repeat = null;
+    else if(k==='custom') F.repeat = {freq:'custom', interval:F.repeat?.freq==='custom'?F.repeat.interval:2};
+    else F.repeat = {freq:k, interval:1};
+    renderRepeat(); return; }
+  if(x = el('[data-repstep]')){
+    if(F.repeat?.freq==='custom'){
+      F.repeat.interval = Math.min(365, Math.max(2, F.repeat.interval + Number(x.dataset.repstep)));
+      renderRepeat();
+    }
+    return; }
   if(x = el('[data-dl]')){
     const d = new Date(); const pad = n=>String(n).padStart(2,'0');
     const set = dt => $('f-deadline').value = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
@@ -1630,6 +1837,14 @@ document.addEventListener('click', e=>{
   if(el('#f-save')){ saveForm(false); return; }
   if(el('#form-back')){ cancelForm(); return; }
   /* семья */
+  if(x = el('[data-notif]')){
+    if(x.dataset.notif === 'on'){
+      Notification.requestPermission().then(p=>{
+        renderNotifCard();
+        if(p === 'granted'){ notify('Семейный Хаб','Уведомления включены на этом устройстве 👌'); checkDeadlines(); }
+      });
+    } else notify('Проверка связи','Уведомления работают 👌','test');
+    return; }
   if(x = el('[data-sync]')){
     const a = x.dataset.sync;
     if(a==='create'){
@@ -1730,6 +1945,8 @@ document.addEventListener('keydown', e=>{
   applyTheme();
   if(S.currentUser && member(S.currentUser)) show('main'); else show('auth');
   SYNC.start();
+  checkDeadlines();
+  setInterval(checkDeadlines, 30000);
   window.addEventListener('online', ()=>SYNC.pull());
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) SYNC.pull(); });
   /* защищённая регистрация SW: не ломает открытие файла напрямую */

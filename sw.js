@@ -1,5 +1,5 @@
 /* Семейный Хаб — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v8';
+const CACHE = 'family-hub-v9';
 const SHELL = [
   './',
   './index.html',
@@ -18,6 +18,16 @@ self.addEventListener('activate', e => {
     caches.keys()
       .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
+      for (const c of cs) if ('focus' in c) return c.focus();
+      return clients.openWindow('./');
+    })
   );
 });
 
