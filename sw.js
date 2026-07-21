@@ -1,5 +1,5 @@
 /* Семейный Хаб — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v6';
+const CACHE = 'family-hub-v8';
 const SHELL = [
   './',
   './index.html',
@@ -37,7 +37,21 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Свой origin: cache-first, сеть — как обновление кэша
+  // HTML-навигация: network-first, чтобы обновления доезжали сразу
+  if (e.request.mode === 'navigate' || url.pathname.endsWith('index.html')) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+        }
+        return res;
+      }).catch(() => caches.match(e.request).then(h => h || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // Остальная статика своего origin: cache-first с фоновым обновлением
   if (url.origin === location.origin) {
     e.respondWith(
       caches.match(e.request).then(hit => {
@@ -47,7 +61,7 @@ self.addEventListener('fetch', e => {
             caches.open(CACHE).then(c => c.put(e.request, copy));
           }
           return res;
-        }).catch(() => hit || caches.match('./index.html'));
+        }).catch(() => hit);
         return hit || net;
       })
     );
