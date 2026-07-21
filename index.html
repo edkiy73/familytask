@@ -596,6 +596,7 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
    3) вставьте сюда Project URL и anon public key                              */
 const SB_URL = 'https://qviioxefqtnhashdbtls.supabase.co';
 const SB_KEY = 'sb_publishable_iYhV1carD3GiDhtRzvGluw_5G4TyHhA';
+const VAPID_PUBLIC = 'BDMLjsN-aJssPhcvr-YJH2d6fSYLjft-D_CNpsE6pC8vhIT1LkW-2v_fj4SWANpVrtzuIWMvtL6LowRF4EC15Jg';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -808,6 +809,45 @@ function checkDeadlines(){
     }
   });
 }
+/* --- Web Push: подписка устройства и отправка событий семье --- */
+const DEVICE_ID = (()=>{ let d = localStorage.getItem('hub_device'); if(!d){ d = uid('dev_'); localStorage.setItem('hub_device', d); } return d; })();
+let pushSubActive = false;
+function b64uToU8(s){
+  const pad = '='.repeat((4 - s.length % 4) % 4);
+  const raw = atob((s + pad).replace(/-/g,'+').replace(/_/g,'/'));
+  const a = new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++) a[i] = raw.charCodeAt(i);
+  return a;
+}
+async function ensurePushSub(){
+  try{
+    if(!VAPID_PUBLIC || !S.familyCode || !SYNC.client) return;
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if(!('Notification' in window) || Notification.permission !== 'granted') return;
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64uToU8(VAPID_PUBLIC) });
+    await SYNC.rpc('hub_sub_put', { p_fid:S.familyCode, p_device:DEVICE_ID, p_sub:sub.toJSON() });
+    if(!pushSubActive){ pushSubActive = true; renderNotifCard(); }
+  }catch(e){ console.warn('push sub', e); }
+}
+async function dropPushSub(code){
+  try{
+    if(SYNC.client && code) await SYNC.rpc('hub_sub_del', { p_fid:code, p_device:DEVICE_ID });
+    const reg = await navigator.serviceWorker?.getRegistration?.();
+    const sub = await reg?.pushManager?.getSubscription();
+    if(sub) await sub.unsubscribe();
+  }catch(e){}
+  pushSubActive = false;
+}
+function pushEvent(title, body, tag){
+  if(!VAPID_PUBLIC || !S.familyCode || !SB_URL) return;
+  fetch(SB_URL + '/functions/v1/push-send', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY },
+    body: JSON.stringify({ fid:S.familyCode, title, body, tag, exclude:DEVICE_ID }),
+  }).catch(()=>{});
+}
 function renderNotifCard(){
   const el = $('notif-card'); if(!el) return;
   const box = (dot,title,text,btn='')=>`<div class="sync-box">
@@ -819,7 +859,8 @@ function renderNotifCard(){
   }
   const p = Notification.permission;
   if(p==='granted') el.innerHTML = box('on','Уведомления включены',
-    'Это устройство получает сигналы о дедлайнах, новых и назначенных делах. Включите то же на остальных устройствах семьи.',
+    'Это устройство получает сигналы о дедлайнах, новых и назначенных делах. Включите то же на остальных устройствах семьи.'
+    + (VAPID_PUBLIC ? '<br>Пуши в закрытое приложение: <b>' + (pushSubActive ? 'работают' : (S.familyCode ? 'подключаются…' : 'нужен код семьи')) + '</b>' : ''),
     '<button class="btn btn-soft" data-notif="test">Проверить уведомление</button>');
   else if(p==='denied') el.innerHTML = box('err','Уведомления запрещены',
     'Разрешите уведомления для этого сайта в настройках браузера, затем вернитесь сюда.');
@@ -875,7 +916,7 @@ function setSyncStatus(s){
   syncState = s;
   if(!$('screen-family').classList.contains('hidden')) renderSyncCard();
 }
-function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], metaUpdatedAt:st.metaUpdatedAt||0 }; }
+function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], metaUpdatedAt:st.metaUpdatedAt||0, tz:(typeof st.tz==='number'?st.tz:new Date().getTimezoneOffset()) }; }
 function mergeStates(local, remote){
   local = normSnap(local); remote = normSnap(remote);
   const map = new Map();
@@ -889,6 +930,7 @@ function mergeStates(local, remote){
     labels:  takeLocal ? local.labels  : remote.labels,
     tasks: [...map.values()],
     metaUpdatedAt: Math.max(local.metaUpdatedAt||0, remote.metaUpdatedAt||0),
+    tz: new Date().getTimezoneOffset(),
   };
 }
 function rerender(){
@@ -942,6 +984,7 @@ const SYNC = {
       else { S.syncRev = 0; this.seeded = true; this.push(); }   // в облаке пусто — заливаем своё
       setSyncStatus('on');
       this.flushImages();
+      ensurePushSub();
     }catch(e){ console.warn('sync pull', e); setSyncStatus('err'); }
     this.pulling = false;
   },
@@ -963,16 +1006,16 @@ const SYNC = {
         const who = member(t.updatedBy)?.name || member(t.createdBy)?.name || '';
         if(!b || b.del){
           if(t.createdBy !== S.currentUser)
-            news.push([t.type==='tasks'?'🆕 Новое дело':'🆕 Новая заметка', t.title + (who?` — ${who}`:'')]);
+            news.push([t.type==='tasks'?'🆕 Новое дело':'🆕 Новая заметка', t.title + (who?` — ${who}`:''), 'evt-new-'+t.id]);
         } else if((t.updatedAt||0) > b.u && t.updatedBy !== S.currentUser){
           if(t.assignedTo === S.currentUser && b.a !== S.currentUser)
-            news.push(['👉 Вам назначено', t.title + (who?` — ${who}`:'')]);
+            news.push(['👉 Вам назначено', t.title + (who?` — ${who}`:''), 'evt-asg-'+t.id+'-'+(t.updatedAt||0)]);
           else if(t.completed && !b.c)
-            news.push(['✅ Выполнено', t.title + (who?` — ${who}`:'')]);
+            news.push(['✅ Выполнено', t.title + (who?` — ${who}`:''), 'evt-done-'+t.id+'-'+(t.updatedAt||0)]);
         }
       });
       if(news.length > 3) notify('Семейный Хаб', 'Обновлений от семьи: '+news.length, 'batch');
-      else news.forEach(([a,b],i)=>notify(a, b, 'n'+Date.now()+i));
+      else news.forEach(([a,b,tg])=>notify(a, b, tg));
       if(news.length) checkDeadlines();
     }
     this.seeded = true;
@@ -1278,6 +1321,7 @@ function assignWork(mid){
   if(!t) return;
   t.assignedTo = mid; t.status = 'in_progress'; t.updatedBy = S.currentUser; touch(t);
   persist(); toast(`В работе у: ${member(mid)?.name}`,'💼');
+  pushEvent('👉 Назначено', `${t.title} → ${member(mid)?.name||''}`, 'evt-asg-'+t.id+'-'+(t.updatedAt||0));
   activeScreen==='detail' ? renderDetail() : renderMain();
 }
 
@@ -1323,6 +1367,7 @@ function toggleComplete(id){
   if(!t.completed){
     t.completed = true; t.updatedBy = S.currentUser; touch(t);
     persist(); toast('Дело выполнено! 🎉','✓');
+    pushEvent('✅ Выполнено', `${t.title} — ${member(S.currentUser)?.name||''}`, 'evt-done-'+t.id+'-'+(t.updatedAt||0));
   } else {
     t.completed = false; t.status = 'pending'; t.updatedBy = S.currentUser; touch(t);
     persist(); toast('Возвращено в работу','↩️');
@@ -1410,7 +1455,9 @@ function detailAction(act){
   if(act==='del') confirmDelete(t.id);
   if(act==='work') openWho(t.id);
   if(act==='done') toggleComplete(t.id);
-  if(act==='publish'){ t.isDraft=false; touch(t); persist(); toast('Опубликовано','🚀'); renderDetail(); }
+  if(act==='publish'){ t.isDraft=false; touch(t); persist(); toast('Опубликовано','🚀');
+    pushEvent(t.type==='tasks'?'🆕 Новое дело':'🆕 Новая заметка', t.title + ' — ' + (member(S.currentUser)?.name||''), 'evt-new-'+t.id);
+    renderDetail(); }
   if(act==='chk-all'){
     const all = (t.checklist||[]).every(c=>c.done);
     (t.checklist||[]).forEach(c=>c.done=!all);
@@ -1611,6 +1658,11 @@ async function saveForm(asDraft){
     });
     S.currentTab = F.type;
     persist(); toast(asDraft?'Сохранено в черновики':'Опубликовано','🎉');
+    if(!asDraft){
+      const me = member(S.currentUser)?.name || '';
+      const nt = S.tasks[S.tasks.length-1];
+      pushEvent(F.type==='tasks'?'🆕 Новое дело':'🆕 Новая заметка', title + (me?' — '+me:''), 'evt-new-'+nt.id);
+    }
     show('main');
   }
 }
@@ -1781,6 +1833,7 @@ document.addEventListener('click', e=>{
     else {
       t.completed = true; t.updatedBy = S.currentUser; touch(t);
       persist(); toast('Серия завершена — напоминаний больше не будет','✓');
+      pushEvent('✅ Выполнено (серия завершена)', `${t.title} — ${member(S.currentUser)?.name||''}`, 'evt-done-'+t.id+'-'+(t.updatedAt||0));
       activeScreen==='detail' ? renderDetail() : renderMain();
     }
     return; }
@@ -1841,7 +1894,7 @@ document.addEventListener('click', e=>{
     if(x.dataset.notif === 'on'){
       Notification.requestPermission().then(p=>{
         renderNotifCard();
-        if(p === 'granted'){ notify('Семейный Хаб','Уведомления включены на этом устройстве 👌'); checkDeadlines(); }
+        if(p === 'granted'){ notify('Семейный Хаб','Уведомления включены на этом устройстве 👌'); checkDeadlines(); ensurePushSub(); }
       });
     } else notify('Проверка связи','Уведомления работают 👌','test');
     return; }
@@ -1868,7 +1921,9 @@ document.addEventListener('click', e=>{
     }
     if(a==='off'){
       confirmDlg('Отключить облако?','Данные останутся на этом устройстве, но перестанут синхронизироваться.','Отключить',true,()=>{
+        const code = S.familyCode;
         S.familyCode = null; persistLocal(); SYNC.stop(); renderSyncCard();
+        dropPushSub(code);
       });
     }
     return; }
@@ -1947,6 +2002,7 @@ document.addEventListener('keydown', e=>{
   SYNC.start();
   checkDeadlines();
   setInterval(checkDeadlines, 30000);
+  setTimeout(ensurePushSub, 2500);
   window.addEventListener('online', ()=>SYNC.pull());
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) SYNC.pull(); });
   /* защищённая регистрация SW: не ломает открытие файла напрямую */

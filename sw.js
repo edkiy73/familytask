@@ -1,5 +1,5 @@
 /* Семейный Хаб — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v9';
+const CACHE = 'family-hub-v10';
 const SHELL = [
   './',
   './index.html',
@@ -19,6 +19,17 @@ self.addEventListener('activate', e => {
       .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
+});
+
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data.json(); } catch (_) { d = { title: 'Семейный Хаб', body: e.data && e.data.text() }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Семейный Хаб', {
+    body: d.body || '',
+    tag: d.tag || undefined,
+    icon: 'icon-192.png',
+    badge: 'icon-192.png',
+  }));
 });
 
 self.addEventListener('notificationclick', e => {
