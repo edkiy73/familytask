@@ -1,5 +1,5 @@
 /* Семейный Хаб — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v5';
+const CACHE = 'family-hub-v6';
 const SHELL = [
   './',
   './index.html',
@@ -26,7 +26,7 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
 
   // Google Fonts: cache-first с докачкой в кэш
-  if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
+  if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com') || url.hostname.includes('cdn.jsdelivr.net')) {
     e.respondWith(
       caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
         const copy = res.clone();

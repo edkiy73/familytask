@@ -296,6 +296,19 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
 .cam-badge{position:absolute;right:-3px;bottom:-3px;width:19px;height:19px;border-radius:50%;background:var(--card);box-shadow:var(--shadow), 0 0 0 1px var(--ring);display:flex;align-items:center;justify-content:center;color:var(--mut);pointer-events:none}
 .cam-badge svg{width:10px;height:10px}
 
+/* ===== СИНХРОНИЗАЦИЯ ===== */
+.sync-box{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow);margin-bottom:16px}
+.sync-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sync-head b{font-size:13.5px;letter-spacing:-.01em}
+.sync-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.sync-dot.on{background:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
+.sync-dot.off{background:var(--faint)}
+.sync-dot.err{background:var(--amber);box-shadow:0 0 0 4px var(--amber-soft)}
+.sync-box p{font-size:11.5px;color:var(--mut);line-height:1.5;margin-bottom:12px}
+.sync-code{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:17px;font-weight:700;letter-spacing:.12em;text-align:center;background:var(--soft);border-radius:13px;padding:12px;margin-bottom:10px;cursor:pointer;user-select:all;-webkit-user-select:all;box-shadow:inset 0 0 0 1px var(--ring)}
+.sync-join{display:grid;grid-template-columns:1fr 74px;gap:8px}
+.sync-join input{text-transform:uppercase;font-family:ui-monospace,'SF Mono',Menlo,monospace;letter-spacing:.08em}
+
 /* ===== МОДАЛКИ / ШТОРКИ ===== */
 .overlay{position:fixed;inset:0;background:color-mix(in srgb,#0C0D0F 55%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:40;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s}
 .overlay.sheet-mode{align-items:flex-end;padding:0}
@@ -470,6 +483,7 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
       <div class="sub-actions"></div>
     </div>
     <div class="fam-body">
+      <div id="sync-card"></div>
       <div id="fam-list"></div>
       <div class="fam-add">
         <span class="label-cap">Новый член семьи</span>
@@ -541,12 +555,19 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
   <div id="toast"><span id="toast-ico"></span><span id="toast-txt"></span></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 'use strict';
 /* ============================================================
    Семейный Хаб · local-first PWA
    Данные и фото — в IndexedDB (без лимитов localStorage)
 ============================================================ */
+
+/* ========= НАСТРОЙКА ОБЛАКА (Supabase) — см. README и supabase.sql =========
+   1) создайте проект на supabase.com  2) выполните supabase.sql в SQL Editor
+   3) вставьте сюда Project URL и anon public key                              */
+const SB_URL = '';   // например 'https://abcdefgh.supabase.co'
+const SB_KEY = '';   // anon public key
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -588,6 +609,7 @@ const DB = {
 /* ---------- Состояние ---------- */
 const defaultState = () => ({
   currentUser:null, currentTab:'tasks', showCompleted:false, activeFilter:null, theme:'auto',
+  familyCode:null, syncRev:0, pendingImg:[], metaUpdatedAt:0,
   members:[
     {id:'m1', name:'Сергей',   avatarId:null, color:MEMBER_COLORS[0]},
     {id:'m2', name:'Светлана', avatarId:null, color:MEMBER_COLORS[2]},
@@ -622,20 +644,24 @@ let searchQ = '';
 let F = null; // {editingId, type, label, labelColor, assignee, imageIds, removedImageIds, visibility[]}
 
 let saveTimer = null;
-function persist(){
+function persistLocal(){
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
     try{ await DB.set('kv','state', JSON.parse(JSON.stringify(S))); }
     catch(e){ console.error(e); toast('Не удалось сохранить данные','⚠️'); }
   }, 120);
 }
+function persist(){ persistLocal(); SYNC.onLocalChange(); }
+const liveTasks = () => S.tasks.filter(t=>!t.deleted);
+function touch(t){ t.updatedAt = Date.now(); }
 
 /* ---------- Работа с фото ---------- */
 const urlCache = new Map();
 async function imgURL(id){
   if(urlCache.has(id)) return urlCache.get(id);
   try{
-    const blob = await DB.get('img', id);
+    let blob = await DB.get('img', id);
+    if(!blob) blob = await SYNC.imgGet(id);   // нет локально — пробуем облако
     if(!blob) return null;
     const u = URL.createObjectURL(blob);
     urlCache.set(id, u); return u;
@@ -678,8 +704,13 @@ async function deleteTaskImages(t){
   for(const id of (t.imageIds||[])){
     try{ await DB.del('img', id); }catch(e){}
     if(urlCache.has(id)){ URL.revokeObjectURL(urlCache.get(id)); urlCache.delete(id); }
+    SYNC.imgDel(id);
   }
 }
+function blobToB64(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); }); }
+function b64toBlob(b64){ const bin=atob(b64); const a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new Blob([a],{type:'image/jpeg'}); }
+function queuePendingImg(id){ S.pendingImg = S.pendingImg||[]; if(!S.pendingImg.includes(id)) S.pendingImg.push(id); persistLocal(); }
+function genFamilyCode(){ const A='ABCDEFGHJKMNPQRSTVWXYZ23456789'; return Array.from(crypto.getRandomValues(new Uint8Array(12))).map(b=>A[b%A.length]).join(''); }
 
 /* ---------- Миграция из старого localStorage ---------- */
 async function migrateLegacy(){
@@ -718,6 +749,135 @@ async function migrateLegacy(){
     return true;
   }catch(e){ console.error(e); return false; }
 }
+
+/* ============ ОБЛАЧНАЯ СИНХРОНИЗАЦИЯ ============ */
+let syncState = 'off';
+function setSyncStatus(s){
+  if(syncState === s) return;
+  syncState = s;
+  if(!$('screen-family').classList.contains('hidden')) renderSyncCard();
+}
+function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], metaUpdatedAt:st.metaUpdatedAt||0 }; }
+function mergeStates(local, remote){
+  local = normSnap(local); remote = normSnap(remote);
+  const map = new Map();
+  [...remote.tasks, ...local.tasks].forEach(t=>{
+    const ex = map.get(t.id);
+    if(!ex || (t.updatedAt||0) > (ex.updatedAt||0)) map.set(t.id, t);
+  });
+  const takeLocal = (local.metaUpdatedAt||0) >= (remote.metaUpdatedAt||0);
+  return {
+    members: takeLocal ? local.members : remote.members,
+    labels:  takeLocal ? local.labels  : remote.labels,
+    tasks: [...map.values()],
+    metaUpdatedAt: Math.max(local.metaUpdatedAt||0, remote.metaUpdatedAt||0),
+  };
+}
+function rerender(){
+  if(activeScreen==='main') renderMain();
+  else if(activeScreen==='detail') renderDetail();
+  else if(activeScreen==='family') renderFamily();
+  else if(activeScreen==='auth') renderAuth();
+  updateNav();
+}
+const SYNC = {
+  cid: uid('c_'), client:null, chan:null, timer:null, pushTimer:null,
+  lastSent:'', pulling:false, pushing:false,
+  enabled(){ return !!(SB_URL && SB_KEY && S.familyCode && window.supabase); },
+  start(){
+    this.stop();
+    if(!this.enabled()) return;
+    if(!this.client) this.client = window.supabase.createClient(SB_URL, SB_KEY);
+    this.chan = this.client.channel('hub-'+S.familyCode, {config:{broadcast:{self:false}}})
+      .on('broadcast', {event:'sync'}, p=>{
+        const d = p.payload||{};
+        if(d.cid !== this.cid && (d.rev||0) > (S.syncRev||0)) this.pull();
+      }).subscribe();
+    this.timer = setInterval(()=>this.pull(), 45000);
+    this.pull();
+  },
+  stop(){
+    if(this.chan){ try{ this.client.removeChannel(this.chan); }catch(e){} this.chan = null; }
+    clearInterval(this.timer); clearTimeout(this.pushTimer);
+    this.timer = this.pushTimer = null;
+    setSyncStatus('off');
+  },
+  snapshot(){ return normSnap(S); },
+  async rpc(fn, args){
+    const {data, error} = await this.client.rpc(fn, args);
+    if(error) throw error;
+    return data;
+  },
+  onLocalChange(){
+    if(!this.enabled() || !this.client) return;
+    if(JSON.stringify(this.snapshot()) === this.lastSent) return;
+    clearTimeout(this.pushTimer);
+    this.pushTimer = setTimeout(()=>this.push(), 900);
+  },
+  async pull(){
+    if(!this.enabled() || this.pulling) return;
+    if(!this.client) this.client = window.supabase.createClient(SB_URL, SB_KEY);
+    this.pulling = true;
+    try{
+      const d = await this.rpc('hub_pull', {p_fid:S.familyCode});
+      if(d && d.state) this.applyRemote(d.state, d.rev);
+      else { S.syncRev = 0; this.push(); }   // в облаке пусто — заливаем своё
+      setSyncStatus('on');
+      this.flushImages();
+    }catch(e){ console.warn('sync pull', e); setSyncStatus('err'); }
+    this.pulling = false;
+  },
+  applyRemote(remote, rev){
+    const merged = mergeStates(this.snapshot(), remote);
+    S.members = merged.members; S.labels = merged.labels;
+    S.tasks = merged.tasks; S.metaUpdatedAt = merged.metaUpdatedAt;
+    S.syncRev = rev;
+    if(S.currentUser && !member(S.currentUser)) S.currentUser = null;
+    persistLocal(); rerender();
+    if(JSON.stringify(merged) !== JSON.stringify(normSnap(remote))) this.onLocalChange();
+    else this.lastSent = JSON.stringify(merged);
+  },
+  async push(){
+    if(!this.enabled() || !this.client || this.pushing) return;
+    this.pushing = true;
+    try{
+      const snap = this.snapshot();
+      const d = await this.rpc('hub_push', {p_fid:S.familyCode, p_base_rev:S.syncRev||0, p_state:JSON.parse(JSON.stringify(snap))});
+      if(d && d.ok){
+        S.syncRev = d.rev; this.lastSent = JSON.stringify(snap); persistLocal();
+        try{ this.chan && this.chan.send({type:'broadcast', event:'sync', payload:{cid:this.cid, rev:d.rev}}); }catch(e){}
+        setSyncStatus('on');
+      } else if(d){                       // конфликт: сливаем и пробуем снова
+        this.pushing = false;
+        this.applyRemote(d.state, d.rev);
+        return;
+      }
+    }catch(e){ console.warn('sync push', e); setSyncStatus('err'); }
+    this.pushing = false;
+  },
+  async imgPut(id){
+    if(!this.enabled() || !this.client){ queuePendingImg(id); return; }
+    try{
+      const blob = await DB.get('img', id);
+      if(!blob){ S.pendingImg = (S.pendingImg||[]).filter(x=>x!==id); return; }
+      await this.rpc('hub_img_put', {p_fid:S.familyCode, p_id:id, p_data: await blobToB64(blob)});
+      S.pendingImg = (S.pendingImg||[]).filter(x=>x!==id);
+      persistLocal();
+    }catch(e){ queuePendingImg(id); }
+  },
+  async imgGet(id){
+    if(!this.enabled() || !this.client) return null;
+    try{
+      const b64 = await this.rpc('hub_img_get', {p_fid:S.familyCode, p_id:id});
+      if(!b64) return null;
+      const blob = b64toBlob(b64);
+      await DB.set('img', id, blob);
+      return blob;
+    }catch(e){ return null; }
+  },
+  imgDel(id){ if(this.enabled() && this.client) this.rpc('hub_img_del', {p_fid:S.familyCode, p_id:id}).catch(()=>{}); },
+  flushImages(){ (S.pendingImg||[]).slice().forEach(id=>this.imgPut(id)); },
+};
 
 /* ---------- Хелперы ---------- */
 const member = id => S.members.find(m=>m.id===id) || null;
@@ -774,7 +934,7 @@ function updateNav(){
     nav.innerHTML = me.avatarId ? `<img data-img="${me.avatarId}" alt="">` : esc(me.name.trim()[0].toUpperCase());
     hydrateImages(nav);
   } else { nav.style.setProperty('--mc','#9B9CA4'); nav.textContent = '•'; }
-  const cnt = S.tasks.filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===S.currentUser).length;
+  const cnt = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===S.currentUser).length;
   const badge = $('nav-badge-tasks');
   badge.classList.toggle('hidden', !cnt);
   badge.textContent = cnt;
@@ -806,7 +966,7 @@ function renderMain(){
   updateNav();
 }
 function renderFilterBar(){
-  const openBy = id => S.tasks.filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===id).length;
+  const openBy = id => liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===id).length;
   let html = S.members.map(m=>{
     const c = openBy(m.id);
     return `<button class="f-item ${S.activeFilter===m.id?'active':''}" data-filter="${m.id}" style="--mc:${m.color}">
@@ -823,7 +983,7 @@ function renderFilterBar(){
 
 function visibleList(){
   const q = searchQ.toLowerCase().trim();
-  let list = S.tasks.filter(t=>{
+  let list = liveTasks().filter(t=>{
     if(t.type !== S.currentTab) return false;
     if(!canSee(t)) return false;
     if(t.type==='tasks'){
@@ -948,10 +1108,10 @@ function ctxAction(act){
     t.pinnedBy = t.pinnedBy||[];
     const i = t.pinnedBy.indexOf(S.currentUser);
     if(i>=0){ t.pinnedBy.splice(i,1); toast('Откреплено','📌'); } else { t.pinnedBy.push(S.currentUser); toast('Закреплено наверху','📌'); }
-    persist(); renderFeed();
+    touch(t); persist(); renderFeed();
   }
   if(act==='work'){
-    if(t.status==='in_progress'){ t.status='pending'; persist(); renderMain(); toast('Возвращено в очередь','↩️'); }
+    if(t.status==='in_progress'){ t.status='pending'; touch(t); persist(); renderMain(); toast('Возвращено в очередь','↩️'); }
     else openWho(t.id);
   }
   if(act==='done') toggleComplete(t.id);
@@ -972,7 +1132,7 @@ function openWho(id){
 function assignWork(mid){
   const t = task(whoId); $('who-overlay').classList.add('hidden');
   if(!t) return;
-  t.assignedTo = mid; t.status = 'in_progress'; t.updatedBy = S.currentUser;
+  t.assignedTo = mid; t.status = 'in_progress'; t.updatedBy = S.currentUser; touch(t);
   persist(); toast(`В работе у: ${member(mid)?.name}`,'💼');
   activeScreen==='detail' ? renderDetail() : renderMain();
 }
@@ -991,7 +1151,7 @@ function confirmDelete(id){
   const t = task(id); if(!t) return;
   confirmDlg('Удалить навсегда?', `«${t.title}» и все вложения будут стёрты без возможности восстановления.`, 'Удалить', true, async ()=>{
     await deleteTaskImages(t);
-    S.tasks = S.tasks.filter(x=>x.id!==id);
+    t.deleted = true; t.imageIds = []; t.checklist = []; t.description = ''; touch(t);
     persist(); toast('Удалено','🗑️');
     activeScreen==='detail' ? show('main') : renderMain();
   });
@@ -999,10 +1159,10 @@ function confirmDelete(id){
 function toggleComplete(id){
   const t = task(id); if(!t) return;
   if(!t.completed){
-    t.completed = true; t.updatedBy = S.currentUser;
+    t.completed = true; t.updatedBy = S.currentUser; touch(t);
     persist(); toast('Дело выполнено! 🎉','✓');
   } else {
-    t.completed = false; t.status = 'pending'; t.updatedBy = S.currentUser;
+    t.completed = false; t.status = 'pending'; t.updatedBy = S.currentUser; touch(t);
     persist(); toast('Возвращено в работу','↩️');
   }
   activeScreen==='detail' ? renderDetail() : renderMain();
@@ -1011,7 +1171,7 @@ function toggleComplete(id){
 /* ---------- ДЕТАЛИ ---------- */
 function renderDetail(){
   const t = task(activeTaskId);
-  if(!t || !canSee(t)){ show('main'); return; }
+  if(!t || t.deleted || !canSee(t)){ show('main'); return; }
   $('detail-hdr').textContent = t.type==='tasks' ? 'Дело' : 'Заметка';
   $('detail-actions').innerHTML = `
     <button class="icon-btn" data-d-act="edit" title="Редактировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg></button>
@@ -1087,17 +1247,17 @@ function detailAction(act){
   if(act==='del') confirmDelete(t.id);
   if(act==='work') openWho(t.id);
   if(act==='done') toggleComplete(t.id);
-  if(act==='publish'){ t.isDraft=false; persist(); toast('Опубликовано','🚀'); renderDetail(); }
+  if(act==='publish'){ t.isDraft=false; touch(t); persist(); toast('Опубликовано','🚀'); renderDetail(); }
   if(act==='chk-all'){
     const all = (t.checklist||[]).every(c=>c.done);
     (t.checklist||[]).forEach(c=>c.done=!all);
-    persist(); renderDetail();
+    touch(t); persist(); renderDetail();
   }
 }
 function toggleChk(cid){
   const t = task(activeTaskId); if(!t) return;
   const c = (t.checklist||[]).find(x=>String(x.id)===String(cid)); if(!c) return;
-  c.done = !c.done; persist();
+  c.done = !c.done; touch(t); persist();
   /* точечное обновление без полного перерендера */
   const row = document.querySelector(`.chk-row[data-chk="${cid}"]`);
   if(row) row.classList.toggle('on', c.done);
@@ -1225,6 +1385,7 @@ async function handleFiles(files){
       const id = uid('img_');
       await DB.set('img', id, blob);
       F.imageIds.push(id);
+      queuePendingImg(id); SYNC.imgPut(id);
     }catch(e){ console.error(e); toast('Не удалось добавить фото','⚠️'); }
   }
   renderFormPhotos();
@@ -1246,13 +1407,13 @@ async function saveForm(asDraft){
   if(F.editingId){
     const t = task(F.editingId); if(!t) return;
     /* удалить фото, снятые при редактировании */
-    for(const id of F.removedImageIds){ try{ await DB.del('img', id); }catch(e){} urlCache.delete(id); }
+    for(const id of F.removedImageIds){ try{ await DB.del('img', id); }catch(e){} urlCache.delete(id); SYNC.imgDel(id); }
     /* сохранить done для неизменённых пунктов чек-листа по тексту */
     checklist.forEach(n=>{ if(!n.done){ const m=(t.checklist||[]).find(o=>o.text===n.text); if(m) n.done=m.done; } });
     Object.assign(t, { title, description:desc, deadline:dl,
       label:F.label, labelColor:F.labelColor, assignedTo:F.type==='tasks'?F.assignee:null,
       visibleTo:F.type==='notes'?[...F.visibility]:[], imageIds:[...F.imageIds],
-      checklist, updatedBy:S.currentUser });
+      checklist, updatedBy:S.currentUser, updatedAt:Date.now() });
     persist(); toast('Сохранено','✓');
     activeTaskId = t.id; show('detail');
   } else {
@@ -1263,6 +1424,7 @@ async function saveForm(asDraft){
       visibleTo:F.type==='notes'?[...F.visibility]:[],
       createdBy:S.currentUser, updatedBy:S.currentUser,
       isDraft:!!asDraft, pinnedBy:[], imageIds:[...F.imageIds], checklist,
+      updatedAt:Date.now(),
     });
     S.currentTab = F.type;
     persist(); toast(asDraft?'Сохранено в черновики':'Опубликовано','🎉');
@@ -1282,12 +1444,50 @@ async function cancelForm(){
 }
 
 /* ---------- СЕМЬЯ ---------- */
+function renderSyncCard(){
+  const el = $('sync-card'); if(!el) return;
+  if(!SB_URL || !SB_KEY){
+    el.innerHTML = `<div class="sync-box">
+      <div class="sync-head"><span class="sync-dot off"></span><b>Облако не настроено</b></div>
+      <p>Каждое устройство хранит свою копию. Чтобы дела и заметки синхронизировались между телефонами, подключите Supabase: инструкция в README.md и supabase.sql, затем впишите SB_URL и SB_KEY в начале index.html.</p>
+    </div>`;
+    return;
+  }
+  if(!S.familyCode){
+    el.innerHTML = `<div class="sync-box">
+      <div class="sync-head"><span class="sync-dot off"></span><b>Облако не подключено</b></div>
+      <p>На первом устройстве создайте семью — появится код. На остальных введите этот код, и данные объединятся.</p>
+      <button class="btn btn-acc" data-sync="create" style="margin-bottom:9px">☁️ Создать семью в облаке</button>
+      <div class="sync-join">
+        <input class="field" id="sync-code-input" placeholder="Код семьи…" maxlength="14" autocomplete="off">
+        <button class="btn btn-soft" data-sync="join">ОК</button>
+      </div>
+    </div>`;
+  } else {
+    const st = syncState==='on' ? ['on','Облако подключено']
+      : syncState==='err' ? ['err','Нет связи — работаем локально']
+      : ['off','Подключение…'];
+    el.innerHTML = `<div class="sync-box">
+      <div class="sync-head"><span class="sync-dot ${st[0]}"></span><b>${st[1]}</b></div>
+      <div class="sync-code" data-sync="copy" title="Нажмите, чтобы скопировать">${S.familyCode.replace(/(.{4})(?=.)/g,'$1‑')}</div>
+      <p>Введите этот код на других устройствах — изменения будут прилетать сами.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-soft" data-sync="copy">Скопировать</button>
+        <button class="btn btn-rose-soft" data-sync="off">Отключить</button>
+      </div>
+    </div>`;
+  }
+}
+function enqueueAllImages(){
+  S.tasks.forEach(t=>(t.imageIds||[]).forEach(queuePendingImg));
+  S.members.forEach(m=>{ if(m.avatarId) queuePendingImg(m.avatarId); });
+}
 let famNewAvatarId = null;   // фото для нового профиля
 let famAvaTarget = null;     // 'new' или id члена семьи, которому меняем фото
 const CAM_SVG = '<span class="cam-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg></span>';
 function renderFamily(){
   $('fam-list').innerHTML = S.members.map(m=>{
-    const open = S.tasks.filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===m.id).length;
+    const open = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===m.id).length;
     return `<div class="fam-row" style="--mc:${m.color}">
       <button type="button" class="fam-ring-btn" data-ava-mem="${m.id}" title="Изменить фото">
         ${avaHTML(m,'fam-ring')}${CAM_SVG}
@@ -1297,6 +1497,7 @@ function renderFamily(){
     </div>`;
   }).join('');
   hydrateImages($('fam-list'));
+  renderSyncCard();
   const pv = $('fam-new-ava');
   pv.innerHTML = famNewAvatarId ? `<img data-img="${famNewAvatarId}" alt="">` : '+';
   if(famNewAvatarId) hydrateImages(pv.parentElement);
@@ -1332,8 +1533,10 @@ async function handleAvatarFile(file){
       renderFamily();
     } else {
       const m = member(famAvaTarget); if(!m) return;
-      if(m.avatarId){ try{ await DB.del('img', m.avatarId); }catch(e){} urlCache.delete(m.avatarId); }
+      if(m.avatarId){ try{ await DB.del('img', m.avatarId); }catch(e){} urlCache.delete(m.avatarId); SYNC.imgDel(m.avatarId); }
       m.avatarId = id;
+      S.metaUpdatedAt = Date.now();
+      queuePendingImg(id); SYNC.imgPut(id);
       persist(); renderFamily(); updateNav();
       toast('Фото обновлено','📸');
     }
@@ -1344,6 +1547,8 @@ function addMember(){
   const name = $('fam-name').value.trim();
   if(!name){ toast('Введите имя','⚠️'); $('fam-name').focus(); return; }
   S.members.push({ id:uid('m_'), name, avatarId:famNewAvatarId, color:MEMBER_COLORS[S.members.length % MEMBER_COLORS.length] });
+  if(famNewAvatarId){ queuePendingImg(famNewAvatarId); SYNC.imgPut(famNewAvatarId); }
+  S.metaUpdatedAt = Date.now();
   famNewAvatarId = null;
   $('fam-name').value = '';
   persist(); renderFamily(); toast(`${name} — в семье!`,'👪');
@@ -1351,8 +1556,9 @@ function addMember(){
 function delMember(id){
   const m = member(id); if(!m) return;
   confirmDlg('Удалить профиль?', `Дела ${m.name} станут общими. Профиль будет удалён.`, 'Удалить', true, async ()=>{
-    if(m.avatarId){ try{ await DB.del('img', m.avatarId); }catch(e){} urlCache.delete(m.avatarId); }
+    if(m.avatarId){ try{ await DB.del('img', m.avatarId); }catch(e){} urlCache.delete(m.avatarId); SYNC.imgDel(m.avatarId); }
     S.members = S.members.filter(x=>x.id!==id);
+    S.metaUpdatedAt = Date.now();
     S.tasks.forEach(t=>{ if(t.assignedTo===id) t.assignedTo=null; });
     if(S.currentUser===id){ S.currentUser=null; persist(); show('auth'); }
     else { persist(); renderFamily(); }
@@ -1398,6 +1604,7 @@ document.addEventListener('click', e=>{
     const n = x.dataset.delLbl;
     confirmDlg('Удалить категорию?', `«${n}» исчезнет из списка.`, 'Удалить', true, ()=>{
       S.labels = S.labels.filter(l=>l.name!==n);
+      S.metaUpdatedAt = Date.now();
       if(F.label===n){ F.label=S.labels[0]?.name||''; F.labelColor=S.labels[0]?.color||'green'; }
       persist(); renderFormSelectors();
     }); return; }
@@ -1423,6 +1630,33 @@ document.addEventListener('click', e=>{
   if(el('#f-save')){ saveForm(false); return; }
   if(el('#form-back')){ cancelForm(); return; }
   /* семья */
+  if(x = el('[data-sync]')){
+    const a = x.dataset.sync;
+    if(a==='create'){
+      if(!window.supabase){ toast('Нет связи с облаком — проверьте интернет','⚠️'); return; }
+      S.familyCode = genFamilyCode(); S.syncRev = 0;
+      enqueueAllImages(); persistLocal(); SYNC.start(); renderSyncCard();
+      toast('Семья создана — код на экране','☁️');
+    }
+    if(a==='join'){
+      const v = ($('sync-code-input')?.value||'').replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+      if(v.length < 10){ toast('Введите код полностью','⚠️'); return; }
+      if(!window.supabase){ toast('Нет связи с облаком — проверьте интернет','⚠️'); return; }
+      S.familyCode = v; S.syncRev = 0;
+      enqueueAllImages(); persistLocal(); SYNC.start(); renderSyncCard();
+      toast('Подключаемся…','☁️');
+    }
+    if(a==='copy'){
+      (navigator.clipboard?.writeText(S.familyCode) || Promise.reject())
+        .then(()=>toast('Код скопирован','📋'))
+        .catch(()=>toast(S.familyCode,'📋'));
+    }
+    if(a==='off'){
+      confirmDlg('Отключить облако?','Данные останутся на этом устройстве, но перестанут синхронизироваться.','Отключить',true,()=>{
+        S.familyCode = null; persistLocal(); SYNC.stop(); renderSyncCard();
+      });
+    }
+    return; }
   if(x = el('[data-ava-mem]')){ famAvaTarget = x.dataset.avaMem; $('fam-ava-input').click(); return; }
   if(el('#fam-new-ava-btn')){ famAvaTarget = 'new'; $('fam-ava-input').click(); return; }
   if(el('#fam-save')){ addMember(); return; }
@@ -1448,6 +1682,7 @@ function commitNewLabel(){
   if(!v){ inp.focus(); return; }
   if(S.labels.some(l=>l.name===v)){ toast('Такая категория уже есть','⚠️'); return; }
   S.labels.push({name:v, color:F.newLabelColor});
+  S.metaUpdatedAt = Date.now();
   F.label = v; F.labelColor = F.newLabelColor;
   inp.value = ''; persist(); renderFormSelectors();
   toast('Категория добавлена','🏷️');
@@ -1491,8 +1726,12 @@ document.addEventListener('keydown', e=>{
     console.error('IndexedDB недоступен', e);
     toast('Хранилище недоступно — данные не сохранятся','⚠️');
   }
+  S.tasks = S.tasks.filter(t=>!t.deleted || (Date.now()-(t.updatedAt||0)) < 30*864e5);
   applyTheme();
   if(S.currentUser && member(S.currentUser)) show('main'); else show('auth');
+  SYNC.start();
+  window.addEventListener('online', ()=>SYNC.pull());
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) SYNC.pull(); });
   /* защищённая регистрация SW: не ломает открытие файла напрямую */
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
     navigator.serviceWorker.register('sw.js').catch(()=>{});
