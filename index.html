@@ -128,7 +128,7 @@ img{display:block}
 .search-wrap.has-q .search-clear{display:block}
 
 /* фильтр по людям */
-.filter-bar{display:flex;gap:17px;overflow-x:auto;scrollbar-width:none;padding:12px 12px 6px}
+.filter-bar{display:flex;gap:17px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;padding:12px 14px 10px}
 .filter-bar::-webkit-scrollbar{display:none}
 .f-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;position:relative;transition:transform .25s var(--spring)}
 .f-item:active{transform:scale(.92)}
@@ -139,17 +139,16 @@ img{display:block}
 .f-cnt{position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--mc,var(--mut));color:#fff!important;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--bg);z-index:1;text-shadow:0 1px 1px rgba(0,0,0,.15)}
 
 /* ===== ПАНЕЛЬ ФИЛЬТРОВ ===== */
-.tools-row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:nowrap}
-.cat-bar{flex:1 1 0;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;min-width:0}
-.cat-bar::-webkit-scrollbar{display:none}
-.cat-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;font-size:11px;font-weight:700;background:var(--card);color:var(--mut);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);white-space:nowrap;flex-shrink:0;transition:all .2s var(--spring)}
-.cat-chip:active{transform:scale(.93)}
-.cat-chip.sel{color:var(--ink);box-shadow:var(--shadow), inset 0 0 0 2px var(--lc,var(--ink))}
-.cat-chip .cdot{width:7px;height:7px;border-radius:50%;background:var(--lc,var(--mut));flex-shrink:0}
-.tool-btn{width:36px;height:36px;border-radius:12px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);display:flex;align-items:center;justify-content:center;color:var(--mut);flex-shrink:0;transition:all .2s var(--spring)}
-.tool-btn:active{transform:scale(.9)}
-.tool-btn.on{color:var(--acc);box-shadow:var(--shadow), inset 0 0 0 2px var(--acc)}
-.tool-btn svg{width:17px;height:17px}
+.tools-row{display:flex;gap:8px;align-items:center;margin-top:10px;padding-bottom:2px}
+.drop-btn{flex:1;min-width:0;height:38px;padding:0 11px;border-radius:12px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);display:flex;align-items:center;gap:7px;color:var(--ink);font-size:12px;font-weight:700;transition:all .2s var(--spring)}
+.drop-btn:active{transform:scale(.96)}
+.drop-btn.on{box-shadow:var(--shadow), inset 0 0 0 2px var(--acc);color:var(--acc-ink)}
+.drop-btn.narrow{flex:0 0 auto}
+.drop-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left}
+.drop-btn .lead{width:15px;height:15px;flex-shrink:0;color:var(--mut)}
+.drop-btn .cv{width:14px;height:14px;flex-shrink:0;color:var(--faint);margin-left:auto}
+.drop-btn .dp{width:9px;height:9px;border-radius:50%;background:var(--dpc,var(--mut));flex-shrink:0;box-shadow:0 0 0 2px color-mix(in srgb,var(--dpc,var(--mut)) 20%,transparent)}
+.opt-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
 
 /* ===== КАЛЕНДАРЬ ===== */
 .cal{background:var(--card);border-radius:20px;padding:13px 13px 6px;box-shadow:var(--shadow);margin-bottom:10px}
@@ -172,9 +171,10 @@ img{display:block}
 .no-date-btn .n{background:var(--acc);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;font-weight:800;margin-left:2px}
 .sheet-scroll{max-height:60vh;overflow-y:auto;overscroll-behavior:contain;padding:2px}
 .sheet-scroll .card-item{animation:none}
+.sheet-scroll-wrap{max-height:70vh;overflow-y:auto;overscroll-behavior:contain}
 
 /* ===== ЛЕНТА ===== */
-.feed{flex:1;padding:12px 16px calc(118px + env(safe-area-inset-bottom))}
+.feed{flex:1;padding:12px 14px calc(118px + env(safe-area-inset-bottom))}
 .feed-section{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:18px 4px 10px;display:flex;align-items:center;gap:10px}
 .feed-section::after{content:'';flex:1;height:1px;background:var(--line)}
 .card-item{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:10px;display:flex;overflow:hidden;position:relative;transition:transform .25s var(--spring);animation:rise .4s var(--spring) backwards}
@@ -269,8 +269,12 @@ select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 input[type=date].field,input[type=time].field{min-height:48px;line-height:1.2}
 .dt-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
 .dt-field{position:relative;display:block}
-.dt-cap{position:absolute;top:7px;left:14px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);pointer-events:none;z-index:1}
-.dt-field .field{padding-top:22px;padding-bottom:8px}
+.dt-input{color:var(--ink)}
+.dt-input.empty::-webkit-datetime-edit{color:transparent}
+.dt-input.empty{color:transparent}
+.dt-ph{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--faint);pointer-events:none;display:none}
+.dt-input.empty + .dt-ph{display:block}
+.dt-input::-webkit-calendar-picker-indicator{opacity:.5}
 .chk-add-btn{width:100%;background:var(--card);border:2px dashed var(--line);border-radius:13px;padding:12px;font-size:12.5px;font-weight:700;color:var(--mut);transition:all .2s;margin-top:2px}
 .chk-add-btn:active{border-color:var(--acc);color:var(--acc)}
 .form-hint{font-size:11px;color:var(--faint);margin-top:8px;line-height:1.4}
@@ -293,7 +297,7 @@ input[type=date].field,input[type=time].field{min-height:48px;line-height:1.2}
 .dots{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .dot{width:24px;height:24px;border-radius:50%;transition:all .25s var(--spring);flex-shrink:0}
 .dot.sel{box-shadow:0 0 0 2.5px var(--bg), 0 0 0 5px var(--ink);transform:scale(1.1)}
-.mem-scroll{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:3px}
+.mem-scroll{display:flex;gap:8px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;padding:6px 4px}
 .mem-scroll::-webkit-scrollbar{display:none}
 .mem-pick{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 12px;background:var(--card);border-radius:17px;flex-shrink:0;transition:all .25s var(--spring);min-width:64px;box-shadow:var(--shadow), inset 0 0 0 1.5px transparent}
 .mem-pick:active{transform:scale(.93)}
@@ -304,7 +308,7 @@ input[type=date].field,input[type=time].field{min-height:48px;line-height:1.2}
 .mem-pick .tick{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--mc,var(--acc));color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--card);opacity:0;transform:scale(.4);transition:all .25s var(--spring)}
 .mem-pick.sel .tick{opacity:1;transform:scale(1)}
 .vis-hint{font-size:11px;color:var(--mut);margin-top:8px;padding-left:3px}
-.quick-dl{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.quick-dl{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;padding:2px}
 .quick-dl button{padding:7px 12px;border-radius:99px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);font-size:11px;font-weight:650;color:var(--mut);transition:transform .2s var(--spring)}
 .quick-dl button:active{transform:scale(.93);color:var(--acc)}
 .quick-dl button.act{color:#fff;background:var(--acc);border-color:transparent;box-shadow:0 3px 10px color-mix(in srgb,var(--acc) 35%,transparent)}
@@ -439,9 +443,9 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
       </div>
       <div class="filter-bar" id="filter-bar"></div>
       <div class="tools-row" id="tools-row">
-        <div class="cat-bar" id="cat-bar"></div>
-        <button class="tool-btn" id="btn-sort" title="Сортировка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 20l-3-3M7 4l3 3M14 7h7M14 12h5M14 17h3"/></svg></button>
-        <button class="tool-btn" id="btn-view" title="Вид"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></button>
+        <button class="drop-btn" id="btn-cat"><i class="dp" id="cat-dot"></i><span id="cat-label">Все</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="drop-btn" id="btn-sort"><svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 20l-3-3M7 4l3 3M14 7h7M14 12h5M14 17h3"/></svg><span id="sort-label">Умная</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="drop-btn narrow" id="btn-view" title="Вид"><svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg><span id="view-label">Список</span></button>
       </div>
     </header>
     <div class="feed" id="feed"></div>
@@ -484,8 +488,8 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
             <button type="button" class="plan-clear hidden" id="f-plan-clear">Очистить</button>
           </div>
           <div class="dt-grid" style="margin-top:8px">
-            <label class="dt-field"><span class="dt-cap">Дата</span><input type="date" class="field" id="f-date"></label>
-            <label class="dt-field"><span class="dt-cap">Время</span><input type="time" class="field" id="f-time"></label>
+            <div class="dt-field"><input type="date" class="field dt-input" id="f-date"><span class="dt-ph" id="f-date-ph">Дата</span></div>
+            <div class="dt-field"><input type="time" class="field dt-input" id="f-time"><span class="dt-ph" id="f-time-ph">Время</span></div>
           </div>
           <div class="form-hint" id="f-plan-hint"></div>
           <div class="quick-dl" id="f-plan-quick"></div>
@@ -593,6 +597,11 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
       <div class="sheet-title" id="calday-title"></div>
       <div class="sheet-scroll" id="calday-list"></div>
     </div>
+  </div>
+
+  <!-- КАТЕГОРИЯ -->
+  <div class="overlay sheet-mode hidden" id="cat-overlay">
+    <div class="sheet sheet-scroll-wrap" id="cat-sheet"></div>
   </div>
 
   <!-- СОРТИРОВКА -->
@@ -1274,17 +1283,39 @@ function renderMain(){
   $('tools-row').style.display = isTasks ? '' : 'none';
   $('btn-view').classList.toggle('on', P.view==='calendar');
   $('btn-sort').style.display = P.view==='calendar' ? 'none' : '';
+  $('view-label').textContent = P.view==='calendar' ? 'Кален.' : 'Список';
+  $('btn-view').classList.toggle('on', P.view==='calendar');
+  $('sort-label').textContent = SORTS[P.sort] || 'Умная';
   if(isTasks){ renderFilterBar(); renderCatBar(); }
   renderFeed();
   updateNav();
 }
 function renderCatBar(){
   const P = prefs();
+  const btn = $('btn-cat');
+  const dot = $('cat-dot');
+  btn.classList.toggle('on', !!P.catFilter);
+  if(P.catFilter){
+    const l = S.labels.find(x=>x.name===P.catFilter);
+    dot.style.setProperty('--dpc', l ? (LABEL_DOT[l.color]||'#10B981') : '#9B9CA4');
+    dot.style.display = '';
+    $('cat-label').textContent = P.catFilter;
+  } else {
+    dot.style.display = 'none';
+    $('cat-label').textContent = 'Все категории';
+  }
+}
+function openCatSheet(){
+  const P = prefs();
   const used = new Set(liveTasks().filter(t=>t.type==='tasks' && !t.isDraft).map(t=>t.label));
   const cats = S.labels.filter(l=>used.has(l.name));
-  let html = `<button class="cat-chip ${!P.catFilter?'sel':''}" data-cat="" style="--lc:var(--ink)">Все</button>`;
-  html += cats.map(l=>`<button class="cat-chip ${P.catFilter===l.name?'sel':''}" data-cat="${esc(l.name)}" style="--lc:${LABEL_DOT[l.color]||'#10B981'}"><i class="cdot"></i>${esc(l.name)}</button>`).join('');
-  $('cat-bar').innerHTML = html;
+  let html = `<div class="sheet-grip"></div><div class="sheet-title">Категория</div>`;
+  html += `<button class="sheet-btn ${!P.catFilter?'green':''}" data-catpick="">${!P.catFilter?ICO.done:'<span style="width:18px"></span>'}Все категории</button>`;
+  html += cats.map(l=>`<button class="sheet-btn ${P.catFilter===l.name?'green':''}" data-catpick="${esc(l.name)}">
+    ${P.catFilter===l.name?ICO.done:'<span style="width:18px"></span>'}<span class="opt-dot" style="background:${LABEL_DOT[l.color]||'#10B981'}"></span>${esc(l.name)}</button>`).join('');
+  if(!cats.length) html += `<div class="empty" style="padding:24px"><span>Категорий пока нет</span></div>`;
+  $('cat-sheet').innerHTML = html;
+  $('cat-overlay').classList.remove('hidden');
 }
 function renderFilterBar(){
   const openBy = id => liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===id).length;
@@ -1812,8 +1843,10 @@ function renderFormSelectors(){
   renderRepeat();
 }
 function renderPlan(){
-  $('f-date').value = F.date || '';
-  $('f-time').value = F.time || '';
+  const dEl = $('f-date'), tEl = $('f-time');
+  dEl.value = F.date || ''; tEl.value = F.time || '';
+  dEl.classList.toggle('empty', !F.date);
+  tEl.classList.toggle('empty', !F.time);
   const has = !!F.date;
   $('f-plan-clear').classList.toggle('hidden', !has && !F.time);
   $('f-repeat-group').classList.toggle('hidden', !has);
@@ -2126,7 +2159,9 @@ document.addEventListener('click', e=>{
     return; }
   if(el('#btn-completed')){ S.showCompleted=!S.showCompleted; persist(); renderMain(); toast(S.showCompleted?'Показаны выполненные':'Выполненные скрыты','👁'); return; }
   if(x = el('[data-filter]')){ const f = x.dataset.filter; S.activeFilter = S.activeFilter===f?null:f; persist(); renderMain(); return; }
-  if(x = el('[data-cat]')){ prefs().catFilter = x.dataset.cat || null; persist(); renderMain(); return; }
+  if(el('#btn-cat')){ openCatSheet(); return; }
+  if(x = el('[data-catpick]')){ prefs().catFilter = x.dataset.catpick || null; persist(); $('cat-overlay').classList.add('hidden'); renderMain(); return; }
+  if(el('#cat-overlay') && !el('.sheet')){ $('cat-overlay').classList.add('hidden'); return; }
   if(el('#btn-sort')){ openSortSheet(); return; }
   if(x = el('[data-sort]')){ prefs().sort = x.dataset.sort; persist(); $('sort-overlay').classList.add('hidden'); renderFeed(); return; }
   if(el('#sort-overlay') && !el('.sheet')){ $('sort-overlay').classList.add('hidden'); return; }
