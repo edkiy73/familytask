@@ -201,8 +201,9 @@ body.no-anim *{animation:none!important}
 .card-title{font-weight:700;font-size:14.5px;line-height:1.3;letter-spacing:-.01em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .card-item.done .card-title{text-decoration:line-through;color:var(--mut)}
 .card-excerpt{font-size:12px;line-height:1.45;color:var(--mut);margin-top:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;word-break:break-word}
-.md-inline strong{font-weight:800;color:var(--ink)}.md-inline em{font-style:italic}.md-inline del{opacity:.7}.md-inline code{background:var(--soft);padding:0 4px;border-radius:5px;font-size:.92em}
-.ava-general{background:linear-gradient(135deg,#8FA3B8,#5E7186)!important;color:#fff!important;text-shadow:none!important}
+.md-inline strong{font-weight:800;color:inherit}.md-inline em{font-style:italic}.md-inline del{opacity:.7}.md-inline code{background:var(--soft);padding:0 4px;border-radius:5px;font-size:.92em}
+.ava-general{border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(135deg,#8FA3B8,#5E7186)!important;color:#fff!important;text-shadow:none!important}
+.ava-general .ic{color:#fff}
 .ava-general .ic{opacity:.95}
 .ava-stack{display:flex;align-items:center}
 .ava-sm{width:26px;height:26px;font-size:10px;box-shadow:0 0 0 2px var(--card)}
@@ -342,15 +343,31 @@ select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .quick-dl button.act{color:#fff;background:var(--acc);border-color:transparent;box-shadow:0 3px 10px color-mix(in srgb,var(--acc) 35%,transparent)}
 /* separator removed — used two rows instead */
 textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;border-radius:17px;overflow-y:auto}
-.md-area{transition:height .1s}
-.md-toolbar{position:sticky;top:calc(env(safe-area-inset-top) + 4px);z-index:15;display:flex;align-items:center;gap:3px;background:var(--card);border:1.5px solid var(--line);border-bottom:none;border-radius:15px 15px 0 0;padding:6px 8px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.md-editor{position:relative}
+.md-toolbar{position:sticky;top:-1px;z-index:15;display:flex;align-items:center;gap:3px;background:var(--card);border:1.5px solid var(--line);border-bottom:none;border-radius:15px 15px 0 0;padding:6px 8px;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,.06)}
 .md-btn{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--mut);transition:all .18s var(--spring)}
 .md-btn:active{transform:scale(.85);background:var(--soft);color:var(--acc)}
 .md-sep{width:1px;height:18px;background:var(--line);margin:0 4px}
-.md-area{border-radius:0 0 15px 15px!important;border-top:none!important}
-.md-preview-wrap{margin-top:9px;background:var(--soft);border-radius:14px;padding:11px 13px;animation:rise .25s var(--spring)}
-.md-preview-cap{font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
-.md-preview{font-size:13.5px;color:var(--ink)}
+.md-editor .md-area, .md-hl{
+  font-family:var(--font);font-size:14px;line-height:1.55;letter-spacing:0;
+  padding:12px 14px;border-radius:0 0 15px 15px;box-sizing:border-box;
+  white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word;margin:0;
+}
+.md-hl{position:absolute;inset:0;pointer-events:none;color:var(--ink);overflow:hidden;
+  border:1.5px solid var(--line);border-top:none;background:var(--card)}
+.md-area{position:relative;width:100%;min-height:110px;max-height:800px;resize:none;overflow-y:auto;
+  border:1.5px solid var(--line);border-top:none;outline:none;background:transparent;
+  color:transparent;caret-color:var(--acc);-webkit-text-fill-color:transparent}
+.md-area:focus{border-color:var(--acc)}
+.md-editor:focus-within .md-hl{border-color:var(--acc)}
+.md-hl b,.md-hl strong{font-weight:800;color:var(--ink)}
+.md-hl i,.md-hl em{font-style:italic}
+.md-hl s,.md-hl del{text-decoration:line-through;opacity:.75}
+.md-hl .mk{color:var(--faint);opacity:.6}
+.md-hl .h{font-weight:800;font-size:15px}
+.md-hl .li{color:var(--acc)}
+.md-hl a,.md-hl .lk{color:var(--acc-ink);text-decoration:underline}
+.md-hl code{background:var(--soft);border-radius:5px;padding:0 3px}
 .md-render{line-height:1.6}
 .md-render p{margin:0 0 6px}.md-render p:last-child{margin:0}
 .md-render h3{font-size:15px;font-weight:800;margin:8px 0 4px}
@@ -380,7 +397,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .fam-body{flex:1;overflow-y:auto;padding:14px 16px calc(118px + env(safe-area-inset-bottom))}
 .fam-row{display:flex;align-items:center;gap:13px;background:var(--card);border-radius:var(--r);padding:12px 14px;margin-bottom:9px;box-shadow:var(--shadow);animation:rise .35s var(--spring) backwards}
 .fam-row:nth-child(2){animation-delay:.04s}.fam-row:nth-child(3){animation-delay:.08s}.fam-row:nth-child(4){animation-delay:.12s}
-.fam-ring{width:46px;height:46px;font-size:17px;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--card), 0 0 0 5px var(--mc,var(--line))}
+.fam-ring{width:46px;height:46px;border-radius:50%;font-size:17px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 0 2.5px var(--card), 0 0 0 5px var(--mc,var(--line))}
 .fam-row .fam-ring.ava-general{box-shadow:0 0 0 2.5px var(--card),0 0 0 5px #5E7186}
 .fam-info{flex:1;min-width:0}
 .fam-info b{font-size:14px;display:block;letter-spacing:-.01em}
@@ -552,10 +569,9 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
           <button type="button" class="md-btn" data-md="list" title="Список"></button>
           <button type="button" class="md-btn" data-md="link" title="Ссылка"></button>
         </div>
-        <textarea class="field md-area" id="f-desc" placeholder="Подробности, списки, счета, реквизиты…&#10;Поддерживается **жирный**, *курсив*, - списки, [ссылки](url)"></textarea>
-        <div class="md-preview-wrap hidden" id="md-preview-wrap">
-          <div class="md-preview-cap">Предпросмотр</div>
-          <div class="md-render md-preview" id="md-preview"></div>
+        <div class="md-editor" id="md-editor">
+          <div class="md-hl" id="md-hl" aria-hidden="true"></div>
+          <textarea class="md-area" id="f-desc" placeholder="Подробности, списки, счета, реквизиты…" spellcheck="false"></textarea>
         </div>
       </div>
 
@@ -917,16 +933,39 @@ async function pasteUrl(){
 function autoGrowDesc(){
   const ta = $('f-desc'); if(!ta) return;
   ta.style.height='auto';
-  ta.style.height = Math.min(800, Math.max(110, ta.scrollHeight+2))+'px';
-  updateMdPreview();
+  const h = Math.min(800, Math.max(110, ta.scrollHeight));
+  ta.style.height = h+'px';
+  const hl = $('md-hl'); if(hl) hl.style.height = h+'px';
+  highlightDesc();
 }
-function updateMdPreview(){
-  const ta = $('f-desc'), wrap = $('md-preview-wrap'), pv = $('md-preview');
-  if(!ta || !wrap) return;
-  const v = ta.value;
-  const hasMd = /(\*\*|__|\*|~~|`|^#{1,3}\s|^[-*]\s|\[[^\]]+\]\()/m.test(v);
-  if(v.trim() && hasMd){ pv.innerHTML = renderMarkdown(v); wrap.classList.remove('hidden'); }
-  else wrap.classList.add('hidden');
+function highlightDesc(){
+  const ta = $('f-desc'), hl = $('md-hl'); if(!ta||!hl) return;
+  hl.innerHTML = highlightMarkdown(ta.value);
+  hl.scrollTop = ta.scrollTop;
+}
+// подсветка markdown прямо в поле: маркеры приглушены, содержимое стилизовано
+function highlightMarkdown(src){
+  let s = esc(src);
+  // экранируем построчно заголовки/списки
+  s = s.split('\n').map(line=>{
+    let m = line.match(/^(#{1,3})(\s+)(.*)$/);
+    if(m) return `<span class="mk">${m[1]}${m[2]}</span><span class="h">${m[3]}</span>`;
+    m = line.match(/^(\s*)([-*])(\s+)(.*)$/);
+    if(m) return `${m[1]}<span class="li">•</span>${m[3]}${m[4]}`;
+    return line;
+  }).join('\n');
+  // код
+  s = s.replace(/`([^`]+)`/g,'<span class="mk">`</span><code>$1</code><span class="mk">`</span>');
+  // жирный
+  s = s.replace(/\*\*([^*]+)\*\*/g,'<span class="mk">**</span><b>$1</b><span class="mk">**</span>');
+  // курсив (одиночная *), не задевая **
+  s = s.replace(/(^|[^*<])\*([^*\n]+)\*(?!\*)/g,'$1<span class="mk">*</span><i>$2</i><span class="mk">*</span>');
+  // зачёркнутый
+  s = s.replace(/~~([^~]+)~~/g,'<span class="mk">~~</span><s>$1</s><span class="mk">~~</span>');
+  // ссылки [text](url)
+  s = s.replace(/\[([^\]]+)\]\(([^)]*)\)/g,'<span class="mk">[</span><span class="lk">$1</span><span class="mk">](</span><span class="mk">$2</span><span class="mk">)</span>');
+  if(s.endsWith('\n')) s += ' ';
+  return s;
 }
 
 
@@ -997,7 +1036,7 @@ const THEME_ICONS = {
   dark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13.5A8.5 8.5 0 1 1 10.5 4a7 7 0 0 0 9.5 9.5z"/></svg>'
 };
 function applyTheme(){
-  const t = (S.currentUser ? prefs().theme : (S.theme||'auto')) || 'auto';
+  const t = (S.currentUser ? (prefs().theme || S.theme) : S.theme) || 'auto';
   if(t === 'auto') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = t;
   const b = $('btn-theme');
@@ -1014,10 +1053,12 @@ let F = null; // {editingId, type, label, labelColor, assignee, imageIds, remove
 let saveTimer = null;
 function persistLocal(){
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(async ()=>{
-    try{ await DB.set('kv','state', JSON.parse(JSON.stringify(S))); }
-    catch(e){ console.error(e); toast('Не удалось сохранить данные','⚠️'); }
-  }, 120);
+  saveTimer = setTimeout(()=>persistNow(), 120);
+}
+async function persistNow(){
+  clearTimeout(saveTimer);
+  try{ await DB.set('kv','state', JSON.parse(JSON.stringify(S))); }
+  catch(e){ console.error(e); }
 }
 function persist(){ persistLocal(); SYNC.onLocalChange(); }
 const liveTasks = () => S.tasks.filter(t=>!t.deleted);
@@ -1157,6 +1198,8 @@ function checkDeadlines(){
   const now = Date.now();
   liveTasks().forEach(t=>{
     if(t.type!=='tasks' || t.completed || t.isDraft || !t.deadline) return;
+    // локальный фолбэк: показываем только свои дела и общие (без исполнителя)
+    if(t.assignedTo && t.assignedTo !== S.currentUser) return;
     const d = deadlineMs(t.deadline); if(isNaN(d)) return;
     const kS = 's'+t.id+'|'+t.deadline, kD = 'd'+t.id+'|'+t.deadline;
     const time = isAllDay(t.deadline) ? 'сегодня' : new Date(d).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
@@ -1177,6 +1220,18 @@ function b64uToU8(s){
   const a = new Uint8Array(raw.length);
   for(let i=0;i<raw.length;i++) a[i] = raw.charCodeAt(i);
   return a;
+}
+async function resubscribePush(){
+  // профиль на устройстве сменился — обновляем member в подписке
+  try{
+    if(!VAPID_PUBLIC || !S.familyCode || !SYNC.client) return;
+    if(Notification.permission !== 'granted') return;
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64uToU8(VAPID_PUBLIC) });
+    await SYNC.rpc('hub_sub_put', { p_fid:S.familyCode, p_device:DEVICE_ID, p_member:S.currentUser||'', p_sub:sub.toJSON() });
+    pushSubActive = true;
+  }catch(e){ console.warn('resub', e); }
 }
 async function ensurePushSub(){
   try{
@@ -1199,16 +1254,22 @@ async function dropPushSub(code){
   }catch(e){}
   pushSubActive = false;
 }
-function pushEvent(title, body, tag, toMember){
+function pushEvent(title, body, tag, to){
   if(!VAPID_PUBLIC || !S.familyCode || !SB_URL) return;
+  // to: undefined/null → всем; строка → одному участнику; массив → списку участников
+  const payload = { fid:S.familyCode, title, body, tag, exclude:DEVICE_ID };
+  if(Array.isArray(to)) payload.members = to;
+  else if(to) payload.member = to;
   fetch(SB_URL + '/functions/v1/push-send', {
     method:'POST',
     headers:{ 'Content-Type':'application/json', 'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY },
-    body: JSON.stringify({ fid:S.familyCode, title, body, tag, exclude:DEVICE_ID, member:toMember||null }),
+    body: JSON.stringify(payload),
   }).catch(()=>{});
 }
 async function runNotifSelfTest(){
   if(Notification.permission !== 'granted'){ toast('Сначала включите уведомления','⚠️'); return; }
+  const me = member(S.currentUser)?.name || 'вы';
+  // 1) локальный показ всех типов
   const samples = [
     ['⏰ Скоро дедлайн', 'Пример: дело через 30 минут'],
     ['🔥 Дедлайн наступил', 'Пример: срок дела настал'],
@@ -1218,14 +1279,19 @@ async function runNotifSelfTest(){
     ['🔔 Напоминание', 'Вам напомнили о деле'],
   ];
   samples.forEach((s,i)=> setTimeout(()=>notify(s[0], s[1], 'selftest-'+i), i*700));
-  toast('Показываю все виды уведомлений…','🔔');
-  // серверная доставка (закрытое приложение): шлём адресно самому себе
+  toast('Показываю все виды локально…','🔔');
+  // 2) серверная адресная доставка — проверяем, что push идёт именно этому профилю
   if(VAPID_PUBLIC && S.familyCode && pushSubActive){
     try{
-      await ensurePushSub();
-      pushEvent('📡 Серверный тест', 'Если это пришло при закрытом приложении — Web Push работает', 'selftest-server', S.currentUser);
-      setTimeout(()=>toast('Серверный тест отправлен — сверните приложение','📡'), samples.length*700);
-    }catch(e){}
+      await resubscribePush();   // гарантируем свежий member в подписке
+      // адресно себе — проверка что адресация работает
+      pushEvent('📡 Адресный тест', `Должно прийти только профилю: ${me}`, 'selftest-me', S.currentUser);
+      // всем — проверка широковещания
+      setTimeout(()=>pushEvent('📢 Тест для всех', 'Это уведомление получают все устройства семьи', 'selftest-all'), 800);
+      setTimeout(()=>toast('Серверные тесты отправлены — сверните приложение','📡'), samples.length*700);
+    }catch(e){ toast('Ошибка серверного теста','⚠️'); }
+  } else if(VAPID_PUBLIC && S.familyCode){
+    toast('Web Push ещё подключается — повторите через пару секунд','⚠️');
   }
 }
 function renderNotifCard(){
@@ -1359,6 +1425,9 @@ const SYNC = {
   },
   async pull(){
     if(!this.enabled() || this.pulling) return;
+    const now = Date.now();
+    if(now - (this._lastPull||0) < 2000) return;   // антидребезг
+    this._lastPull = now;
     if(!this.client) this.client = window.supabase.createClient(SB_URL, SB_KEY);
     this.pulling = true;
     try{
@@ -1373,26 +1442,38 @@ const SYNC = {
   },
   applyRemote(remote, rev){
     const before = new Map(S.tasks.map(t=>[t.id, {u:t.updatedAt||0, a:t.assignedTo, c:!!t.completed, del:!!t.deleted}]));
+    const prevSig = JSON.stringify({m:S.members, l:S.labels, t:S.tasks, g:S.generalAvatarId});
     const merged = mergeStates(this.snapshot(), remote);
     S.members = merged.members; S.labels = merged.labels;
     S.tasks = merged.tasks; S.metaUpdatedAt = merged.metaUpdatedAt;
     S.syncRev = rev;
     if(S.currentUser && !member(S.currentUser)) S.currentUser = null;
-    persistLocal(); rerender();
+    const newSig = JSON.stringify({m:S.members, l:S.labels, t:S.tasks, g:S.generalAvatarId});
+    persistLocal();
+    if(newSig !== prevSig) rerender();   // перерисовываем ТОЛЬКО при реальных изменениях
 
     /* пуш о новостях с других устройств (кроме самого первого слияния) */
-    if(this.seeded){
+    if(this.seeded && !pushSubActive){
+      // Локальные уведомления — ТОЛЬКО фолбэк, когда серверный push не активен.
+      // Когда push активен, все эти события уже разосланы адресно сервером.
       const news = [];
       S.tasks.forEach(t=>{
         if(t.deleted || t.isDraft) return;
         const b = before.get(t.id);
         const who = member(t.updatedBy)?.name || member(t.createdBy)?.name || '';
         if(!b || b.del){
-          if(t.createdBy !== S.currentUser)
-            news.push([t.type==='tasks'?'🆕 Новое дело':'🆕 Новая заметка', t.title + (who?` — ${who}`:''), 'evt-new-'+t.id]);
+          if(t.createdBy === S.currentUser) return;
+          // заметку показываем только если она видна мне
+          if(t.type==='notes'){
+            const vis = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
+            if(!vis.includes(S.currentUser)) return;
+            news.push(['🔒 Новая заметка', t.title + (who?` — ${who}`:''), 'evt-new-'+t.id]);
+          } else {
+            news.push(['🆕 Новое дело', t.title + (who?` — ${who}`:''), 'evt-new-'+t.id]);
+          }
         } else if((t.updatedAt||0) > b.u && t.updatedBy !== S.currentUser){
           if(t.assignedTo === S.currentUser && b.a !== S.currentUser)
-            news.push(['👉 Вам назначено', t.title + (who?` — ${who}`:''), 'evt-asg-'+t.id+'-'+(t.updatedAt||0)]);
+            news.push(['👉 Вам назначено дело', t.title + (who?` — ${who}`:''), 'evt-asg-'+t.id+'-'+(t.updatedAt||0)]);
           else if(t.completed && !b.c)
             news.push(['✅ Выполнено', t.title + (who?` — ${who}`:''), 'evt-done-'+t.id+'-'+(t.updatedAt||0)]);
         }
@@ -1608,9 +1689,9 @@ function renderFilterBar(){
       ${avaHTML(m,'ring')}<span>${esc(m.name)}</span></button>`;
   }).join('');
   const un = openBy(null);
-  html += `<button class="f-item ${S.activeFilter==='un'?'active':''}" data-filter="un" style="--mc:#9B9CA4">
+  html += `<button class="f-item ${S.activeFilter==='un'?'active':''}" data-filter="un" style="--mc:#5E7186">
     ${un?`<span class="f-cnt">${un}</span>`:''}
-    <span class="ava ring">✦</span><span>Общие</span></button>`;
+    <span class="ava ring ava-general">${ICON.users(16)}</span><span>Общие</span></button>`;
   $('filter-bar').innerHTML = html;
   hydrateImages($('filter-bar'));
 }
@@ -2042,11 +2123,13 @@ function renderDetail(){
 }
 function pingTask(t){
   const who = t.assignedTo ? member(t.assignedTo)?.name : null;
-  const title = t.assignedTo ? '🔔 Напоминание' : '🔔 Общее напоминание';
-  const body = t.title;
-  pushEvent(title, body, 'ping-'+t.id+'-'+Date.now(), t.assignedTo || null);
-  toast(t.assignedTo ? `Напомнили: ${who}` : 'Напомнили всей семье', '🔔');
-  haptic('med');
+  const target = who || 'всей семье';
+  confirmDlg('Отправить напоминание?', `${who ? who+' получит' : 'Все получат'} уведомление о «${t.title}».`, 'Отправить', false, ()=>{
+    const title = t.assignedTo ? '🔔 Напоминание' : '🔔 Общее напоминание';
+    pushEvent(title, t.title, 'ping-'+t.id+'-'+Date.now(), t.assignedTo || null);
+    toast(who ? `Напомнили: ${who}` : 'Напомнили всей семье', '🔔');
+    haptic('med');
+  });
 }
 function detailAction(act){
   const t = task(activeTaskId); if(!t) return;
@@ -2156,9 +2239,11 @@ function openForm(editId){
     F.type = S.currentTab;
   }
   $('f-title').classList.remove('err');
-  renderFormType(); renderFormSelectors(); renderFormPhotos(); renderPlan(); autoGrowDesc();
+  renderFormType(); renderFormSelectors(); renderFormPhotos(); renderPlan();
   $('ctx-overlay').classList.add('hidden');
   show('form');
+  // высота описания считается только когда форма видима
+  requestAnimationFrame(()=>{ autoGrowDesc(); requestAnimationFrame(autoGrowDesc); });
   setTimeout(()=>{ formBaseline = formSnapshot(); }, 60);
   if(!editId) setTimeout(()=>$('f-title').focus(), 250);
 }
@@ -2335,9 +2420,15 @@ function finalizeCreate(assignee, asDraft){
   persist(); toast(asDraft?'Сохранено в черновики':'Опубликовано','🎉');
   if(!asDraft){
     const me = member(S.currentUser)?.name || '';
-    pushEvent(F.type==='tasks'?'🆕 Новое дело':'🆕 Новая заметка', p.title + (me?' — '+me:''), 'evt-new-'+nt.id);
-    if(nt.assignedTo && nt.assignedTo!==S.currentUser)
-      pushEvent('👉 Вам назначено дело', p.title, 'evt-asg-'+nt.id+'-'+(nt.updatedAt||0), nt.assignedTo);
+    if(F.type==='notes'){
+      // приватная заметка — только тем, кому она видна (кроме автора)
+      const audience = (nt.visibleTo && nt.visibleTo.length ? nt.visibleTo : S.members.map(m=>m.id)).filter(id=>id!==S.currentUser);
+      if(audience.length) pushEvent('🔒 Новая заметка', p.title + (me?' — '+me:''), 'evt-new-'+nt.id, audience);
+    } else {
+      pushEvent('🆕 Новое дело', p.title + (me?' — '+me:''), 'evt-new-'+nt.id);
+      if(nt.assignedTo && nt.assignedTo!==S.currentUser)
+        pushEvent('👉 Вам назначено дело', p.title, 'evt-asg-'+nt.id+'-'+(nt.updatedAt||0), nt.assignedTo);
+    }
   }
   F._pending = null;
   show('main');
@@ -2518,7 +2609,7 @@ document.addEventListener('pointercancel', clearLP, {passive:true});
 document.addEventListener('click', e=>{
   const el = t => e.target.closest(t);
   let x;
-  if(x = el('[data-login]')){ S.currentUser = x.dataset.login; persist(); applyTheme(); show('main'); return; }
+  if(x = el('[data-login]')){ S.currentUser = x.dataset.login; persist(); applyTheme(); resubscribePush(); show('main'); return; }
   if(el('[data-goto-family]')){ show('family'); return; }
   if(x = el('[data-nav]')){ show(x.dataset.nav); return; }
   if(x = el('[data-tab]')){ S.currentTab = x.dataset.tab; searchQ=''; $('search-input').value=''; $('search-wrap').classList.remove('has-q'); if(activeScreen!=='main') show('main'); else renderMain(); persist(); return; }
@@ -2528,8 +2619,9 @@ document.addEventListener('click', e=>{
     const order = ['auto','light','dark'];
     const cur = (S.currentUser ? prefs().theme : S.theme) || 'auto';
     const next = order[(order.indexOf(cur)+1)%3];
-    if(S.currentUser) prefs().theme = next; else S.theme = next;
-    persist(); applyTheme();
+    if(S.currentUser){ prefs().theme = next; } 
+    S.theme = next;   // дублируем глобально как фолбэк
+    persistNow(); SYNC.onLocalChange(); applyTheme();
     toast('Тема: ' + ({auto:'как в системе',light:'светлая',dark:'тёмная'})[next], next==='dark'?'🌙':next==='light'?'☀️':'⚙️');
     return; }
   if(el('#btn-completed')){ S.showCompleted=!S.showCompleted; persist(); renderMain(); toast(S.showCompleted?'Показаны выполненные':'Выполненные скрыты','👁'); return; }
@@ -2698,6 +2790,7 @@ $('f-time').addEventListener('change', e=>{ F.time = e.target.value; renderPlan(
 $('fam-ava-input').addEventListener('change', e=>{ handleAvatarFile(e.target.files[0]); e.target.value=''; });
 $('f-title').addEventListener('input', e=>e.target.classList.remove('err'));
 $('f-desc').addEventListener('input', autoGrowDesc);
+$('f-desc').addEventListener('scroll', ()=>{ const hl=$('md-hl'); if(hl) hl.scrollTop = $('f-desc').scrollTop; });
 $('md-input1').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); if(mdPendingKind==='link') $('md-input2').focus(); else mdConfirm(); } });
 $('md-input2').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); mdConfirm(); } });
 
@@ -2748,7 +2841,9 @@ document.addEventListener('keydown', e=>{
   setInterval(checkDeadlines, 30000);
   setTimeout(ensurePushSub, 2500);
   window.addEventListener('online', ()=>SYNC.pull());
-  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) SYNC.pull(); });
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ persistNow(); } else SYNC.pull(); });
+  window.addEventListener('pagehide', persistNow);
+  window.addEventListener('beforeunload', persistNow);
   /* защищённая регистрация SW: не ломает открытие файла напрямую */
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
     navigator.serviceWorker.register('sw.js').catch(()=>{});
