@@ -143,7 +143,9 @@ img{display:block}
 .drop-btn{flex:1;min-width:0;height:38px;padding:0 11px;border-radius:12px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);display:flex;align-items:center;gap:7px;color:var(--ink);font-size:12px;font-weight:700;transition:all .2s var(--spring)}
 .drop-btn:active{transform:scale(.96)}
 .drop-btn.on{box-shadow:var(--shadow), inset 0 0 0 2px var(--acc);color:var(--acc-ink)}
-.drop-btn.narrow{flex:0 0 auto}
+.drop-btn.icon-only{flex:0 0 auto;width:38px;padding:0;justify-content:center}
+.drop-btn.icon-only .lead{color:var(--ink)}
+.drop-btn.icon-only.on .lead{color:var(--acc)}
 .drop-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left}
 .drop-btn .lead{width:15px;height:15px;flex-shrink:0;color:var(--mut)}
 .drop-btn .cv{width:14px;height:14px;flex-shrink:0;color:var(--faint);margin-left:auto}
@@ -236,6 +238,7 @@ img{display:block}
 .info-cell.wide{grid-column:1/-1}
 .info-cell .k{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
 .info-cell .v{font-size:12.5px;font-weight:650;display:flex;align-items:center;gap:6px}
+.edit-pencil{width:13px;height:13px;color:var(--acc);margin-left:auto;flex-shrink:0}
 .d-desc{background:var(--card);border-radius:var(--r);padding:14px 15px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:color-mix(in srgb,var(--ink) 82%,var(--mut));box-shadow:var(--shadow);margin-bottom:14px;word-break:break-word}
 .d-desc.empty-desc{color:var(--faint);font-style:italic}
 .d-sec{display:flex;align-items:center;justify-content:space-between;margin:18px 4px 9px}
@@ -266,15 +269,16 @@ img{display:block}
 .field-title.err{border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-soft)}
 .field{appearance:none;-webkit-appearance:none}
 select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2373747B' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:38px}
-input[type=date].field,input[type=time].field{min-height:48px;line-height:1.2}
+input[type=date].field,input[type=time].field{height:52px;line-height:normal;display:flex;align-items:center}
 .dt-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
+.dt-grid{align-items:stretch}
 .dt-field{position:relative;display:block}
-.dt-input{color:var(--ink)}
+.dt-input{width:100%;color:var(--ink)}
 .dt-input.empty::-webkit-datetime-edit{color:transparent}
 .dt-input.empty{color:transparent}
-.dt-ph{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--faint);pointer-events:none;display:none}
+.dt-ph{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--faint);pointer-events:none;display:none}
 .dt-input.empty + .dt-ph{display:block}
-.dt-input::-webkit-calendar-picker-indicator{opacity:.5}
+.dt-input::-webkit-calendar-picker-indicator{opacity:.55}
 .chk-add-btn{width:100%;background:var(--card);border:2px dashed var(--line);border-radius:13px;padding:12px;font-size:12.5px;font-weight:700;color:var(--mut);transition:all .2s;margin-top:2px}
 .chk-add-btn:active{border-color:var(--acc);color:var(--acc)}
 .form-hint{font-size:11px;color:var(--faint);margin-top:8px;line-height:1.4}
@@ -308,11 +312,12 @@ input[type=date].field,input[type=time].field{min-height:48px;line-height:1.2}
 .mem-pick .tick{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--mc,var(--acc));color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--card);opacity:0;transform:scale(.4);transition:all .25s var(--spring)}
 .mem-pick.sel .tick{opacity:1;transform:scale(1)}
 .vis-hint{font-size:11px;color:var(--mut);margin-top:8px;padding-left:3px}
-.quick-dl{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;padding:2px}
+.quick-dl{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;padding:2px 0}
+.quick-dl.row2{margin-top:6px}
 .quick-dl button{padding:7px 12px;border-radius:99px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);font-size:11px;font-weight:650;color:var(--mut);transition:transform .2s var(--spring)}
 .quick-dl button:active{transform:scale(.93);color:var(--acc)}
 .quick-dl button.act{color:#fff;background:var(--acc);border-color:transparent;box-shadow:0 3px 10px color-mix(in srgb,var(--acc) 35%,transparent)}
-.quick-sep{width:1px;align-self:stretch;background:var(--line);margin:2px 2px}
+/* separator removed — used two rows instead */
 textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17px}
 .photo-drop{width:100%;background:var(--card);border:2px dashed var(--line);border-radius:18px;padding:18px;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--mut);font-size:12.5px;font-weight:650;transition:all .2s}
 .photo-drop:active{border-color:var(--acc);color:var(--acc)}
@@ -445,7 +450,7 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
       <div class="tools-row" id="tools-row">
         <button class="drop-btn" id="btn-cat"><i class="dp" id="cat-dot"></i><span id="cat-label">Все</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
         <button class="drop-btn" id="btn-sort"><svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 20l-3-3M7 4l3 3M14 7h7M14 12h5M14 17h3"/></svg><span id="sort-label">Умная</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
-        <button class="drop-btn narrow" id="btn-view" title="Вид"><svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg><span id="view-label">Список</span></button>
+        <button class="drop-btn icon-only" id="btn-view" title="Список / Календарь"><svg class="lead" id="view-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></button>
       </div>
     </header>
     <div class="feed" id="feed"></div>
@@ -492,7 +497,8 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
             <div class="dt-field"><input type="time" class="field dt-input" id="f-time"><span class="dt-ph" id="f-time-ph">Время</span></div>
           </div>
           <div class="form-hint" id="f-plan-hint"></div>
-          <div class="quick-dl" id="f-plan-quick"></div>
+          <div class="quick-dl" id="f-plan-dates"></div>
+          <div class="quick-dl row2" id="f-plan-times"></div>
         </div>
         <div class="fgroup hidden" id="f-repeat-group">
           <span class="label-cap">Повтор</span>
@@ -1282,9 +1288,12 @@ function renderMain(){
   $('filter-bar').style.display = isTasks ? '' : 'none';
   $('tools-row').style.display = isTasks ? '' : 'none';
   $('btn-view').classList.toggle('on', P.view==='calendar');
-  $('btn-sort').style.display = P.view==='calendar' ? 'none' : '';
-  $('view-label').textContent = P.view==='calendar' ? 'Кален.' : 'Список';
-  $('btn-view').classList.toggle('on', P.view==='calendar');
+  const cal = P.view==='calendar';
+  $('btn-sort').style.display = cal ? 'none' : '';
+  $('btn-view').classList.toggle('on', cal);
+  $('view-ico').innerHTML = cal
+    ? '<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"/>'
+    : '<line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>';
   $('sort-label').textContent = SORTS[P.sort] || 'Умная';
   if(isTasks){ renderFilterBar(); renderCatBar(); }
   renderFeed();
@@ -1530,6 +1539,7 @@ function openSortSheet(){
 let ctxId = null;
 const ICO = {
   pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l1 7 2.5 2.5H5.5L8 10z"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
   person:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.7-3.6 3.2-5.2 6.5-5.2s5.8 1.6 6.5 5.2"/></svg>',
   done:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg>',
@@ -1543,9 +1553,10 @@ function openCtx(id){
     <button class="sheet-btn" data-act="pin">${ICO.pin}${pinned?'Открепить':'Закрепить наверху'}</button>`;
   if(t.type==='tasks' && !t.completed){
     html += `<button class="sheet-btn" data-act="assign">${ICO.person}Сменить исполнителя</button>`;
+    html += `<button class="sheet-btn" data-act="ping">${ICO.bell}${t.assignedTo?'Напомнить исполнителю':'Напомнить всем'}</button>`;
     html += `<button class="sheet-btn green" data-act="done">${ICO.done}Отметить выполненным</button>`;
   } else if(t.type==='tasks' && t.completed){
-    html += `<button class="sheet-btn" data-act="done">${ICO.person}Вернуть в работу</button>`;
+    html += `<button class="sheet-btn" data-act="done">${ICO.person}Вернуть в актуальное</button>`;
   }
   html += `<button class="sheet-btn" data-act="edit">${ICO.edit}Редактировать</button>`;
   if(t.createdBy===S.currentUser)
@@ -1563,6 +1574,7 @@ function ctxAction(act){
     touch(t); persist(); renderFeed();
   }
   if(act==='assign') openAssignee(t.id, true);
+  if(act==='ping') pingTask(t);
   if(act==='done') toggleComplete(t.id);
   if(act==='edit') openForm(t.id);
   if(act==='del') confirmDelete(t.id);
@@ -1664,9 +1676,9 @@ function renderDetail(){
   const t = task(activeTaskId);
   if(!t || t.deleted || !canSee(t)){ show('main'); return; }
   $('detail-hdr').textContent = t.type==='tasks' ? 'Дело' : 'Заметка';
-  $('detail-actions').innerHTML = `
-    <button class="icon-btn" data-d-act="edit" title="Редактировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg></button>
-    ${t.createdBy===S.currentUser ? `<button class="icon-btn" data-d-act="del" style="color:var(--rose);border-color:var(--rose-soft);background:var(--rose-soft)" title="Удалить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg></button>`:''}`;
+  $('detail-actions').innerHTML = t.createdBy===S.currentUser
+    ? `<button class="icon-btn" data-d-act="del" style="color:var(--rose);border-color:var(--rose-soft);background:var(--rose-soft)" title="Удалить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg></button>`
+    : '';
 
   const author = member(t.createdBy), editor = member(t.updatedBy);
   let history = `Автор: <b>${esc(author?.name||'—')}</b>`;
@@ -1681,7 +1693,7 @@ function renderDetail(){
     const asg = member(t.assignedTo);
     const r = t.deadline ? relDeadline(t.deadline) : null;
     info = `<div class="info-grid">
-      <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель ›</div><div class="v">${asg?avaHTML(asg,'ava-xs')+esc(asg.name):generalAvaHTML('ava-xs')+'Общее'}</div></div>
+      <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?avaHTML(asg,'ava-xs')+esc(asg.name):generalAvaHTML('ava-xs')+'Общее'}<svg class="edit-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg></div></div>
       <div class="info-cell"><div class="k">Запланировано</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text)+(r.over?' ⚠️':'') : '—'}</div></div>
       ${t.repeat?`<div class="info-cell wide"><div class="k">↻ Повтор</div><div class="v">${repLabel(t.repeat)}${t.deadline?` · далее: ${new Date(deadlineMs(t.deadline)).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}</div></div>`:''}
     </div>`;
@@ -1714,12 +1726,19 @@ function renderDetail(){
     if(t.isDraft && t.createdBy===S.currentUser)
       actions += `<button class="btn btn-green" data-d-act="publish">🚀 Опубликовать черновик</button>`;
     if(!t.completed){
+      const target = t.assignedTo ? (member(t.assignedTo)?.name||'исполнителю') : 'всей семье';
+      actions += `<button class="btn btn-dark" data-d-act="ping">🔔 Напомнить ${esc(target)}</button>`;
       actions += `<div class="row2">
-        <button class="btn btn-soft" data-d-act="assign">Исполнитель</button>
+        <button class="btn btn-soft" data-d-act="edit">✏️ Изменить</button>
         <button class="btn btn-acc" data-d-act="done">✓ Готово</button></div>`;
-    } else actions += `<button class="btn btn-soft" data-d-act="done">↩️ Вернуть в работу</button>`;
-  } else if(t.isDraft && t.createdBy===S.currentUser)
-    actions += `<button class="btn btn-green" data-d-act="publish">🚀 Опубликовать</button>`;
+    } else actions += `<div class="row2">
+        <button class="btn btn-soft" data-d-act="edit">✏️ Изменить</button>
+        <button class="btn btn-acc" data-d-act="done">↩️ Вернуть в актуальное</button></div>`;
+  } else {
+    if(t.isDraft && t.createdBy===S.currentUser)
+      actions += `<button class="btn btn-green" data-d-act="publish">🚀 Опубликовать</button>`;
+    actions += `<button class="btn btn-soft" data-d-act="edit">✏️ Изменить</button>`;
+  }
 
   const body = $('detail-body');
   body.innerHTML = `
@@ -1732,8 +1751,17 @@ function renderDetail(){
     <div class="d-actions">${actions}</div>`;
   hydrateImages(body);
 }
+function pingTask(t){
+  const who = t.assignedTo ? member(t.assignedTo)?.name : null;
+  const title = t.assignedTo ? '🔔 Напоминание' : '🔔 Общее напоминание';
+  const body = t.title + (who ? ` · для ${who}` : ' · для всех');
+  pushEvent(title, body, 'ping-'+t.id+'-'+Date.now());
+  notify(title, body, 'ping-local');
+  toast(t.assignedTo ? `Напомнили: ${who}` : 'Напомнили всей семье', '🔔');
+}
 function detailAction(act){
   const t = task(activeTaskId); if(!t) return;
+  if(act==='ping') pingTask(t);
   if(act==='edit') openForm(t.id);
   if(act==='del') confirmDelete(t.id);
   if(act==='assign') openAssignee(t.id, true);
@@ -1871,7 +1899,9 @@ function renderPlan(){
   const timeChips = [ ['Утро','09:00'], ['В обед','13:00'], ['Вечер','19:00'] ];
   const dhtml = dateChips.map(([lbl,d])=>`<button type="button" class="${F.date===d?'act':''}" data-setdate="${d}">${lbl}</button>`).join('');
   const thtml = has ? timeChips.map(([lbl,t])=>`<button type="button" class="${F.time===t?'act':''}" data-settime="${t}">${lbl}</button>`).join('') : '';
-  $('f-plan-quick').innerHTML = dhtml + (thtml?`<span class="quick-sep"></span>`+thtml:'');
+  $('f-plan-dates').innerHTML = dhtml;
+  $('f-plan-times').innerHTML = thtml;
+  $('f-plan-times').style.display = has ? '' : 'none';
   if(F.repeat?.freq==='custom') $('f-rep-n').textContent = F.repeat.interval;
   renderRepeat();
 }
@@ -2163,7 +2193,7 @@ document.addEventListener('click', e=>{
   if(x = el('[data-catpick]')){ prefs().catFilter = x.dataset.catpick || null; persist(); $('cat-overlay').classList.add('hidden'); renderMain(); return; }
   if(el('#cat-overlay') && !el('.sheet')){ $('cat-overlay').classList.add('hidden'); return; }
   if(el('#btn-sort')){ openSortSheet(); return; }
-  if(x = el('[data-sort]')){ prefs().sort = x.dataset.sort; persist(); $('sort-overlay').classList.add('hidden'); renderFeed(); return; }
+  if(x = el('[data-sort]')){ prefs().sort = x.dataset.sort; persist(); $('sort-overlay').classList.add('hidden'); renderMain(); return; }
   if(el('#sort-overlay') && !el('.sheet')){ $('sort-overlay').classList.add('hidden'); return; }
   if(el('#btn-view')){ const P=prefs(); P.view = P.view==='calendar'?'list':'calendar'; persist(); renderMain(); toast(P.view==='calendar'?'Календарь':'Список','📅'); return; }
   if(x = el('[data-calnav]')){ calShiftMonth(Number(x.dataset.calnav)); return; }
