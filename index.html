@@ -348,26 +348,33 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .md-btn{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--mut);transition:all .18s var(--spring)}
 .md-btn:active{transform:scale(.85);background:var(--soft);color:var(--acc)}
 .md-sep{width:1px;height:18px;background:var(--line);margin:0 4px}
+/* КРИТИЧНО: оба слоя должны иметь ИДЕНТИЧНЫЕ метрики символов,
+   иначе курсор textarea уезжает относительно видимой подсветки.
+   Поэтому подсветка НЕ меняет font-weight/font-size/letter-spacing —
+   только цвет. Ширина каждого символа совпадает 1:1. */
 .md-editor .md-area, .md-hl{
-  font-family:var(--font);font-size:14px;line-height:1.55;letter-spacing:0;
+  font-family:var(--font);font-size:14px;line-height:1.55;letter-spacing:0;font-weight:500;
   padding:12px 14px;border-radius:0 0 15px 15px;box-sizing:border-box;
-  white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word;margin:0;
+  white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word;
+  tab-size:2;margin:0;border:1.5px solid var(--line);border-top:none;
 }
-.md-hl{position:absolute;inset:0;pointer-events:none;color:var(--ink);overflow:hidden;
-  border:1.5px solid var(--line);border-top:none;background:var(--card)}
+.md-hl{position:absolute;inset:0;pointer-events:none;color:var(--ink);overflow:hidden;background:var(--card);border-color:transparent!important}
 .md-area{position:relative;width:100%;min-height:110px;max-height:800px;resize:none;overflow-y:auto;
-  border:1.5px solid var(--line);border-top:none;outline:none;background:transparent;
-  color:transparent;caret-color:var(--acc);-webkit-text-fill-color:transparent}
-.md-area:focus{border-color:var(--acc)}
-.md-editor:focus-within .md-hl{border-color:var(--acc)}
-.md-hl b,.md-hl strong{font-weight:800;color:var(--ink)}
-.md-hl i,.md-hl em{font-style:italic}
-.md-hl s,.md-hl del{text-decoration:line-through;opacity:.75}
-.md-hl .mk{color:var(--faint);opacity:.6}
-.md-hl .h{font-weight:800;font-size:15px}
+  outline:none;background:transparent;color:transparent;caret-color:var(--acc);-webkit-text-fill-color:transparent;scrollbar-width:none}
+.md-area::-webkit-scrollbar{display:none}
+.md-hl{scrollbar-width:none}.md-hl::-webkit-scrollbar{display:none}
+.md-area:focus, .md-editor:focus-within .md-hl{border-color:var(--acc)}
+/* подсветка только цветом — вес и размер НЕ трогаем (иначе сдвиг курсора) */
+.md-hl .b{color:#111318;font-weight:500}
+.md-hl .i{color:var(--acc-ink)}
+.md-hl .s{color:var(--faint);text-decoration:line-through}
+.md-hl .mk{color:var(--faint);opacity:.55}
+.md-hl .h{color:var(--acc-ink)}
 .md-hl .li{color:var(--acc)}
-.md-hl a,.md-hl .lk{color:var(--acc-ink);text-decoration:underline}
-.md-hl code{background:var(--soft);border-radius:5px;padding:0 3px}
+.md-hl .lk{color:var(--acc-ink);text-decoration:underline}
+.md-hl .code{color:#b0407a}
+[data-theme="dark"] .md-hl .b{color:#fff}
+[data-theme="dark"] .md-hl .code{color:#ff9ecb}
 .md-render{line-height:1.6}
 .md-render p{margin:0 0 6px}.md-render p:last-child{margin:0}
 .md-render h3{font-size:15px;font-weight:800;margin:8px 0 4px}
@@ -935,7 +942,6 @@ function autoGrowDesc(){
   ta.style.height='auto';
   const h = Math.min(800, Math.max(110, ta.scrollHeight));
   ta.style.height = h+'px';
-  const hl = $('md-hl'); if(hl) hl.style.height = h+'px';
   highlightDesc();
 }
 function highlightDesc(){
@@ -945,27 +951,28 @@ function highlightDesc(){
 }
 // подсветка markdown прямо в поле: маркеры приглушены, содержимое стилизовано
 function highlightMarkdown(src){
+  // ВАЖНО: ни один span не меняет ширину символов (без font-weight/size/style),
+  // маркеры (**, *, ~~, #, -, [](), `) НЕ прячем — только красим. Тогда каждый
+  // символ занимает то же место, что и в textarea, и курсор точен.
   let s = esc(src);
-  // экранируем построчно заголовки/списки
   s = s.split('\n').map(line=>{
-    let m = line.match(/^(#{1,3})(\s+)(.*)$/);
-    if(m) return `<span class="mk">${m[1]}${m[2]}</span><span class="h">${m[3]}</span>`;
-    m = line.match(/^(\s*)([-*])(\s+)(.*)$/);
-    if(m) return `${m[1]}<span class="li">•</span>${m[3]}${m[4]}`;
+    // заголовки: подсветить всю строку, маркер # оставить
+    let m = line.match(/^(#{1,3}\s+)(.*)$/);
+    if(m) return `<span class="mk">${m[1]}</span><span class="h">${m[2]}</span>`;
+    // список: подсветить маркер, символ '-'/'*' оставить как есть
+    m = line.match(/^(\s*)([-*])(\s.*)$/);
+    if(m) return `${m[1]}<span class="li">${m[2]}</span>${m[3]}`;
     return line;
   }).join('\n');
-  // код
-  s = s.replace(/`([^`]+)`/g,'<span class="mk">`</span><code>$1</code><span class="mk">`</span>');
-  // жирный
-  s = s.replace(/\*\*([^*]+)\*\*/g,'<span class="mk">**</span><b>$1</b><span class="mk">**</span>');
-  // курсив (одиночная *), не задевая **
-  s = s.replace(/(^|[^*<])\*([^*\n]+)\*(?!\*)/g,'$1<span class="mk">*</span><i>$2</i><span class="mk">*</span>');
-  // зачёркнутый
-  s = s.replace(/~~([^~]+)~~/g,'<span class="mk">~~</span><s>$1</s><span class="mk">~~</span>');
-  // ссылки [text](url)
-  s = s.replace(/\[([^\]]+)\]\(([^)]*)\)/g,'<span class="mk">[</span><span class="lk">$1</span><span class="mk">](</span><span class="mk">$2</span><span class="mk">)</span>');
-  if(s.endsWith('\n')) s += ' ';
-  return s;
+  s = s.replace(/`([^`\n]+)`/g,'<span class="mk">`</span><span class="code">$1</span><span class="mk">`</span>');
+  s = s.replace(/\*\*([^*\n]+)\*\*/g,'<span class="mk">**</span><span class="b">$1</span><span class="mk">**</span>');
+  s = s.replace(/(^|[^*<])\*([^*\n]+)\*(?!\*)/g,'$1<span class="mk">*</span><span class="i">$2</span><span class="mk">*</span>');
+  s = s.replace(/~~([^~\n]+)~~/g,'<span class="mk">~~</span><span class="s">$1</span><span class="mk">~~</span>');
+  s = s.replace(/\[([^\]\n]+)\]\(([^)\n]*)\)/g,'<span class="mk">[</span><span class="lk">$1</span><span class="mk">](</span><span class="mk">$2</span><span class="mk">)</span>');
+  // при white-space:pre-wrap переводы строк остаются как \n (не <br>),
+  // чтобы перенос строки занимал ровно ту же позицию, что в textarea.
+  // добавляем финальный пробел, чтобы высота overlay совпала при завершающем \n
+  return s + '\n ';
 }
 
 
