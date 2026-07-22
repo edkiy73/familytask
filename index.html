@@ -68,7 +68,7 @@ img{display:block}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ---------- утилиты ---------- */
-.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:4px;line-height:1;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
 .chip.soft-green{background:var(--acc-soft);color:var(--acc-ink)}
 .chip.soft-amber{background:var(--amber-soft);color:var(--amber)}
 .chip.soft-rose{background:var(--rose-soft);color:var(--rose)}
@@ -77,8 +77,11 @@ img{display:block}
 .chip.lbl::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--lc,var(--acc));flex-shrink:0}
 .lbl-green{--lc:#10B981}.lbl-blue{--lc:#3B82F6}.lbl-plum{--lc:#A855F7}
 .lbl-amber{--lc:#F59E0B}.lbl-teal{--lc:#14B8A6}.lbl-rose{--lc:#F43F5E}
+.btn .ic{flex-shrink:0}
+.chip .ic{margin-right:-1px}
 .btn{display:flex;align-items:center;justify-content:center;gap:7px;border-radius:16px;font-weight:700;font-size:13.5px;padding:14px 16px;transition:transform .25s var(--spring),opacity .15s,box-shadow .2s;width:100%}
-.btn:active{transform:scale(.96)}
+.btn:active{transform:scale(.955)}
+.btn{will-change:transform}
 .btn-acc,.btn-green{background:linear-gradient(135deg,var(--acc-2),var(--acc));color:#fff;box-shadow:0 6px 18px color-mix(in srgb,var(--acc) 35%,transparent)}
 .btn-dark{background:var(--ink);color:var(--bg)}
 .btn-soft{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
@@ -190,6 +193,11 @@ img{display:block}
 .card-chips{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:6px}
 .card-title{font-weight:700;font-size:14.5px;line-height:1.3;letter-spacing:-.01em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .card-item.done .card-title{text-decoration:line-through;color:var(--mut)}
+.card-excerpt{font-size:12px;line-height:1.4;color:var(--mut);margin-top:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.ava-stack{display:flex;align-items:center}
+.ava-sm{width:26px;height:26px;font-size:10px;box-shadow:0 0 0 2px var(--card)}
+.ava-stack .ava-sm:not(:first-child){margin-left:-9px}
+.ava-more{background:var(--soft)!important;color:var(--mut)!important;font-weight:800;text-shadow:none!important}
 .card-meta{display:flex;align-items:center;gap:9px;font-size:10.5px;color:var(--mut);margin-top:5px;flex-wrap:wrap}
 .card-meta b{color:var(--ink);font-weight:600}
 .mini-prog{display:inline-flex;align-items:center;gap:5px}
@@ -229,7 +237,7 @@ img{display:block}
 .sub-actions{display:flex;gap:6px;min-width:76px;justify-content:flex-end}
 
 /* ===== ДЕТАЛИ ===== */
-.detail-body{flex:1;overflow-y:auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
+.detail-body{flex:1;overflow-y:auto;overflow-x:visible;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
 .d-title{font-size:22px;font-weight:800;line-height:1.22;margin:10px 0 5px;letter-spacing:-.025em}
 .d-history{font-size:10.5px;color:var(--faint);margin-bottom:14px}
 .d-history b{color:var(--mut);font-weight:600}
@@ -237,7 +245,10 @@ img{display:block}
 .info-cell{background:var(--card);border-radius:16px;padding:11px 13px;box-shadow:var(--shadow)}
 .info-cell.wide{grid-column:1/-1}
 .info-cell .k{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.info-cell{overflow:visible}
 .info-cell .v{font-size:12.5px;font-weight:650;display:flex;align-items:center;gap:6px}
+.vis-cell-v{flex-wrap:wrap}
+.vis-cell-v .ava-stack{margin-right:2px}
 .edit-pencil{width:13px;height:13px;color:var(--acc);margin-left:auto;flex-shrink:0}
 .d-desc{background:var(--card);border-radius:var(--r);padding:14px 15px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:color-mix(in srgb,var(--ink) 82%,var(--mut));box-shadow:var(--shadow);margin-bottom:14px;word-break:break-word}
 .d-desc.empty-desc{color:var(--faint);font-style:italic}
@@ -256,7 +267,7 @@ img{display:block}
 .prog-line i{display:block;height:100%;background:linear-gradient(90deg,var(--acc-2),var(--acc));border-radius:3px;transition:width .35s var(--spring)}
 .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .gal img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;box-shadow:var(--shadow)}
-.d-actions{display:flex;flex-direction:column;gap:9px;margin-top:20px}
+.d-actions{display:flex;flex-direction:column;gap:9px;margin-top:20px;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .d-actions .row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 
 /* ===== ФОРМА ===== */
@@ -269,16 +280,16 @@ img{display:block}
 .field-title.err{border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-soft)}
 .field{appearance:none;-webkit-appearance:none}
 select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2373747B' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:38px}
-input[type=date].field,input[type=time].field{height:52px;line-height:normal;display:flex;align-items:center}
-.dt-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
-.dt-grid{align-items:stretch}
-.dt-field{position:relative;display:block}
-.dt-input{width:100%;color:var(--ink)}
-.dt-input.empty::-webkit-datetime-edit{color:transparent}
+.dt-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;align-items:start}
+.dt-field{position:relative}
+.dt-input{width:100%;height:50px;box-sizing:border-box;padding:0 14px;font-size:14px;line-height:50px;border:1.5px solid var(--line);border-radius:15px;background:var(--card);color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
+.dt-input:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
 .dt-input.empty{color:transparent}
-.dt-ph{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--faint);pointer-events:none;display:none}
+.dt-input.empty::-webkit-datetime-edit{color:transparent}
+.dt-input::-webkit-date-and-time-value{text-align:left;margin:0}
+.dt-input::-webkit-calendar-picker-indicator{opacity:.5;margin:0}
+.dt-ph{position:absolute;left:15px;top:0;height:50px;line-height:50px;font-size:14px;color:var(--faint);pointer-events:none;display:none}
 .dt-input.empty + .dt-ph{display:block}
-.dt-input::-webkit-calendar-picker-indicator{opacity:.55}
 .chk-add-btn{width:100%;background:var(--card);border:2px dashed var(--line);border-radius:13px;padding:12px;font-size:12.5px;font-weight:700;color:var(--mut);transition:all .2s;margin-top:2px}
 .chk-add-btn:active{border-color:var(--acc);color:var(--acc)}
 .form-hint{font-size:11px;color:var(--faint);margin-top:8px;line-height:1.4}
@@ -319,6 +330,22 @@ input[type=date].field,input[type=time].field{height:52px;line-height:normal;dis
 .quick-dl button.act{color:#fff;background:var(--acc);border-color:transparent;box-shadow:0 3px 10px color-mix(in srgb,var(--acc) 35%,transparent)}
 /* separator removed — used two rows instead */
 textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17px}
+.md-toolbar{display:flex;align-items:center;gap:3px;background:var(--card);border:1.5px solid var(--line);border-bottom:none;border-radius:15px 15px 0 0;padding:6px 8px;flex-wrap:wrap}
+.md-btn{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--mut);transition:all .18s var(--spring)}
+.md-btn:active{transform:scale(.85);background:var(--soft);color:var(--acc)}
+.md-sep{width:1px;height:18px;background:var(--line);margin:0 4px}
+.md-area{border-radius:0 0 15px 15px!important;border-top:none!important}
+.md-render{line-height:1.6}
+.md-render p{margin:0 0 6px}.md-render p:last-child{margin:0}
+.md-render h3{font-size:15px;font-weight:800;margin:8px 0 4px}
+.md-render h4{font-size:13.5px;font-weight:800;margin:7px 0 3px}
+.md-render h5{font-size:12.5px;font-weight:700;margin:6px 0 3px;color:var(--mut)}
+.md-render ul{margin:4px 0 8px;padding-left:18px}
+.md-render li{margin:2px 0}
+.md-render a{color:var(--acc-ink);text-decoration:underline;word-break:break-all}
+.md-render code{background:var(--soft);padding:1px 5px;border-radius:6px;font-size:.9em;font-family:ui-monospace,Menlo,monospace}
+.md-render strong{font-weight:800}.md-render del{color:var(--faint)}
+.md-render br{line-height:.5}
 .photo-drop{width:100%;background:var(--card);border:2px dashed var(--line);border-radius:18px;padding:18px;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--mut);font-size:12.5px;font-weight:650;transition:all .2s}
 .photo-drop:active{border-color:var(--acc);color:var(--acc)}
 .photo-drop svg{width:19px;height:19px}
@@ -412,6 +439,17 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
 /* ===== ТОСТ ===== */
 #toast{position:fixed;top:calc(env(safe-area-inset-top) + 14px);left:50%;transform:translate(-50%,-20px) scale(.95);background:var(--ink);color:var(--bg);padding:11px 19px;border-radius:99px;font-size:12.5px;font-weight:650;display:flex;align-items:center;gap:8px;z-index:70;opacity:0;pointer-events:none;transition:all .35s var(--spring);box-shadow:var(--shadow-lg);max-width:88%}
 #toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
+@keyframes pulseIn{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+.chip{animation:pulseIn .25s var(--spring) backwards}
+.d-actions .btn{animation:rise .3s var(--spring) backwards}
+.d-actions .btn:nth-child(2){animation-delay:.04s}
+.d-actions .btn:nth-child(3){animation-delay:.08s}
+.sheet-btn{animation:rise .28s var(--spring) backwards}
+.sheet-btn:nth-child(3){animation-delay:.03s}.sheet-btn:nth-child(4){animation-delay:.06s}.sheet-btn:nth-child(5){animation-delay:.09s}.sheet-btn:nth-child(6){animation-delay:.12s}
+.info-cell{animation:rise .3s var(--spring) backwards}
+.info-cell:nth-child(2){animation-delay:.05s}
+.gal img{animation:pulseIn .3s var(--spring) backwards}
+.ic{transition:transform .18s var(--spring)}
 </style>
 </head>
 <body>
@@ -483,7 +521,16 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
 
       <div class="fgroup">
         <span class="label-cap">Описание</span>
-        <textarea class="field" id="f-desc" placeholder="Подробности, списки, счета, реквизиты…"></textarea>
+        <div class="md-toolbar" id="md-toolbar">
+          <button type="button" class="md-btn" data-md="bold" title="Жирный"></button>
+          <button type="button" class="md-btn" data-md="italic" title="Курсив"></button>
+          <button type="button" class="md-btn" data-md="strike" title="Зачёркнутый"></button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn" data-md="h" title="Заголовок"></button>
+          <button type="button" class="md-btn" data-md="list" title="Список"></button>
+          <button type="button" class="md-btn" data-md="link" title="Ссылка"></button>
+        </div>
+        <textarea class="field md-area" id="f-desc" placeholder="Подробности, списки, счета, реквизиты…&#10;Поддерживается **жирный**, *курсив*, - списки, [ссылки](url)"></textarea>
       </div>
 
       <div id="f-task-fields">
@@ -493,8 +540,8 @@ textarea.field{min-height:120px;resize:vertical;line-height:1.5;border-radius:17
             <button type="button" class="plan-clear hidden" id="f-plan-clear">Очистить</button>
           </div>
           <div class="dt-grid" style="margin-top:8px">
-            <div class="dt-field"><input type="date" class="field dt-input" id="f-date"><span class="dt-ph" id="f-date-ph">Дата</span></div>
-            <div class="dt-field"><input type="time" class="field dt-input" id="f-time"><span class="dt-ph" id="f-time-ph">Время</span></div>
+            <div class="dt-field"><input type="date" class="dt-input" id="f-date"><span class="dt-ph" id="f-date-ph">Дата</span></div>
+            <div class="dt-field"><input type="time" class="dt-input" id="f-time"><span class="dt-ph" id="f-time-ph">Время</span></div>
           </div>
           <div class="form-hint" id="f-plan-hint"></div>
           <div class="quick-dl" id="f-plan-dates"></div>
@@ -677,9 +724,88 @@ const SB_URL = 'https://qviioxefqtnhashdbtls.supabase.co';
 const SB_KEY = 'sb_publishable_iYhV1carD3GiDhtRzvGluw_5G4TyHhA';
 const VAPID_PUBLIC = 'BDMLjsN-aJssPhcvr-YJH2d6fSYLjft-D_CNpsE6pC8vhIT1LkW-2v_fj4SWANpVrtzuIWMvtL6LowRF4EC15Jg';
 
+
+/* ---------- единый набор иконок (Lucide-стиль) ---------- */
+const _svg = (p, s=18) => `<svg class="ic" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const ICON = {
+  pin:(s)=>_svg('<path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v1H7v-1l3-3z"/>',s),
+  bell:(s)=>_svg('<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/>',s),
+  check:(s)=>_svg('<path d="M20 6 9 17l-5-5"/>',s),
+  edit:(s)=>_svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',s),
+  trash:(s)=>_svg('<path d="M3 6h18"/><path d="M8 6V4h8v2M6 6l1 14h10l1-14"/>',s),
+  person:(s)=>_svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/>',s),
+  users:(s)=>_svg('<circle cx="9" cy="8" r="3.4"/><path d="M3.5 20c.6-3.4 2.8-5 5.5-5s4.9 1.6 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M16 15.4c2.3.2 4 1.6 4.5 4.6"/>',s),
+  eye:(s)=>_svg('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',s),
+  repeat:(s)=>_svg('<path d="M17 2l4 4-4 4"/><path d="M3 12v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 12v1a4 4 0 0 1-4 4H3"/>',s),
+  rocket:(s)=>_svg('<path d="M5 15c-1 1-2 5-2 5s4-1 5-2M9 12a11 11 0 0 1 8-8c2 0 3 1 3 3a11 11 0 0 1-8 8z"/><circle cx="14.5" cy="9.5" r="1.3"/>',s),
+  send:(s)=>_svg('<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>',s),
+  undo:(s)=>_svg('<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',s),
+  plus:(s)=>_svg('<path d="M12 5v14M5 12h14"/>',s),
+  x:(s)=>_svg('<path d="M18 6 6 18M6 6l12 12"/>',s),
+  camera:(s)=>_svg('<path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3"/>',s),
+  bold:(s)=>_svg('<path d="M6 4h7a4 4 0 0 1 0 8H6zM6 12h8a4 4 0 0 1 0 8H6z"/>',s),
+  italic:(s)=>_svg('<path d="M19 4h-9M14 20H5M15 4 9 20"/>',s),
+  strike:(s)=>_svg('<path d="M4 12h16"/><path d="M6 7a4 3 0 0 1 4-3h4a4 3 0 0 1 4 3M8 17a4 3 0 0 0 4 3h1"/>',s),
+  list:(s)=>_svg('<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',s),
+  link:(s)=>_svg('<path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>',s),
+  head:(s)=>_svg('<path d="M6 4v16M18 4v16M6 12h12"/>',s),
+  cal:(s)=>_svg('<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/>',s),
+  search:(s)=>_svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',s),
+};
+
 const $ = id => document.getElementById(id);
+function haptic(kind='tap'){
+  if(!('vibrate' in navigator)) return;
+  const P = {tap:8, med:[12], strong:[18], ok:[10,40,14], warn:[24,50,24], err:[30,60,30,60,30]};
+  try{ navigator.vibrate(P[kind]||8); }catch(e){}
+}
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+/* ---------- лёгкий Markdown ---------- */
+function renderMarkdown(src){
+  let s = esc(src);
+  // код `...`
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // жирный **...** и курсив *...*
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+  s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+  // ссылки [text](url)
+  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // авто-ссылки
+  s = s.replace(/(^|[\s(])((https?:\/\/)[^\s<]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  // построчно: заголовки и списки
+  const lines = s.split('\n');
+  let out = '', inList = false;
+  for(let ln of lines){
+    const h = ln.match(/^(#{1,3})\s+(.*)$/);
+    const li = ln.match(/^\s*[-*]\s+(.*)$/);
+    if(li){ if(!inList){ out+='<ul>'; inList=true; } out+='<li>'+li[1]+'</li>'; continue; }
+    if(inList){ out+='</ul>'; inList=false; }
+    if(h){ const n=h[1].length; out+=`<h${n+2}>`+h[2]+`</h${n+2}>`; continue; }
+    if(ln.trim()==='') out+='<br>'; else out+='<p>'+ln+'</p>';
+  }
+  if(inList) out+='</ul>';
+  return out;
+}
+function mdWrap(kind){
+  const ta = $('f-desc');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const val = ta.value, sel = val.slice(s,e);
+  let ins, cursor;
+  const wrap = (a,b,ph)=>{ const t = sel||ph; ins = a+t+b; cursor = s + a.length + (sel? t.length : 0) + (sel? b.length : 0); if(!sel) cursor = s + a.length + ph.length; };
+  if(kind==='bold') wrap('**','**','текст');
+  else if(kind==='italic') wrap('*','*','текст');
+  else if(kind==='strike') wrap('~~','~~','текст');
+  else if(kind==='h'){ const lineStart = val.lastIndexOf('\n',s-1)+1; ins=null; ta.value = val.slice(0,lineStart)+'## '+val.slice(lineStart); ta.focus(); ta.setSelectionRange(s+3,e+3); return; }
+  else if(kind==='list'){ const lineStart = val.lastIndexOf('\n',s-1)+1; ta.value = val.slice(0,lineStart)+'- '+val.slice(lineStart); ta.focus(); ta.setSelectionRange(s+2,e+2); return; }
+  else if(kind==='link'){ const t=sel||'текст'; ins='['+t+'](https://)'; cursor = s + ins.length - 1; }
+  ta.value = val.slice(0,s)+ins+val.slice(e);
+  ta.focus(); ta.setSelectionRange(cursor,cursor);
+  haptic('tap');
+}
+
 
 const MEMBER_COLORS = ['#10B981','#3B82F6','#A855F7','#F59E0B','#14B8A6','#F43F5E'];
 const LABEL_COLORS  = ['green','blue','amber','plum','teal','rose'];
@@ -936,7 +1062,7 @@ async function ensurePushSub(){
     const reg = await navigator.serviceWorker.ready;
     let sub = await reg.pushManager.getSubscription();
     if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64uToU8(VAPID_PUBLIC) });
-    await SYNC.rpc('hub_sub_put', { p_fid:S.familyCode, p_device:DEVICE_ID, p_sub:sub.toJSON() });
+    await SYNC.rpc('hub_sub_put', { p_fid:S.familyCode, p_device:DEVICE_ID, p_member:S.currentUser||'', p_sub:sub.toJSON() });
     if(!pushSubActive){ pushSubActive = true; renderNotifCard(); }
   }catch(e){ console.warn('push sub', e); }
 }
@@ -949,12 +1075,12 @@ async function dropPushSub(code){
   }catch(e){}
   pushSubActive = false;
 }
-function pushEvent(title, body, tag){
+function pushEvent(title, body, tag, toMember){
   if(!VAPID_PUBLIC || !S.familyCode || !SB_URL) return;
   fetch(SB_URL + '/functions/v1/push-send', {
     method:'POST',
     headers:{ 'Content-Type':'application/json', 'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY },
-    body: JSON.stringify({ fid:S.familyCode, title, body, tag, exclude:DEVICE_ID }),
+    body: JSON.stringify({ fid:S.familyCode, title, body, tag, exclude:DEVICE_ID, member:toMember||null }),
   }).catch(()=>{});
 }
 function renderNotifCard(){
@@ -1183,6 +1309,7 @@ function toast(txt, ico='✓'){
   $('toast-txt').textContent = txt; $('toast-ico').textContent = ico;
   $('toast').classList.add('show');
   clearTimeout(toast._t); toast._t = setTimeout(()=>$('toast').classList.remove('show'), 2200);
+  if(ico==='⚠️'||ico==='❌') haptic('warn'); else haptic('med');
 }
 function relDeadline(ds){
   if(!ds) return null;
@@ -1389,19 +1516,23 @@ function visibleList(){
 function cardHTML(t){
   const pinned = (t.pinnedBy||[]).includes(S.currentUser);
   const asg = member(t.assignedTo);
-  const lbl = `<span class="chip lbl lbl-${t.labelColor||'green'}">${esc(t.label)}</span>`;
-  let chips = (pinned?'<span style="font-size:11px">📌</span>':'') + lbl;
+  const lbl = t.label ? `<span class="chip lbl lbl-${t.labelColor||'green'}">${esc(t.label)}</span>` : '';
+  let chips = (pinned?ICON.pin(12):'') + lbl;
   if(t.isDraft) chips += `<span class="chip soft-gray">Черновик</span>`;
   if(t.type==='tasks' && t.deadline && !t.completed){
     const r = relDeadline(t.deadline);
     if(r) chips += `<span class="chip ${r.over?'soft-rose':r.soon?'soft-amber':'soft-gray'}">${r.text}</span>`;
   }
-  if(t.type==='tasks' && t.repeat && !t.completed) chips += `<span class="chip soft-green">↻ ${repShort(t.repeat)}</span>`;
-  let meta = '';
-  const ch = t.checklist||[];
-  if(ch.length){
-    const done = ch.filter(c=>c.done).length;
-    meta = `<span class="mini-prog"><span class="bar"><i style="width:${Math.round(done/ch.length*100)}%"></i></span>${done}/${ch.length}</span>`;
+  if(t.type==='tasks' && t.repeat && !t.completed) chips += `<span class="chip soft-green">${ICON.repeat(11)} ${repShort(t.repeat)}</span>`;
+  let meta = '', excerpt = '';
+  if(t.type==='notes'){
+    if(t.description) excerpt = `<div class="card-excerpt">${esc(t.description)}</div>`;
+  } else {
+    const ch = t.checklist||[];
+    if(ch.length){
+      const done = ch.filter(c=>c.done).length;
+      meta = `<span class="mini-prog"><span class="bar"><i style="width:${Math.round(done/ch.length*100)}%"></i></span>${done}/${ch.length}</span>`;
+    }
   }
   let thumbs = '';
   const imgs = t.imageIds||[];
@@ -1410,17 +1541,24 @@ function cardHTML(t){
       imgs.slice(0,4).map((id,i)=>`<img data-img="${id}" data-lb="${t.id}" data-idx="${i}" alt="">`).join('') +
       (imgs.length>4?`<span class="more">+${imgs.length-4}</span>`:'') + `</div>`;
   }
-  const side = t.type==='tasks'
-    ? `<button class="ava card-ava" data-ctxasg="${t.id}" title="${esc(asg?asg.name:'Общее — сменить')}" style="--mc:${asg?asg.color:'#9B9CA4'}">${asg ? (asg.avatarId?`<img data-img="${asg.avatarId}" alt="">`:esc(asg.name.trim()[0].toUpperCase())) : (S.generalAvatarId?`<img data-img="${S.generalAvatarId}" alt="">`:'✦')}</button>`
-    : `<span class="ava card-ava" style="--mc:transparent;background:var(--soft);color:var(--mut)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.6"/></svg></span>`;
+  let side;
+  if(t.type==='tasks'){
+    side = `<button class="ava card-ava" data-ctxasg="${t.id}" title="${esc(asg?asg.name:'Общее — сменить')}" style="--mc:${asg?asg.color:'#9B9CA4'}">${asg ? (asg.avatarId?`<img data-img="${asg.avatarId}" alt="">`:esc(asg.name.trim()[0].toUpperCase())) : (S.generalAvatarId?`<img data-img="${S.generalAvatarId}" alt="">`:ICON.users(13))}</button>`;
+  } else {
+    const vis = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
+    const shown = vis.slice(0,3).map(id=>member(id)).filter(Boolean);
+    const extra = vis.length - shown.length;
+    side = `<div class="ava-stack">` + shown.map((m,i)=>`<span class="ava ava-sm" style="--mc:${m.color};z-index:${5-i}">${m.avatarId?`<img data-img="${m.avatarId}" alt="">`:esc(m.name.trim()[0].toUpperCase())}</span>`).join('') + (extra>0?`<span class="ava ava-sm ava-more" style="z-index:1">+${extra}</span>`:'') + `</div>`;
+  }
   return `<article class="card-item ${t.completed?'done':''}" data-open="${t.id}">
     <div class="card-in">
       <div class="card-chips">${chips}</div>
       <div class="card-title">${esc(t.title)}</div>
+      ${excerpt||''}
       ${meta?`<div class="card-meta">${meta}</div>`:''}
       ${thumbs}
     </div>
-    <div class="card-side">${side}<button class="kebab" data-ctx="${t.id}">⋮</button></div>
+    <div class="card-side">${side}<button class="kebab" data-ctx="${t.id}"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div>
   </article>`;
 }
 
@@ -1431,7 +1569,7 @@ function renderFeed(){
   if(!list.length){
     const isTasks = S.currentTab==='tasks';
     feed.innerHTML = `<div class="empty">
-      <div class="e-ico">${searchQ ? '🔍' : isTasks ? '✓' : '🔒'}</div>
+      <div class="e-ico">${searchQ ? ICON.search(28) : isTasks ? ICON.check(28) : ICON.eye(28)}</div>
       <b>${searchQ ? 'Ничего не найдено' : isTasks ? 'Дел пока нет' : 'Заметок пока нет'}</b>
       <span>${searchQ ? 'Попробуйте другой запрос' : 'Нажмите «+», чтобы добавить ' + (isTasks?'первое дело':'первую заметку')}</span>
     </div>`;
@@ -1490,7 +1628,7 @@ function renderCalendar(){
   }
 
   feed.innerHTML = `
-    ${noDate.length?`<button class="btn btn-soft no-date-btn" id="cal-nodate">📥 Без даты <span class="n">${noDate.length}</span></button>`:''}
+    ${noDate.length?`<button class="btn btn-soft no-date-btn" id="cal-nodate">${ICON.cal(16)} Без даты <span class="n">${noDate.length}</span></button>`:''}
     <div class="cal">
       <div class="cal-head">
         <button class="cal-nav" data-calnav="-1">‹</button>
@@ -1612,7 +1750,7 @@ function chooseAssignee(mid){
   const name = mid ? member(mid)?.name : 'Общее';
   toast('Исполнитель: '+name, '👉');
   if(mid && mid !== S.currentUser)
-    pushEvent('👉 Назначено', `${t.title} → ${member(mid)?.name||''}`, 'evt-asg-'+t.id+'-'+(t.updatedAt||0));
+    pushEvent('👉 Вам назначено дело', t.title, 'evt-asg-'+t.id+'-'+(t.updatedAt||0), mid);
   activeScreen==='detail' ? renderDetail() : renderMain();
 }
 
@@ -1684,7 +1822,7 @@ function renderDetail(){
   let history = `Автор: <b>${esc(author?.name||'—')}</b>`;
   if(t.updatedBy && t.updatedBy!==t.createdBy) history += ` · правил: <b>${esc(editor?.name||'—')}</b>`;
 
-  let chips = `<span class="chip lbl lbl-${t.labelColor||'green'}">${esc(t.label)}</span>`;
+  let chips = t.label ? `<span class="chip lbl lbl-${t.labelColor||'green'}">${esc(t.label)}</span>` : '';
   if(t.isDraft) chips += `<span class="chip soft-gray">Черновик</span>`;
   if(t.type==='tasks' && t.completed) chips += `<span class="chip soft-green">Выполнено</span>`;
 
@@ -1695,12 +1833,14 @@ function renderDetail(){
     info = `<div class="info-grid">
       <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?avaHTML(asg,'ava-xs')+esc(asg.name):generalAvaHTML('ava-xs')+'Общее'}<svg class="edit-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg></div></div>
       <div class="info-cell"><div class="k">Запланировано</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text)+(r.over?' ⚠️':'') : '—'}</div></div>
-      ${t.repeat?`<div class="info-cell wide"><div class="k">↻ Повтор</div><div class="v">${repLabel(t.repeat)}${t.deadline?` · далее: ${new Date(deadlineMs(t.deadline)).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}</div></div>`:''}
+      ${t.repeat?`<div class="info-cell wide"><div class="k">Повтор</div><div class="v">${repLabel(t.repeat)}${t.deadline?` · далее: ${new Date(deadlineMs(t.deadline)).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}</div></div>`:''}
     </div>`;
   } else {
-    const vis = (t.visibleTo||[]);
-    const names = vis.length ? vis.map(id=>member(id)?.name).filter(Boolean).join(', ') : 'Вся семья';
-    info = `<div class="info-grid"><div class="info-cell wide"><div class="k">👁 Кто видит</div><div class="v">${esc(names)}</div></div></div>`;
+    const vis = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
+    const all = vis.length === S.members.length;
+    const avas = vis.map(id=>member(id)).filter(Boolean).map(m=>`<span class="ava ava-sm" style="--mc:${m.color}">${m.avatarId?`<img data-img="${m.avatarId}" alt="">`:esc(m.name.trim()[0].toUpperCase())}</span>`).join('');
+    const names = all ? 'Вся семья' : vis.map(id=>member(id)?.name).filter(Boolean).join(', ');
+    info = `<div class="info-grid"><div class="info-cell wide"><div class="k">Кто видит</div><div class="v vis-cell-v"><span class="ava-stack">${avas}</span><span>${esc(names)}</span></div></div></div>`;
   }
 
   let chkHtml = '';
@@ -1724,20 +1864,20 @@ function renderDetail(){
   let actions = '';
   if(t.type==='tasks'){
     if(t.isDraft && t.createdBy===S.currentUser)
-      actions += `<button class="btn btn-green" data-d-act="publish">🚀 Опубликовать черновик</button>`;
+      actions += `<button class="btn btn-green" data-d-act="publish">${ICON.rocket(16)} Опубликовать черновик</button>`;
     if(!t.completed){
       const target = t.assignedTo ? (member(t.assignedTo)?.name||'исполнителю') : 'всей семье';
-      actions += `<button class="btn btn-dark" data-d-act="ping">🔔 Напомнить ${esc(target)}</button>`;
+      actions += `<button class="btn btn-dark" data-d-act="ping">${ICON.bell(16)} Напомнить ${esc(target)}</button>`;
       actions += `<div class="row2">
-        <button class="btn btn-soft" data-d-act="edit">✏️ Изменить</button>
-        <button class="btn btn-acc" data-d-act="done">✓ Готово</button></div>`;
+        <button class="btn btn-soft" data-d-act="edit">${ICON.edit(16)} Изменить</button>
+        <button class="btn btn-acc" data-d-act="done">${ICON.check(16)} Готово</button></div>`;
     } else actions += `<div class="row2">
-        <button class="btn btn-soft" data-d-act="edit">✏️ Изменить</button>
-        <button class="btn btn-acc" data-d-act="done">↩️ Вернуть в актуальное</button></div>`;
+        <button class="btn btn-soft" data-d-act="edit">${ICON.edit(16)} Изменить</button>
+        <button class="btn btn-acc" data-d-act="done">${ICON.undo(16)} В актуальное</button></div>`;
   } else {
     if(t.isDraft && t.createdBy===S.currentUser)
-      actions += `<button class="btn btn-green" data-d-act="publish">🚀 Опубликовать</button>`;
-    actions += `<button class="btn btn-soft" data-d-act="edit">✏️ Изменить</button>`;
+      actions += `<button class="btn btn-green" data-d-act="publish">${ICON.rocket(16)} Опубликовать</button>`;
+    actions += `<button class="btn btn-soft" data-d-act="edit">${ICON.edit(16)} Изменить</button>`;
   }
 
   const body = $('detail-body');
@@ -1746,7 +1886,7 @@ function renderDetail(){
     <h1 class="d-title">${esc(t.title)}</h1>
     <div class="d-history">${history}</div>
     ${info}
-    <div class="d-desc ${t.description?'':'empty-desc'}">${esc(t.description)||'Без описания'}</div>
+    ${t.description?`<div class="d-desc md-render">${renderMarkdown(t.description)}</div>`:`<div class="d-desc empty-desc">Без описания</div>`}
     ${chkHtml}${gal}
     <div class="d-actions">${actions}</div>`;
   hydrateImages(body);
@@ -1754,10 +1894,10 @@ function renderDetail(){
 function pingTask(t){
   const who = t.assignedTo ? member(t.assignedTo)?.name : null;
   const title = t.assignedTo ? '🔔 Напоминание' : '🔔 Общее напоминание';
-  const body = t.title + (who ? ` · для ${who}` : ' · для всех');
-  pushEvent(title, body, 'ping-'+t.id+'-'+Date.now());
-  notify(title, body, 'ping-local');
+  const body = t.title;
+  pushEvent(title, body, 'ping-'+t.id+'-'+Date.now(), t.assignedTo || null);
   toast(t.assignedTo ? `Напомнили: ${who}` : 'Напомнили всей семье', '🔔');
+  haptic('med');
 }
 function detailAction(act){
   const t = task(activeTaskId); if(!t) return;
@@ -1910,7 +2050,7 @@ function renderRepeat(){
   $('f-repeat').innerHTML = REPEAT_OPTS.map(o=>{
     const sel = (!F.repeat && o.k==='') || (F.repeat && F.repeat.freq===o.k);
     const label = (o.k==='custom' && F.repeat?.freq==='custom') ? 'Каждые '+F.repeat.interval+' дн.' : o.label;
-    return `<button type="button" class="p-chip ${sel?'sel':''}" data-rep="${o.k}" style="--lc:var(--acc)">${o.k?'↻ ':''}${label}</button>`;
+    return `<button type="button" class="p-chip ${sel?'sel':''}" data-rep="${o.k}" style="--lc:var(--acc)">${o.k?ICON.repeat(13)+' ':''}${label}</button>`;
   }).join('');
   const st = $('f-rep-stepper');
   st.classList.toggle('hidden', F.repeat?.freq !== 'custom');
@@ -2017,7 +2157,7 @@ function finalizeCreate(assignee, asDraft){
     const me = member(S.currentUser)?.name || '';
     pushEvent(F.type==='tasks'?'🆕 Новое дело':'🆕 Новая заметка', p.title + (me?' — '+me:''), 'evt-new-'+nt.id);
     if(nt.assignedTo && nt.assignedTo!==S.currentUser)
-      pushEvent('👉 Назначено', `${p.title} → ${member(nt.assignedTo)?.name||''}`, 'evt-asg-'+nt.id+'-'+(nt.updatedAt||0));
+      pushEvent('👉 Вам назначено дело', p.title, 'evt-asg-'+nt.id+'-'+(nt.updatedAt||0), nt.assignedTo);
   }
   F._pending = null;
   show('main');
@@ -2172,6 +2312,10 @@ function delMember(id){
 }
 
 /* ---------- СОБЫТИЯ ---------- */
+document.addEventListener('pointerdown', e=>{
+  if(e.pointerType==='mouse') return;
+  if(e.target.closest('button, .card-item, .p-chip, .cat-chip, .drop-btn, .mem-pick, .vis-cell, .auth-card, .f-item, .who-cell, .chk-row, .em-cell, .cal-day.has, .fam-ring-btn, .sheet-btn, .nav-btn, .fab, .md-btn, .quick-dl button, .dot')) haptic('tap');
+}, {passive:true});
 document.addEventListener('click', e=>{
   const el = t => e.target.closest(t);
   let x;
@@ -2264,6 +2408,7 @@ document.addEventListener('click', e=>{
   if(el('#f-plan-clear')){ F.date=''; F.time=''; F.repeat=null; renderPlan(); return; }
   if(el('#f-photo-btn')){ $('f-file').click(); return; }
   if(x = el('[data-rm-img]')){ const i=Number(x.dataset.rmImg); F.removedImageIds.push(F.imageIds[i]); F.imageIds.splice(i,1); renderFormPhotos(); return; }
+  if(x = el('[data-md]')){ mdWrap(x.dataset.md); return; }
   if(el('#f-add-chk')){ addChkField(); return; }
   if(el('#f-draft')){ saveForm(true); return; }
   if(el('#f-save')){ saveForm(false); return; }
@@ -2379,6 +2524,8 @@ document.addEventListener('keydown', e=>{
     toast('Хранилище недоступно — данные не сохранятся','⚠️');
   }
   S.tasks = S.tasks.filter(t=>!t.deleted || (Date.now()-(t.updatedAt||0)) < 30*864e5);
+  const mdIco = {bold:ICON.bold(16),italic:ICON.italic(16),strike:ICON.strike(16),h:ICON.head(16),list:ICON.list(16),link:ICON.link(16)};
+  document.querySelectorAll('#md-toolbar .md-btn').forEach(b=>b.innerHTML = mdIco[b.dataset.md]||'');
   applyTheme();
   try{ history.replaceState({screen:'root'}, ''); }catch(e){}
   if(S.currentUser && member(S.currentUser)) show('main'); else show('auth');
