@@ -119,7 +119,8 @@ body.no-anim *{animation:none!important}
 .hdr-row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-bottom:12px}
 .hdr-title{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.02em;line-height:1.1}
 .hdr-title small{display:block;font-family:var(--font);font-weight:600;font-size:11px;color:var(--mut);letter-spacing:.01em;margin-top:4px}
-.hdr-actions{display:flex;gap:6px}
+.hdr-actions{display:flex;align-items:center;gap:6px}
+.hdr-actions .icon-btn{border-radius:50%}
 .icon-btn{width:38px;height:38px;border-radius:14px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);display:flex;align-items:center;justify-content:center;color:var(--mut);transition:all .2s var(--spring)}
 .icon-btn:active{transform:scale(.9)}
 .icon-btn.on{background:linear-gradient(135deg,var(--acc-2),var(--acc));color:#fff;box-shadow:0 4px 14px color-mix(in srgb,var(--acc) 40%,transparent)}
@@ -293,8 +294,8 @@ body.no-anim *{animation:none!important}
 .geo-go:active{transform:scale(.88)}
 
 /* ===== ЧАТ ===== */
-.hdr-ava-btn{padding:0;background:none;border-radius:50%}
-.hdr-ava{width:36px;height:36px;font-size:13px;box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--mc,var(--line))}
+.hdr-ava-btn{padding:0;background:none;border-radius:50%;margin-left:4px;display:flex;align-items:center}
+.hdr-ava{width:34px;height:34px;font-size:13px;box-shadow:0 0 0 2px var(--mc,var(--line))}
 #screen-chat{display:flex;flex-direction:column;height:100dvh}
 .chat-hdr{padding-bottom:6px}
 .chat-body{flex:1;overflow-y:auto;padding:8px 14px 12px;display:flex;flex-direction:column;gap:3px}
@@ -3370,7 +3371,6 @@ async function fireSOS(){
   const me = member(S.currentUser)?.name || '';
   const others = S.members.map(m=>m.id).filter(id=>id!==S.currentUser);
   if(others.length) pushEvent(`«${me}» SOS SOS SOS`, link ? 'Нажмите — откроется чат с координатами' : 'Нажмите — откроется чат', 'chat-sos-'+msg.id, others);
-  notify(`«${me}» SOS SOS SOS`, 'Сигнал отправлен семье', 'chat-sos-local-'+msg.id);
   sosDone(pos ? 'Координаты и запись ушли в чат' : 'Запись ушла в чат');
   SYNC.push();
   setTimeout(()=>{ sosFlashHide(); sosBusy = false; show('chat'); }, 1400);
