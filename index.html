@@ -142,6 +142,36 @@ body.no-anim *{animation:none!important}
 .f-item.active span{color:var(--ink)}
 .f-cnt{position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--mc,var(--mut));color:#fff!important;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--bg);z-index:1;text-shadow:0 1px 1px rgba(0,0,0,.15)}
 
+/* ===== SOS ===== */
+.sos-btn{position:relative;width:38px;height:38px;border-radius:50%;background:#E5484D;color:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 3px 12px rgba(229,72,77,.4);transition:transform .2s var(--spring)}
+.sos-btn b{font-size:10px;font-weight:900;letter-spacing:.03em}
+.sos-btn.holding{transform:scale(1.12)}
+.sos-btn.holding b{animation:blink .6s infinite}
+.sos-ring{position:absolute;inset:-3px;width:44px;height:44px;transform:rotate(-90deg);pointer-events:none}
+.sos-ring circle{fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;
+  stroke-dasharray:126;stroke-dashoffset:126;transition:stroke-dashoffset .1s linear;opacity:.9}
+.sos-btn.holding .sos-ring circle{stroke-dashoffset:var(--off,126)}
+.sos-flash{position:fixed;inset:0;z-index:90;background:rgba(229,72,77,.92);color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  text-align:center;padding:30px;animation:fadeIn .18s}
+.sos-flash b{font-size:30px;font-weight:900;letter-spacing:.08em}
+.sos-flash span{font-size:14px;font-weight:600;opacity:.9}
+.sos-dot{width:14px;height:14px;border-radius:50%;background:#fff;animation:blink .8s infinite}
+
+.msg.sos .bubble{background:#E5484D;color:#fff;box-shadow:0 6px 20px rgba(229,72,77,.35)}
+.msg.sos .b-text{font-weight:800;letter-spacing:.02em}
+.msg.sos .b-text a{color:#fff}
+.msg.sos .b-name,.msg.sos .b-time{color:rgba(255,255,255,.85)}
+.msg.sos .voice-chip{background:rgba(255,255,255,.2);box-shadow:none}
+.msg.sos .vc-play{background:#fff;color:#E5484D}
+.msg.sos .vc-wave i{background:rgba(255,255,255,.55)}
+.msg.sos .vc-dur{color:rgba(255,255,255,.9)}
+.sos-map{display:block;margin-top:7px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.15)}
+.sos-map img{display:block;width:100%;height:auto;max-height:170px;object-fit:cover}
+.sos-map span{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;font-size:11.5px;font-weight:800;color:#fff}
+
 /* ===== ЗВОНКИ ===== */
 .call-overlay{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;
   background:rgba(12,13,15,.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:24px;animation:fadeIn .2s}
@@ -166,8 +196,8 @@ body.no-anim *{animation:none!important}
 .call-btn:active{transform:scale(.9)}
 .call-btn.hang{background:#E5484D;box-shadow:0 8px 26px rgba(229,72,77,.45)}
 .call-btn.answer{background:var(--acc);box-shadow:0 8px 26px color-mix(in srgb,var(--acc) 45%,transparent);animation:pulseRing 1.4s infinite}
-.call-btn.mute,.call-btn.cam,.call-btn.spk{background:rgba(255,255,255,.16)}
-.call-btn.mute.on,.call-btn.cam.on,.call-btn.spk.on{background:#fff;color:#16181D}
+.call-btn.mute,.call-btn.cam{background:rgba(255,255,255,.16)}
+.call-btn.mute.on,.call-btn.cam.on{background:#fff;color:#16181D}
 .call-btn.sm{width:54px;height:54px}
 .call-btn .slash{position:absolute;width:30px;height:2.4px;background:currentColor;border-radius:2px;transform:rotate(-45deg)}
 .call-btn{position:relative}
@@ -783,6 +813,10 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div class="hdr-row">
         <div class="hdr-title" id="hdr-title">Дела<small id="hdr-sub"></small></div>
 <div class="hdr-actions">
+          <button class="sos-btn" title="SOS — удерживайте 3 секунды">
+            <svg class="sos-ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"></circle></svg>
+            <b>SOS</b>
+          </button>
           <button class="icon-btn btn-theme" title="Тема оформления"></button>
           <button class="hdr-ava-btn hdr-profile" title="Профиль"><span class="ava hdr-ava" style="--mc:#9B9CA4">•</span></button>
         </div>
@@ -932,6 +966,10 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div class="hdr-row">
         <div class="hdr-title">Семья<small id="fam-sub"></small></div>
         <div class="hdr-actions">
+          <button class="sos-btn" title="SOS — удерживайте 3 секунды">
+            <svg class="sos-ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"></circle></svg>
+            <b>SOS</b>
+          </button>
           <button class="icon-btn btn-theme" title="Тема оформления"></button>
           <button class="hdr-ava-btn hdr-profile" title="Профиль"><span class="ava hdr-ava" style="--mc:#9B9CA4">•</span></button>
         </div>
@@ -1004,6 +1042,10 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div class="hdr-row">
         <div class="hdr-title">Чат<small id="chat-sub"></small></div>
         <div class="hdr-actions">
+          <button class="sos-btn" title="SOS — удерживайте 3 секунды">
+            <svg class="sos-ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"></circle></svg>
+            <b>SOS</b>
+          </button>
           <button class="icon-btn btn-theme" title="Тема оформления"></button>
           <button class="hdr-ava-btn hdr-profile" title="Профиль"><span class="ava hdr-ava" style="--mc:#9B9CA4">•</span></button>
         </div>
@@ -1206,8 +1248,6 @@ const ICON = {
   cal:(s)=>_svg('<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/>',s),
   mic:(s)=>_svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/>',s),
   cam:(s)=>_svg('<rect x="2" y="6" width="14" height="12" rx="3"/><path d="m16 11 6-3.5v9L16 13z"/>',s),
-  spk:(s)=>_svg('<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 8.5a5 5 0 0 1 0 7M20 6a9 9 0 0 1 0 12"/>',s),
-  spkOff:(s)=>_svg('<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9.5a4 4 0 0 1 0 5"/>',s),
   play:(s)=>_svg('<path d="M7 5l12 7-12 7z" fill="currentColor" stroke="none"/>',s),
   pause:(s)=>_svg('<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>',s),
   search:(s)=>_svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',s),
@@ -3193,6 +3233,106 @@ async function doCancelForm(){
   F.editingId ? show('detail') : show('main');
 }
 
+/* ---------- SOS ---------- */
+const SOS_HOLD = 3000;   // удержание, мс
+const SOS_REC  = 5000;   // длительность записи, мс
+let sosHold = null, sosBusy = false;
+
+function sosBind(){
+  document.querySelectorAll('.sos-btn').forEach(btn=>{
+    if(btn._bound) return;
+    btn._bound = true;
+    const start = e=>{
+      e.preventDefault();
+      if(sosBusy) return;
+      btn.classList.add('holding');
+      haptic('med');
+      const t0 = Date.now();
+      sosHold = { btn, raf:null, timer:null };
+      const tick = ()=>{
+        if(!sosHold) return;
+        const p = Math.min(1, (Date.now()-t0)/SOS_HOLD);
+        btn.style.setProperty('--off', String(126 - 126*p));
+        if(p >= 1){ stop(true); fireSOS(); return; }
+        sosHold.raf = requestAnimationFrame(tick);
+      };
+      sosHold.raf = requestAnimationFrame(tick);
+    };
+    const stop = fired=>{
+      if(!sosHold) return;
+      cancelAnimationFrame(sosHold.raf);
+      sosHold.btn.classList.remove('holding');
+      sosHold.btn.style.setProperty('--off','126');
+      sosHold = null;
+      if(!fired) haptic('tap');
+    };
+    btn.addEventListener('pointerdown', start);
+    btn.addEventListener('pointerup', ()=>stop(false));
+    btn.addEventListener('pointercancel', ()=>stop(false));
+    btn.addEventListener('pointerleave', ()=>stop(false));
+  });
+}
+function sosFlash(text, sub){
+  let el = $('sos-flash');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'sos-flash'; el.className = 'sos-flash';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `<span class="sos-dot"></span><b>${esc(text)}</b><span>${esc(sub||'')}</span>`;
+  el.classList.remove('hidden');
+}
+function sosFlashHide(){ const el = $('sos-flash'); if(el) el.remove(); }
+
+function getPositionOnce(ms=8000){
+  return new Promise(res=>{
+    if(!navigator.geolocation) return res(null);
+    let done = false;
+    const fin = v=>{ if(!done){ done = true; res(v); } };
+    setTimeout(()=>fin(null), ms);
+    navigator.geolocation.getCurrentPosition(
+      p=>fin({ lat:p.coords.latitude, lng:p.coords.longitude, acc:Math.round(p.coords.accuracy||0) }),
+      ()=>fin(null),
+      { enableHighAccuracy:true, timeout:ms, maximumAge:15000 });
+  });
+}
+async function fireSOS(){
+  if(sosBusy) return;
+  sosBusy = true;
+  haptic('err');
+  sosFlash('SOS ОТПРАВЛЯЕТСЯ', 'Записываем 5 секунд звука…');
+  // параллельно: запись и координаты
+  const posP = getPositionOnce();
+  let voice = null;
+  try{
+    const ok = await voiceStart();
+    if(ok){ await new Promise(r=>setTimeout(r, SOS_REC)); voice = await voiceStop(); }
+  }catch(e){}
+  const pos = await posP;
+  if(pos){
+    S.geo = S.geo || {};
+    S.geo[S.currentUser] = { ...pos, at:Date.now() };
+  }
+  // сообщение в чат
+  const link = pos ? `https://www.google.com/maps/search/?api=1&query=${pos.lat},${pos.lng}` : '';
+  const text = 'SOS SOS SOS' + (link ? `\nЯ здесь: ${link}` : '\nМестоположение недоступно');
+  S.chat = S.chat || [];
+  const msg = { id: uid('m_'), author:S.currentUser, text, imageIds:[], files:[],
+                voice: voice || null, sos:true, geo: pos || null,
+                at: Date.now(), sent:false, readBy:[] };
+  S.chat.push(msg);
+  if(S.chat.length > 500) S.chat = S.chat.slice(-500);
+  persist();
+  // уведомление всем, кроме автора — тег chat- ведёт в чат по клику
+  const me = member(S.currentUser)?.name || '';
+  const others = S.members.map(m=>m.id).filter(id=>id!==S.currentUser);
+  if(others.length) pushEvent(`«${me}» SOS SOS SOS`, link ? 'Нажмите — откроется чат с координатами' : 'Нажмите — откроется чат', 'chat-sos-'+msg.id, others);
+  notify(`«${me}» SOS SOS SOS`, 'Сигнал отправлен семье', 'chat-sos-local-'+msg.id);
+  sosFlash('SOS ОТПРАВЛЕН', pos ? 'Координаты и запись ушли в чат' : 'Запись ушла в чат');
+  SYNC.push();
+  setTimeout(()=>{ sosFlashHide(); sosBusy = false; show('chat'); }, 1600);
+}
+
 /* ---------- ЗВОНКИ (WebRTC поверх realtime-канала) ---------- */
 const RTC_CFG = { iceServers:[
   {urls:'stun:stun.l.google.com:19302'},
@@ -3229,7 +3369,6 @@ function bindCallActions(){
     if(a==='accept') acceptCall();
     else if(a==='mute') toggleMute();
     else if(a==='cam') toggleCamera();
-    else if(a==='spk') toggleSpeaker();
     else hangCall();
   });
 }
@@ -3254,7 +3393,6 @@ function renderCall(){
     acts.innerHTML =
       `<button class="call-btn mute sm ${call.muted?'on':''}" data-call="mute">${ICON.mic(22)}${call.muted?'<span class="slash"></span>':''}</button>` +
       `<button class="call-btn cam sm ${call.camOn?'on':''}" data-call="cam">${ICON.cam(22)}${call.camOn?'':'<span class="slash"></span>'}</button>` +
-      `<button class="call-btn spk sm ${call.speaker?'on':''}" data-call="spk">${call.speaker?ICON.spk(22):ICON.spkOff(22)}</button>` +
       `<button class="call-btn hang" data-call="hang">${ICON.x(26)}</button>`;
   }
   // видео-режим оформления
@@ -3287,7 +3425,6 @@ async function buildPeer(isCaller){
       call.remoteStream = st;
       au.srcObject = st;
       au.play().catch(()=>{});
-      applySpeaker();
     }
   };
   pc.onicecandidate = e=>{
@@ -3305,7 +3442,7 @@ async function startCall(peerId){
   if(!SYNC.chan){ toast('Нет связи с семьёй','⚠️'); return; }
   const m = member(peerId); if(!m) return;
   try{
-    call = { id: uid('call_'), peer:peerId, state:'out', muted:false, camOn:false, speaker:false, remoteVideo:false };
+    call = { id: uid('call_'), peer:peerId, state:'out', muted:false, camOn:false, remoteVideo:false };
     renderCall();
     const { pc, stream } = await buildPeer(true);
     call.pc = pc; call.stream = stream;
@@ -3362,50 +3499,6 @@ async function toggleCamera(){
     renderCall(); haptic('ok');
   }catch(e){ toast('Нет доступа к камере','⚠️'); }
 }
-// громкая связь / разговорный динамик
-// 1) пробуем переключить устройство вывода (setSinkId)
-// 2) если нельзя — переносим звук между <audio> и <video>: у медиаэлементов
-//    разные маршруты вывода на мобильных, video обычно идёт в громкий динамик
-async function applySpeaker(){
-  if(!call) return { ok:false, how:'none' };
-  const au = $('call-audio'), vd = $('call-remote');
-  const stream = call.remoteStream;
-  if(!stream) return { ok:false, how:'none' };
-
-  // способ 1: смена устройства вывода
-  if(au && typeof au.setSinkId === 'function'){
-    try{
-      const devs = await navigator.mediaDevices.enumerateDevices();
-      const outs = devs.filter(d=>d.kind==='audiooutput' && d.deviceId);
-      const find = re => outs.find(d=>re.test((d.label||'').toLowerCase()));
-      const target = call.speaker
-        ? (find(/speaker|громк|динам/) || outs.find(d=>d.deviceId==='default'))
-        : (find(/earpiece|receiver|handset|разговор/) || outs.find(d=>d.deviceId!=='default') || outs.find(d=>d.deviceId==='default'));
-      if(target){ await au.setSinkId(target.deviceId); return { ok:true, how:'sink' }; }
-    }catch(e){}
-  }
-
-  // способ 2: маршрут через <video> (громкая) либо <audio> (обычный)
-  try{
-    if(call.speaker){
-      if(au) { au.srcObject = null; au.muted = true; }
-      if(vd){ vd.muted = false; vd.volume = 1; if(!vd.srcObject) vd.srcObject = stream; await vd.play().catch(()=>{}); }
-    } else {
-      if(vd) vd.muted = true;
-      if(au){ au.muted = false; au.volume = 1; au.srcObject = stream; await au.play().catch(()=>{}); }
-    }
-    return { ok:true, how:'element' };
-  }catch(e){}
-  return { ok:false, how:'none' };
-}
-async function toggleSpeaker(){
-  if(!call) return;
-  call.speaker = !call.speaker;
-  const r = await applySpeaker();
-  renderCall(); haptic('tap');
-  if(r.ok) toast(call.speaker ? 'Громкая связь включена' : 'Динамик разговора', '🔊');
-  else toast('Браузер не даёт переключать вывод — используйте системный регулятор', '⚠️');
-}
 function toggleMute(){
   if(!call) return;
   call.muted = !call.muted;
@@ -3424,7 +3517,7 @@ async function onRtcSignal(d){
   if(!d || !d.to || d.to !== S.currentUser) return;      // не нам
   if(d.k === 'offer'){
     if(call){ rtcSend({k:'busy', id:d.id, to:d.from, from:S.currentUser}); return; }
-    call = { id:d.id, peer:d.from, state:'in', muted:false, camOn:false, speaker:false, remoteVideo:false, pendingOffer:d.sdp, pendingIce:[] };
+    call = { id:d.id, peer:d.from, state:'in', muted:false, camOn:false, remoteVideo:false, pendingOffer:d.sdp, pendingIce:[] };
     renderCall(); haptic('strong');
     call.ringTimer = setTimeout(()=>{ if(call && call.state==='in') callCleanup(); }, 45000);
     return;
@@ -3834,6 +3927,12 @@ function renderChat(){
             <b>${esc(f.name)}</b></div>`;
         }).join('')}</div>` : '';
     const voice = m.voice ? `<div style="margin-top:${m.text?'6px':'0'}">${voiceChipHTML(m.voice,{mine})}</div>` : '';
+    const sosMap = m.sos && m.geo
+      ? `<a class="sos-map" href="https://www.google.com/maps/search/?api=1&query=${m.geo.lat},${m.geo.lng}" target="_blank" rel="noopener">
+           <img src="https://staticmap.openstreetmap.de/staticmap.php?center=${m.geo.lat},${m.geo.lng}&zoom=16&size=420x180&markers=${m.geo.lat},${m.geo.lng},red-pushpin" alt="Карта" loading="lazy">
+           <span>${ICON.send(13)} Открыть в Google Maps</span>
+         </a>`
+      : '';
     const time = new Date(m.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
     // кто прочитал (кроме автора)
     const readers = (m.readBy||[]).filter(id=>id!==m.author).map(id=>member(id)).filter(Boolean).slice(0,4);
@@ -3852,12 +3951,12 @@ function renderChat(){
         statusHtml = `<span class="b-ok">${ICON.check(11)}</span>`;
       }
     }
-    html += `<div class="msg ${mine?'mine':''} ${stack?'stack':''}" data-msg="${m.id}">
+    html += `<div class="msg ${mine?'mine':''} ${stack?'stack':''} ${m.sos?'sos':''}" data-msg="${m.id}">
       ${mine?'':avaHTML(au,'m-ava')}
       <div class="bubble">
         ${(!mine && !stack) ? `<div class="b-name" style="--mc:${au?.color||'var(--acc)'}">${esc(au?.name||'—')}</div>` : ''}
         ${m.text ? `<div class="b-text">${linkify(m.text)}</div>` : ''}
-        ${voice}${imgs}${files}
+        ${voice}${sosMap}${imgs}${files}
         <div class="b-time">${readHtml}${m.editedAt?'<span class="b-edited">изм. </span>':''}${time}${statusHtml}</div>
       </div></div>`;
   });
@@ -4296,7 +4395,6 @@ document.addEventListener('click', e=>{
     if(a==='accept') acceptCall();
     else if(a==='mute') toggleMute();
     else if(a==='cam') toggleCamera();
-    else if(a==='spk') toggleSpeaker();
     else hangCall();
     return; }
   if(el('#chat-mic-stop')){ chatRecEnd(); return; }
@@ -4630,6 +4728,7 @@ document.addEventListener('keydown', e=>{
   const _cms = $('chat-mic-stop'); if(_cms) _cms.innerHTML = ICON.check(19);
   const _ls = $('lb-save'); if(_ls) _ls.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0 4-4m-4 4-4-4M5 21h14"/></svg>';
   const _lc = $('lb-close'); if(_lc) _lc.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  sosBind();
   applyTheme();
   try{ history.replaceState({screen:'root'}, ''); }catch(e){}
   if(S.currentUser && member(S.currentUser)){ show('main'); maybeAskPerms(); startGeoBackground(); } else show('auth');
@@ -4647,7 +4746,20 @@ document.addEventListener('keydown', e=>{
   /* защищённая регистрация SW: не ломает открытие файла напрямую */
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
     navigator.serviceWorker.register('sw.js').catch(()=>{});
+    // клик по уведомлению просит открыть нужный экран
+    navigator.serviceWorker.addEventListener('message', e=>{
+      const d = e.data || {};
+      if(d.type === 'open-screen' && d.screen && S.currentUser) show(d.screen);
+    });
   }
+  // открытие по ссылке из уведомления (когда приложение было закрыто)
+  try{
+    const sp = new URLSearchParams(location.search);
+    if(sp.get('screen') === 'chat' && S.currentUser && member(S.currentUser)){
+      setTimeout(()=>show('chat'), 300);
+      history.replaceState({screen:'root'}, '', location.pathname);
+    }
+  }catch(e){}
 })();
 </script>
 </body>

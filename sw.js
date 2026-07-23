@@ -1,5 +1,5 @@
 /* Семейный Хаб — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v35';
+const CACHE = 'family-hub-v36';
 const SHELL = [
   './',
   './index.html',
@@ -70,10 +70,18 @@ self.addEventListener('push', e => {
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
+  const tag = e.notification.tag || '';
+  const goChat = tag.indexOf('chat-') === 0;   // сообщения и SOS ведут в чат
   e.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
-      for (const c of cs) if ('focus' in c) return c.focus();
-      return clients.openWindow('./');
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async cs => {
+      for (const c of cs) {
+        if ('focus' in c) {
+          await c.focus();
+          if (goChat) { try { c.postMessage({ type: 'open-screen', screen: 'chat' }); } catch (_) {} }
+          return;
+        }
+      }
+      return clients.openWindow(goChat ? './?screen=chat' : './');
     })
   );
 });
