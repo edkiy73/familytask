@@ -2408,7 +2408,9 @@ function cardHTML(t){
   if(t.type==='tasks' && t.repeat && !t.completed) chips += `<span class="chip soft-green">${ICON.repeat(11)} ${repShort(t.repeat)}</span>`;
   let meta = '', excerpt = '';
   if(t.type==='notes'){
-    if(t.description) excerpt = `<div class="card-excerpt md-inline">${renderMarkdownInline(t.description)}</div>`;
+    if(t.lock && !unlocked.has(t.id))
+      excerpt = `<div class="card-excerpt lock-badge">${ICON.eye(13)} Защищено паролем</div>`;
+    else if(t.description) excerpt = `<div class="card-excerpt md-inline">${renderMarkdownInline(t.description)}</div>`;
   } else {
     const ch = t.checklist||[];
     if(ch.length){
@@ -2630,7 +2632,7 @@ function ctxAction(act){
   if(act==='accept') acceptTask(t);
   if(act==='ping') pingTask(t);
   if(act==='done') toggleComplete(t.id);
-  if(act==='edit') openForm(t.id);
+  if(act==='edit'){ if(isLocked(t)) askUnlock(t.id, ()=>openForm(t.id)); else openForm(t.id); }
   if(act==='del') confirmDelete(t.id);
 }
 
@@ -2771,7 +2773,7 @@ function renderDetail(){
   }
 
   let gal = '';
-  const imgs = t.imageIds||[];
+  const imgs = (t.lock && !unlocked.has(t.id)) ? [] : (t.imageIds||[]);
   if(imgs.length){
     gal = `<div class="d-sec"><b>Фото · ${imgs.length}</b></div><div class="gal">` +
       imgs.map((id,i)=>`<img data-img="${id}" data-lb="${t.id}" data-idx="${i}" alt="">`).join('') + `</div>`;
@@ -2889,7 +2891,7 @@ function detailAction(act){
   const t = task(activeTaskId); if(!t) return;
   if(act==='accept') acceptTask(t);
   if(act==='ping') pingTask(t);
-  if(act==='edit') openForm(t.id);
+  if(act==='edit'){ if(isLocked(t)) askUnlock(t.id, ()=>openForm(t.id)); else openForm(t.id); }
   if(act==='del') confirmDelete(t.id);
   if(act==='assign') openAssignee(t.id, true);
   if(act==='done') toggleComplete(t.id);
@@ -3387,52 +3389,76 @@ function renderLockRow(){
 }
 
 /* ---------- ДИКТОВКА (речь → текст) ---------- */
-let dictRec = null, dictTarget = null, dictBtn = null, dictBase = '';
+let dictRec = null, dictBtn = null, dictField = '', dictBase = '', dictGuard = null;
 function dictSupported(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
 function dictStop(){
-  if(dictRec){ try{ dictRec.stop(); }catch(e){} }
-  if(dictBtn) dictBtn.classList.remove('rec');
-  dictRec = null; dictBtn = null; dictTarget = null;
+  clearTimeout(dictGuard); dictGuard = null;
+  const r = dictRec; dictRec = null;
+  if(r){ try{ r.onresult = r.onerror = r.onend = null; r.abort ? r.abort() : r.stop(); }catch(e){} }
+  document.querySelectorAll('[data-dict]').forEach(b=>b.classList.remove('rec'));
+  dictBtn = null; dictField = '';
 }
 function dictStart(fieldId, btn){
-  if(dictRec){ dictStop(); return; }
+  const wasField = dictField;
+  if(dictRec){                       // что-то уже идёт — всегда корректно гасим
+    dictStop();
+    if(wasField === fieldId) return; // повторный тап по той же кнопке = выключить
+  }
   if(!dictSupported()){ toast('Браузер не поддерживает распознавание речи','⚠️'); return; }
   const el = $(fieldId); if(!el) return;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const r = new SR();
+  let r;
+  try{ r = new SR(); }catch(e){ toast('Распознавание недоступно','⚠️'); return; }
   r.lang = 'ru-RU';
   r.continuous = true;
-  r.interimResults = false;   // промежуточные результаты дают дубли на части браузеров
-  dictRec = r; dictBtn = btn; dictTarget = el;
+  r.interimResults = false;
+  r.maxAlternatives = 1;
+  dictRec = r; dictBtn = btn; dictField = fieldId;
   dictBase = el.value ? el.value.replace(/\s*$/,'') + ' ' : '';
   btn.classList.add('rec');
   haptic('med');
   toast('Говорите…','🎙️');
-  let acc = '';
+
+  let acc = '', gotAny = false;
+  const armGuard = ()=>{
+    clearTimeout(dictGuard);
+    dictGuard = setTimeout(()=>{
+      if(dictRec === r){
+        dictStop();
+        if(!gotAny) toast('Не расслышал — попробуйте ещё раз','⚠️');
+      }
+    }, gotAny ? 12000 : 9000);   // страховка, если браузер «завис» и не шлёт end
+  };
+  armGuard();
+
   r.onresult = e=>{
-    // разные браузеры шлют либо новый кусок, либо всю фразу целиком —
-    // определяем это и не склеиваем одно и то же дважды
-    let chunk = '';
-    for(let i=e.resultIndex;i<e.results.length;i++) chunk += e.results[i][0].transcript;
-    chunk = chunk.replace(/\s+/g,' ').trim();
-    if(!chunk) return;
-    const norm = s => s.toLowerCase().replace(/[\s.,!?]/g,'');
-    if(acc && norm(chunk).startsWith(norm(acc))) acc = chunk;          // накопительный режим
-    else if(acc && norm(acc).endsWith(norm(chunk))) { /* повтор — пропускаем */ }
-    else acc = acc ? (acc + ' ' + chunk) : chunk;
-    let out = dictBase + acc;
-    if(el.maxLength > 0) out = out.slice(0, el.maxLength);
-    el.value = out;
-    if(fieldId === 'f-desc') autoGrowDesc();
-    el.dispatchEvent(new Event('input', {bubbles:true}));
+    try{
+      let chunk = '';
+      for(let i=e.resultIndex;i<e.results.length;i++) chunk += e.results[i][0].transcript;
+      chunk = chunk.replace(/\s+/g,' ').trim();
+      if(!chunk) return;
+      gotAny = true; armGuard();
+      const norm = s => s.toLowerCase().replace(/[\s.,!?]/g,'');
+      if(acc && norm(chunk).startsWith(norm(acc))) acc = chunk;         // браузер шлёт фразу целиком
+      else if(acc && norm(acc).endsWith(norm(chunk))) { /* повтор */ }
+      else acc = acc ? (acc + ' ' + chunk) : chunk;
+      let out = dictBase + acc;
+      if(el.maxLength > 0) out = out.slice(0, el.maxLength);
+      el.value = out;
+      if(fieldId === 'f-desc'){ try{ autoGrowDesc(); }catch(e2){} }
+      el.dispatchEvent(new Event('input', {bubbles:true}));
+    }catch(err){ console.warn('dict', err); }
   };
   r.onerror = ev=>{
-    if(ev.error === 'not-allowed'){ toast('Нет доступа к микрофону','🎙️'); openPermSheet(); }
-    else if(ev.error !== 'aborted') toast('Не удалось распознать','⚠️');
+    const code = ev && ev.error;
+    if(code === 'not-allowed' || code === 'service-not-allowed'){ toast('Нет доступа к микрофону','🎙️'); openPermSheet(); }
+    else if(code === 'no-speech'){ toast('Не расслышал','⚠️'); }
+    else if(code !== 'aborted'){ toast('Ошибка распознавания','⚠️'); }
     dictStop();
   };
-  r.onend = ()=>{ if(dictBtn) dictBtn.classList.remove('rec'); dictRec = null; dictBtn = null; };
-  try{ r.start(); }catch(e){ dictStop(); }
+  r.onend = ()=>{ if(dictRec === r) dictStop(); };
+  try{ r.start(); }
+  catch(e){ dictStop(); toast('Микрофон занят — попробуйте ещё раз','⚠️'); }
 }
 
 /* ---------- SOS ---------- */
@@ -4742,7 +4768,12 @@ document.addEventListener('click', e=>{
   if(el('#assignee-overlay') && !el('.modal')){ $('assignee-overlay').classList.add('hidden'); return; }
   if(x = el('[data-lb]')){ e.stopPropagation(); openLightbox(Number(x.dataset.lb), Number(x.dataset.idx)); return; }
   if(x = el('[data-ctx]')){ e.stopPropagation(); openCtx(Number(x.dataset.ctx)); return; }
-  if(x = el('[data-open]')){ if(lpFired){ lpFired=false; return; } if(swJustFired){ swJustFired=false; return; } activeTaskId = Number(x.dataset.open); show('detail'); return; }
+  if(x = el('[data-open]')){
+    if(lpFired){ lpFired=false; return; }
+    if(swJustFired){ swJustFired=false; return; }
+    const _id = Number(x.dataset.open), _t = task(_id);
+    if(isLocked(_t)){ askUnlock(_id, ()=>{ activeTaskId = _id; show('detail'); }); return; }
+    activeTaskId = _id; show('detail'); return; }
   if(x = el('[data-act]')){ ctxAction(x.dataset.act); return; }
   if(el('#ctx-overlay') && !el('.sheet')){ $('ctx-overlay').classList.add('hidden'); return; }
   if(x = el('[data-repdone]')){
