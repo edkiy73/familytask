@@ -297,8 +297,9 @@ body.no-anim *{animation:none!important}
 .hdr-ava-btn{padding:0;background:none;border-radius:50%;margin-left:4px;display:flex;align-items:center}
 .hdr-ava{width:34px;height:34px;font-size:13px;box-shadow:0 0 0 2px var(--mc,var(--line))}
 #screen-chat{display:flex;flex-direction:column;height:100dvh}
+.chat-scroll{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column}
 .chat-hdr{padding-bottom:6px}
-.chat-body{flex:1;overflow-y:auto;padding:8px 14px 12px;display:flex;flex-direction:column;gap:3px}
+.chat-body{flex:1 0 auto;padding:8px 14px 12px;display:flex;flex-direction:column;justify-content:flex-end;gap:3px}
 .chat-day{align-self:center;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);background:var(--soft);padding:4px 12px;border-radius:99px;margin:10px 0 6px}
 .msg{display:flex;gap:8px;max-width:88%;align-items:flex-end}
 .msg.mine{align-self:flex-end;flex-direction:row-reverse}
@@ -698,7 +699,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .form-foot{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;background:var(--glass);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);border-top:1px solid var(--ring);padding:11px 14px calc(11px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr 1.6fr;gap:9px;z-index:25}
 
 /* ===== СЕМЬЯ ===== */
-.fam-body{flex:1;overflow-y:auto;padding:14px 16px calc(118px + env(safe-area-inset-bottom))}
+.fam-body{flex:1;padding:14px 16px calc(118px + env(safe-area-inset-bottom))}
 .fam-row{display:flex;align-items:center;gap:13px;background:var(--card);border-radius:var(--r);padding:12px 14px;margin-bottom:9px;box-shadow:var(--shadow);animation:rise .35s var(--spring) backwards}
 .fam-row:nth-child(2){animation-delay:.04s}.fam-row:nth-child(3){animation-delay:.08s}.fam-row:nth-child(4){animation-delay:.12s}
 .fam-ring{width:46px;height:46px;border-radius:50%;font-size:17px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 0 2.5px var(--card), 0 0 0 5px var(--mc,var(--line))}
@@ -1048,6 +1049,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 
   <!-- ЭКРАН: ЧАТ -->
   <section id="screen-chat" class="screen hidden">
+    <div class="chat-scroll" id="chat-scroll">
     <header class="hdr">
       <div class="hdr-row">
         <div class="hdr-title">Чат<small id="chat-sub"></small></div>
@@ -1061,6 +1063,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       </div>
     </header>
     <div class="chat-body" id="chat-body"></div>
+    </div>
     <div class="chat-compose" id="chat-compose">
       <div class="chat-attach-row hidden" id="chat-attach-row"></div>
       <div class="chat-edit-bar hidden" id="chat-edit-bar">
@@ -1257,6 +1260,9 @@ const ICON = {
   cal:(s)=>_svg('<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/>',s),
   mic:(s)=>_svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/>',s),
   cam:(s)=>_svg('<rect x="2" y="6" width="14" height="12" rx="3"/><path d="m16 11 6-3.5v9L16 13z"/>',s),
+  clip:(s)=>_svg('<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.5 3.5 0 0 1 5 5L10.5 18a2 2 0 0 1-3-3l8-8"/>',s),
+  file:(s)=>_svg('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',s),
+  geoPin:(s)=>_svg('<path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>',s),
   play:(s)=>_svg('<path d="M7 5l12 7-12 7z" fill="currentColor" stroke="none"/>',s),
   pause:(s)=>_svg('<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>',s),
   search:(s)=>_svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',s),
@@ -3993,7 +3999,7 @@ function renderChat(){
             <b>${esc(f.name)}</b></div>`;
         }).join('')}</div>` : '';
     const voice = m.voice ? `<div style="margin-top:${m.text?'6px':'0'}">${voiceChipHTML(m.voice,{mine})}</div>` : '';
-    const sosMap = m.sos && m.geo ? miniMapHTML(m.geo) : '';
+    const sosMap = m.geo ? miniMapHTML(m.geo) : '';
     const time = new Date(m.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
     // кто прочитал (кроме автора)
     const readers = (m.readBy||[]).filter(id=>id!==m.author).map(id=>member(id)).filter(Boolean).slice(0,4);
@@ -4023,7 +4029,10 @@ function renderChat(){
   });
   box.innerHTML = html;
   hydrateImages(box);
-  requestAnimationFrame(()=>{ box.scrollTop = box.scrollHeight; });
+  requestAnimationFrame(()=>{
+    const sc = $('chat-scroll');            // прокручивается вся область вместе с шапкой
+    if(sc) sc.scrollTop = sc.scrollHeight;
+  });
   chatToggleSendMic();
   markChatSeen();
   clearTimeout(renderChat._pend);
@@ -4167,6 +4176,31 @@ async function chatRecEnd(){
   const v = await voiceStop();
   if(!v){ toast('Слишком короткая запись','⚠️'); return; }
   sendChatVoice(v);
+}
+function openAttachSheet(){
+  let h = `<div class="sheet-grip"></div><div class="sheet-title">Прикрепить</div>`;
+  h += `<button class="sheet-btn" data-attach="file">${ICON.file(18)}Фото или файл</button>`;
+  h += `<button class="sheet-btn" data-attach="geo">${ICON.geoPin(18)}Геолокация</button>`;
+  $('ctx-sheet').innerHTML = h;
+  $('ctx-overlay').classList.remove('hidden');
+}
+async function sendChatLocation(){
+  toast('Определяем место…','📍');
+  const pos = await getPositionOnce(10000);
+  if(!pos){ toast('Не удалось определить место','⚠️'); return; }
+  S.geo = S.geo || {};
+  S.geo[S.currentUser] = { ...pos, at:Date.now() };
+  const link = `https://www.google.com/maps/search/?api=1&query=${pos.lat},${pos.lng}`;
+  S.chat = S.chat || [];
+  const msg = { id: uid('m_'), author:S.currentUser, text:`Моя геолокация: ${link}`,
+                imageIds:[], files:[], voice:null, geo:pos,
+                at: Date.now(), sent:false, readBy:[] };
+  S.chat.push(msg);
+  if(S.chat.length > 500) S.chat = S.chat.slice(-500);
+  const others = S.members.map(m=>m.id).filter(id=>id!==S.currentUser);
+  if(others.length)
+    pushEvent('💬 Семейный чат', `${member(S.currentUser)?.name||''}: геолокация`, 'chat-'+msg.id, others);
+  persist(); haptic('ok'); renderChat();
 }
 function sendChatVoice(v){
   S.chat = S.chat || [];
@@ -4459,7 +4493,13 @@ document.addEventListener('click', e=>{
     else hangCall();
     return; }
   if(el('#chat-mic-stop')){ chatRecEnd(); return; }
-  if(el('#chat-clip')){ $('chat-file').click(); return; }
+  if(el('#chat-clip')){ openAttachSheet(); return; }
+  if(x = el('[data-attach]')){
+    const a = x.dataset.attach;
+    $('ctx-overlay').classList.add('hidden');
+    if(a==='file') $('chat-file').click();
+    if(a==='geo') sendChatLocation();
+    return; }
   if(el('#chat-send')){ sendChat(); return; }
   if(el('#chat-edit-cancel')){ chatEditId=null; $('chat-input').value=''; $('chat-edit-bar').classList.add('hidden'); autoGrowChat(); return; }
   if(x = el('[data-rmatt]')){
@@ -4782,7 +4822,7 @@ document.addEventListener('keydown', e=>{
   const mdIco = {bold:ICON.bold(16),italic:ICON.italic(16),strike:ICON.strike(16),h:ICON.head(16),list:ICON.list(16),link:ICON.link(16)};
   document.querySelectorAll('#md-toolbar .md-btn').forEach(b=>b.innerHTML = mdIco[b.dataset.md]||'');
   const _mp = $('md-paste'); if(_mp) _mp.innerHTML = ICON.link(16);
-  const _cc = $('chat-clip'); if(_cc) _cc.innerHTML = ICON.camera(19);
+  const _cc = $('chat-clip'); if(_cc) _cc.innerHTML = ICON.clip(20);
   const _gr = $('geo-refresh'); if(_gr) _gr.innerHTML = ICON.repeat(17);
   const _cs = $('chat-send'); if(_cs) _cs.innerHTML = ICON.send(19);
   const _cm = $('chat-mic'); if(_cm) _cm.innerHTML = ICON.mic(19);
