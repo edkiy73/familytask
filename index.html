@@ -747,9 +747,16 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .fam-set:active{transform:scale(.88)}
 .fam-del{width:34px;height:34px;border-radius:12px;background:var(--rose-soft);color:var(--rose);font-size:12px;font-weight:800;transition:transform .2s var(--spring)}
 .fam-del:active{transform:scale(.88)}
-.fam-add{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow);margin-top:18px}
-.fam-new-ava{display:flex;align-items:center;gap:13px;margin-bottom:14px}
-.fam-new-ava .hint{font-size:11.5px;color:var(--mut);line-height:1.4}
+.fam-add{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow);margin-top:14px}
+.fam-add.compact{padding:13px 14px}
+.fam-new-row{display:flex;align-items:center;gap:9px}
+.fam-new-row .field{flex:1;min-width:0;margin:0;height:44px}
+.fam-new-row .fam-ring-btn{flex-shrink:0}
+.fam-new-row .fam-ring{width:44px;height:44px;font-size:18px;box-shadow:0 0 0 2px var(--mc,var(--line))}
+.fam-add-btn{width:auto;flex-shrink:0;height:44px;padding:0 16px;font-size:13px}
+.bk-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#fam-list .fam-row:last-child{margin-bottom:0}
+#sync-card > *,#notif-card > *{margin-top:14px}
 .fam-ring-btn{position:relative;flex-shrink:0;transition:transform .25s var(--spring)}
 .fam-ring-btn:active{transform:scale(.9)}
 .cam-badge{position:absolute;right:-3px;bottom:-3px;width:19px;height:19px;border-radius:50%;background:var(--card);box-shadow:var(--shadow), 0 0 0 1px var(--ring);display:flex;align-items:center;justify-content:center;color:var(--mut);pointer-events:none}
@@ -1035,29 +1042,31 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
     </header>
     <div class="fam-body">
       <div id="fam-list"></div>
+
+      <div class="fam-add compact">
+        <span class="label-cap">Новый член семьи</span>
+        <input type="file" id="fam-ava-input" accept="image/*" class="hidden">
+        <div class="fam-new-row">
+          <button type="button" class="fam-ring-btn" id="fam-new-ava-btn" title="Фото профиля">
+            <span class="ava fam-ring" id="fam-new-ava" style="--mc:#9B9CA4">+</span>
+            <span class="cam-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg></span>
+          </button>
+          <input class="field" id="fam-name" placeholder="Имя…" maxlength="20">
+          <button class="btn btn-acc fam-add-btn" id="fam-save">Добавить</button>
+        </div>
+      </div>
+
       <div id="sync-card"></div>
       <div id="notif-card"></div>
+
       <div class="fam-add" id="backup-card">
         <span class="label-cap">Резервная копия</span>
         <p class="bk-hint">Файл со всеми делами, заметками, чатом и настройками. Вложения не входят.</p>
-        <div class="row2">
+        <div class="bk-row">
           <button class="btn btn-soft" id="bk-save">Сохранить</button>
           <button class="btn btn-dark" id="bk-load">Импортировать</button>
         </div>
         <input type="file" id="bk-file" accept="application/json,.json" class="hidden">
-      </div>
-      <div class="fam-add">
-        <span class="label-cap">Новый член семьи</span>
-        <input type="file" id="fam-ava-input" accept="image/*" class="hidden">
-        <div class="fam-new-ava">
-          <button type="button" class="fam-ring-btn" id="fam-new-ava-btn">
-            <span class="ava fam-ring" id="fam-new-ava" style="--mc:#9B9CA4">+</span>
-            <span class="cam-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg></span>
-          </button>
-          <span class="hint">Фото профиля.<br>Можно добавить позже — будет буква имени.</span>
-        </div>
-        <input class="field" id="fam-name" placeholder="Имя…" maxlength="20" style="margin-bottom:10px">
-        <button class="btn btn-acc" id="fam-save">Добавить в семью</button>
       </div>
     </div>
   </section>
@@ -1093,7 +1102,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
   </div>
 
   <!-- ВХОД В ПРОФИЛЬ -->
-  <div class="overlay top-anchor hidden" id="auth-overlay">
+  <div class="overlay hidden" id="auth-overlay">
     <div class="modal">
       <span class="ava auth-modal-ava" id="auth-ava">•</span>
       <h3 id="auth-name">Профиль</h3>
@@ -1954,8 +1963,7 @@ function renderNotifCard(){
     'Это устройство получает сигналы о дедлайнах, новых и назначенных делах. Включите то же на остальных устройствах семьи.'
     + (VAPID_PUBLIC ? '<br>Пуши в закрытое приложение: <b>' + (pushSubActive ? 'работают' : (S.familyCode ? 'подключаются…' : 'нужен код семьи')) + '</b>' : ''),
     '<button class="btn btn-soft" data-notif="test">Проверить все уведомления</button>'
-    + '<button class="btn btn-soft" id="open-perms" style="margin-top:8px">Разрешения приложения</button>'
-    + '<button class="btn btn-soft" id="open-pass" style="margin-top:8px">Пароль профиля</button>');
+    + '<button class="btn btn-soft" id="open-perms" style="margin-top:8px">Разрешения приложения</button>');
   else if(p==='denied') el.innerHTML = box('err','Уведомления запрещены',
     'Разрешите уведомления для этого сайта в настройках браузера, затем вернитесь сюда.');
   else el.innerHTML = box('off','Уведомления выключены',
@@ -3513,12 +3521,12 @@ function openAuth(mid, locked){
   $('auth-overlay').classList.remove('hidden');
   // если биометрия настроена — предлагаем её сразу, не заставляя нажимать кнопку
   if(bioAvailable() && bioEnabled(mid)){
-    setTimeout(async ()=>{
-      if(authPending !== mid) return;
+    // запускаем сразу, без ожидания — жест подтверждения появляется мгновенно
+    (async ()=>{
       const ok = await bioVerify(mid);
       if(ok && authPending === mid) doLogin(mid);
-      else $('auth-pass').focus();
-    }, 250);
+      else if(authPending === mid) $('auth-pass').focus();
+    })();
   } else setTimeout(()=>$('auth-pass').focus(), 160);
 }
 function doLogin(mid){
