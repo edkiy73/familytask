@@ -143,22 +143,28 @@ body.no-anim *{animation:none!important}
 .f-cnt{position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--mc,var(--mut));color:#fff!important;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--bg);z-index:1;text-shadow:0 1px 1px rgba(0,0,0,.15)}
 
 /* ===== SOS ===== */
-.sos-btn{position:relative;width:38px;height:38px;border-radius:50%;background:#E5484D;color:#fff;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  box-shadow:0 3px 12px rgba(229,72,77,.4);transition:transform .2s var(--spring)}
-.sos-btn b{font-size:10px;font-weight:900;letter-spacing:.03em}
-.sos-btn.holding{transform:scale(1.12)}
-.sos-btn.holding b{animation:blink .6s infinite}
-.sos-ring{position:absolute;inset:-3px;width:44px;height:44px;transform:rotate(-90deg);pointer-events:none}
-.sos-ring circle{fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;
-  stroke-dasharray:126;stroke-dashoffset:126;transition:stroke-dashoffset .1s linear;opacity:.9}
-.sos-btn.holding .sos-ring circle{stroke-dashoffset:var(--off,126)}
-.sos-flash{position:fixed;inset:0;z-index:90;background:rgba(229,72,77,.92);color:#fff;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-  text-align:center;padding:30px;animation:fadeIn .18s}
-.sos-flash b{font-size:30px;font-weight:900;letter-spacing:.08em}
-.sos-flash span{font-size:14px;font-weight:600;opacity:.9}
-.sos-dot{width:14px;height:14px;border-radius:50%;background:#fff;animation:blink .8s infinite}
+.sos-btn{position:relative;width:95px;height:38px;border-radius:19px;background:#E5484D;color:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;
+  box-shadow:0 3px 12px rgba(229,72,77,.4);transition:transform .2s var(--spring);
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none;
+  -webkit-tap-highlight-color:transparent}
+.sos-btn b{position:relative;z-index:2;font-size:12px;font-weight:900;letter-spacing:.08em}
+.sos-btn.holding{transform:scale(1.04)}
+.sos-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.32);z-index:1;
+  transition:width .08s linear}
+.sos-flash{position:fixed;inset:0;z-index:90;background:rgba(12,13,15,.94);color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  text-align:center;padding:30px;animation:fadeIn .18s;
+  -webkit-user-select:none;user-select:none}
+.sos-flash .num{font-size:84px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;
+  animation:pulseIn .35s var(--spring)}
+.sos-flash b{font-size:19px;font-weight:800;letter-spacing:.1em;color:#E5484D}
+.sos-flash span{font-size:13.5px;font-weight:600;opacity:.75;max-width:280px}
+.sos-cancel{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;
+  padding:10px 18px;border-radius:99px;background:rgba(255,255,255,.14);color:#fff;
+  font-size:13px;font-weight:750;transition:transform .18s var(--spring)}
+.sos-cancel:active{transform:scale(.92)}
+.sos-dot{width:12px;height:12px;border-radius:50%;background:#E5484D;animation:blink .8s infinite}
 
 .msg.sos .bubble{background:#E5484D;color:#fff;box-shadow:0 6px 20px rgba(229,72,77,.35)}
 .msg.sos .b-text{font-weight:800;letter-spacing:.02em}
@@ -169,8 +175,13 @@ body.no-anim *{animation:none!important}
 .msg.sos .vc-wave i{background:rgba(255,255,255,.55)}
 .msg.sos .vc-dur{color:rgba(255,255,255,.9)}
 .sos-map{display:block;margin-top:7px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.15)}
-.sos-map img{display:block;width:100%;height:auto;max-height:170px;object-fit:cover}
-.sos-map span{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;font-size:11.5px;font-weight:800;color:#fff}
+.mm-win{position:relative;display:block;width:100%;height:150px;overflow:hidden;background:#DDD9D2}
+.mm-canvas{position:absolute;left:50%;top:50%;width:768px;height:768px;
+  transform:translate(var(--dx), var(--dy))}
+.mm-t{position:absolute;width:256px;height:256px;display:block}
+.mm-pin{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
+  background:#E5484D;box-shadow:0 0 0 3px #fff,0 3px 10px rgba(0,0,0,.4);z-index:3}
+.mm-go{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;font-size:11.5px;font-weight:800;color:#fff}
 
 /* ===== ЗВОНКИ ===== */
 .call-overlay{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;
@@ -813,9 +824,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div class="hdr-row">
         <div class="hdr-title" id="hdr-title">Дела<small id="hdr-sub"></small></div>
 <div class="hdr-actions">
-          <button class="sos-btn" title="SOS — удерживайте 3 секунды">
-            <svg class="sos-ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"></circle></svg>
-            <b>SOS</b>
+          <button class="sos-btn" title="SOS — удерживайте 1,5 секунды">
+            <span class="sos-fill"></span><b>SOS</b>
           </button>
           <button class="icon-btn btn-theme" title="Тема оформления"></button>
           <button class="hdr-ava-btn hdr-profile" title="Профиль"><span class="ava hdr-ava" style="--mc:#9B9CA4">•</span></button>
@@ -966,9 +976,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div class="hdr-row">
         <div class="hdr-title">Семья<small id="fam-sub"></small></div>
         <div class="hdr-actions">
-          <button class="sos-btn" title="SOS — удерживайте 3 секунды">
-            <svg class="sos-ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"></circle></svg>
-            <b>SOS</b>
+          <button class="sos-btn" title="SOS — удерживайте 1,5 секунды">
+            <span class="sos-fill"></span><b>SOS</b>
           </button>
           <button class="icon-btn btn-theme" title="Тема оформления"></button>
           <button class="hdr-ava-btn hdr-profile" title="Профиль"><span class="ava hdr-ava" style="--mc:#9B9CA4">•</span></button>
@@ -1042,9 +1051,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div class="hdr-row">
         <div class="hdr-title">Чат<small id="chat-sub"></small></div>
         <div class="hdr-actions">
-          <button class="sos-btn" title="SOS — удерживайте 3 секунды">
-            <svg class="sos-ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"></circle></svg>
-            <b>SOS</b>
+          <button class="sos-btn" title="SOS — удерживайте 1,5 секунды">
+            <span class="sos-fill"></span><b>SOS</b>
           </button>
           <button class="icon-btn btn-theme" title="Тема оформления"></button>
           <button class="hdr-ava-btn hdr-profile" title="Профиль"><span class="ava hdr-ava" style="--mc:#9B9CA4">•</span></button>
@@ -2214,7 +2222,7 @@ function renderMain(){
   const isTasks = S.currentTab==='tasks';
   const me = member(S.currentUser);
   const P = prefs();
-  $('hdr-title').childNodes[0].textContent = isTasks ? 'Дела семьи' : 'Заметки';
+  $('hdr-title').childNodes[0].textContent = isTasks ? 'Дела' : 'Заметки';
   $('hdr-sub').textContent = me ? `Привет, ${me.name}` : '';
   $('search-input').placeholder = isTasks ? 'Поиск по делам и спискам…' : 'Поиск по заметкам…';
   $('btn-view').style.display = isTasks ? '' : 'none';
@@ -3234,7 +3242,7 @@ async function doCancelForm(){
 }
 
 /* ---------- SOS ---------- */
-const SOS_HOLD = 3000;   // удержание, мс
+const SOS_HOLD = 1500;   // удержание, мс
 const SOS_REC  = 5000;   // длительность записи, мс
 let sosHold = null, sosBusy = false;
 
@@ -3249,10 +3257,11 @@ function sosBind(){
       haptic('med');
       const t0 = Date.now();
       sosHold = { btn, raf:null, timer:null };
+      const fill = btn.querySelector('.sos-fill');
       const tick = ()=>{
         if(!sosHold) return;
         const p = Math.min(1, (Date.now()-t0)/SOS_HOLD);
-        btn.style.setProperty('--off', String(126 - 126*p));
+        if(fill) fill.style.width = (p*100)+'%';
         if(p >= 1){ stop(true); fireSOS(); return; }
         sosHold.raf = requestAnimationFrame(tick);
       };
@@ -3262,7 +3271,8 @@ function sosBind(){
       if(!sosHold) return;
       cancelAnimationFrame(sosHold.raf);
       sosHold.btn.classList.remove('holding');
-      sosHold.btn.style.setProperty('--off','126');
+      const f = sosHold.btn.querySelector('.sos-fill');
+      if(f) f.style.width = '0%';
       sosHold = null;
       if(!fired) haptic('tap');
     };
@@ -3272,17 +3282,40 @@ function sosBind(){
     btn.addEventListener('pointerleave', ()=>stop(false));
   });
 }
-function sosFlash(text, sub){
+let sosCanceled = false;
+function sosOverlay(){
   let el = $('sos-flash');
   if(!el){
     el = document.createElement('div');
     el.id = 'sos-flash'; el.className = 'sos-flash';
     document.body.appendChild(el);
+    el.addEventListener('click', e=>{
+      if(e.target.closest('.sos-cancel')) cancelSOS();
+    });
   }
-  el.innerHTML = `<span class="sos-dot"></span><b>${esc(text)}</b><span>${esc(sub||'')}</span>`;
-  el.classList.remove('hidden');
+  return el;
+}
+function sosCountdown(n){
+  const el = sosOverlay();
+  el.innerHTML = `<button type="button" class="sos-cancel">Отмена</button>
+    <span class="sos-dot"></span>
+    <b>ЗАПИСЬ SOS</b>
+    <div class="num">${n}</div>
+    <span>Записываем звук и определяем место. Можно отменить.</span>`;
+}
+function sosDone(sub){
+  const el = sosOverlay();
+  el.innerHTML = `<span class="sos-dot"></span><b>SOS ОТПРАВЛЕН</b><span>${esc(sub||'')}</span>`;
 }
 function sosFlashHide(){ const el = $('sos-flash'); if(el) el.remove(); }
+function cancelSOS(){
+  sosCanceled = true;
+  if(vr) voiceCancel();
+  sosFlashHide();
+  sosBusy = false;
+  haptic('warn');
+  toast('SOS отменён','✕');
+}
 
 function getPositionOnce(ms=8000){
   return new Promise(res=>{
@@ -3298,17 +3331,27 @@ function getPositionOnce(ms=8000){
 }
 async function fireSOS(){
   if(sosBusy) return;
-  sosBusy = true;
+  sosBusy = true; sosCanceled = false;
   haptic('err');
-  sosFlash('SOS ОТПРАВЛЯЕТСЯ', 'Записываем 5 секунд звука…');
+  sosCountdown(5);
   // параллельно: запись и координаты
   const posP = getPositionOnce();
   let voice = null;
   try{
     const ok = await voiceStart();
-    if(ok){ await new Promise(r=>setTimeout(r, SOS_REC)); voice = await voiceStop(); }
+    if(ok){
+      for(let i=5;i>0;i--){
+        sosCountdown(i);
+        await new Promise(r=>setTimeout(r, 1000));
+        if(sosCanceled) return;
+      }
+      sosCountdown(0);
+      voice = await voiceStop();
+    }
   }catch(e){}
+  if(sosCanceled) return;
   const pos = await posP;
+  if(sosCanceled) return;
   if(pos){
     S.geo = S.geo || {};
     S.geo[S.currentUser] = { ...pos, at:Date.now() };
@@ -3328,9 +3371,9 @@ async function fireSOS(){
   const others = S.members.map(m=>m.id).filter(id=>id!==S.currentUser);
   if(others.length) pushEvent(`«${me}» SOS SOS SOS`, link ? 'Нажмите — откроется чат с координатами' : 'Нажмите — откроется чат', 'chat-sos-'+msg.id, others);
   notify(`«${me}» SOS SOS SOS`, 'Сигнал отправлен семье', 'chat-sos-local-'+msg.id);
-  sosFlash('SOS ОТПРАВЛЕН', pos ? 'Координаты и запись ушли в чат' : 'Запись ушла в чат');
+  sosDone(pos ? 'Координаты и запись ушли в чат' : 'Запись ушла в чат');
   SYNC.push();
-  setTimeout(()=>{ sosFlashHide(); sosBusy = false; show('chat'); }, 1600);
+  setTimeout(()=>{ sosFlashHide(); sosBusy = false; show('chat'); }, 1400);
 }
 
 /* ---------- ЗВОНКИ (WebRTC поверх realtime-канала) ---------- */
@@ -3891,6 +3934,29 @@ function linkify(txt){
   });
   return s;
 }
+// мини-карта из тайлов OpenStreetMap: без внешних сервисов и ключей
+function miniMapHTML(g, zoom=16){
+  const lat = g.lat, lng = g.lng, TS = 256;
+  const n = Math.pow(2, zoom);
+  const xf = (lng + 180) / 360 * n;
+  const latRad = lat * Math.PI / 180;
+  const yf = (1 - Math.log(Math.tan(latRad) + 1/Math.cos(latRad)) / Math.PI) / 2 * n;
+  const xt = Math.floor(xf), yt = Math.floor(yf);
+  // смещение точки внутри центрального тайла
+  const px = Math.round((xf - xt) * TS), py = Math.round((yf - yt) * TS);
+  const cols = [xt-1, xt, xt+1], rows = [yt-1, yt, yt+1];
+  const tiles = [];
+  rows.forEach((ry,ri)=>cols.forEach((cx,ci)=>{
+    const tx = ((cx % n) + n) % n;
+    tiles.push(`<img class="mm-t" style="left:${ci*TS}px;top:${ri*TS}px" src="https://tile.openstreetmap.org/${zoom}/${tx}/${ry}.png" alt="" loading="lazy" referrerpolicy="no-referrer">`);
+  }));
+  const link = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  // сдвигаем полотно так, чтобы точка оказалась по центру окна карты
+  return `<a class="sos-map" href="${link}" target="_blank" rel="noopener">
+    <span class="mm-win"><span class="mm-canvas" style="--dx:${-(TS + px)}px;--dy:${-(TS + py)}px">${tiles.join('')}</span><span class="mm-pin"></span></span>
+    <span class="mm-go">${ICON.send(13)} Открыть в Google Maps</span>
+  </a>`;
+}
 function chatDayLabel(ts){
   const d = new Date(ts), now = new Date();
   const d0 = new Date(d.getFullYear(),d.getMonth(),d.getDate());
@@ -3927,12 +3993,7 @@ function renderChat(){
             <b>${esc(f.name)}</b></div>`;
         }).join('')}</div>` : '';
     const voice = m.voice ? `<div style="margin-top:${m.text?'6px':'0'}">${voiceChipHTML(m.voice,{mine})}</div>` : '';
-    const sosMap = m.sos && m.geo
-      ? `<a class="sos-map" href="https://www.google.com/maps/search/?api=1&query=${m.geo.lat},${m.geo.lng}" target="_blank" rel="noopener">
-           <img src="https://staticmap.openstreetmap.de/staticmap.php?center=${m.geo.lat},${m.geo.lng}&zoom=16&size=420x180&markers=${m.geo.lat},${m.geo.lng},red-pushpin" alt="Карта" loading="lazy">
-           <span>${ICON.send(13)} Открыть в Google Maps</span>
-         </a>`
-      : '';
+    const sosMap = m.sos && m.geo ? miniMapHTML(m.geo) : '';
     const time = new Date(m.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
     // кто прочитал (кроме автора)
     const readers = (m.readBy||[]).filter(id=>id!==m.author).map(id=>member(id)).filter(Boolean).slice(0,4);
