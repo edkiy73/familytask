@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>План — Света</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F9F2F4;
+  --card:#FFFFFF;
+  --ink:#2B1A25;
+  --ink-2:#5A4553;
+  --mute:#9C8896;
+  --line:#E9D8DE;
+  --accent:#9E3A63;
+  --accent-soft:#F7E4EC;
+  --brick:#C0442C;
+  --brick-soft:#FDEAE3;
+  --amber:#8A6B12;
+  --amber-soft:#FBF0D8;
+  --nav-h:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Golos Text",system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.45;
+  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:600px;margin:0 auto;padding:0 14px}
+
+/* ---- header ---- */
+.masthead{padding:22px 0 14px;border-bottom:1.5px solid var(--ink)}
+.masthead .kicker{
+  font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--mute)
+}
+.masthead h1{
+  font-family:"Unbounded",sans-serif;font-weight:800;font-size:27px;
+  line-height:1.02;letter-spacing:-.02em;margin-top:6px
+}
+.masthead p{font-size:13.5px;color:var(--ink-2);margin-top:8px}
+
+/* ---- sections / tabs ---- */
+.panel{display:none;padding-top:16px}
+.panel.on{display:block}
+
+.sec{margin:0 0 14px}
+.sec-h{
+  display:flex;align-items:baseline;gap:9px;
+  padding:0 0 7px;border-bottom:1px solid var(--ink);margin-bottom:11px
+}
+.sec-h b{
+  font-family:"Unbounded",sans-serif;font-weight:600;font-size:14.5px;
+  letter-spacing:-.01em;text-transform:uppercase
+}
+.sec-h span{
+  font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--mute);
+  letter-spacing:.1em;margin-left:auto;text-transform:uppercase
+}
+
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:9px;
+  padding:13px 14px;margin-bottom:9px
+}
+.card > h3{
+  font-size:15.5px;font-weight:700;line-height:1.25;margin-bottom:3px
+}
+.card p{font-size:14px;color:var(--ink-2);margin-top:7px}
+.card p:first-of-type{margin-top:5px}
+.lede{font-size:14.5px;color:var(--ink);font-weight:500}
+
+/* ---- numbers strip ---- */
+.figs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-bottom:11px}
+.fig{background:var(--card);padding:11px 9px;text-align:center}
+.fig b{font-family:"Unbounded",sans-serif;font-weight:800;font-size:20px;display:block;letter-spacing:-.03em;color:var(--accent)}
+.fig i{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:9.5px;
+  color:var(--mute);letter-spacing:.06em;text-transform:uppercase;display:block;margin-top:4px;line-height:1.3}
+
+/* ---- exercise card ---- */
+.ex{background:var(--card);border:1px solid var(--line);border-radius:9px;margin-bottom:9px;overflow:hidden}
+.ex-top{display:flex;gap:10px;padding:12px 13px 10px;align-items:flex-start}
+.ex-no{
+  font-family:"JetBrains Mono",monospace;font-weight:700;font-size:11px;
+  background:var(--accent);color:#fff;border-radius:5px;padding:3px 6px;flex:none;margin-top:1px
+}
+.ex-ttl{flex:1}
+.ex-ttl h4{font-size:15.5px;font-weight:700;line-height:1.22}
+.ex-ttl .why{font-size:12.5px;color:var(--accent);font-weight:600;margin-top:3px}
+.ex-vol{
+  font-family:"JetBrains Mono",monospace;font-size:12.5px;font-weight:700;
+  background:var(--accent-soft);color:var(--accent);border-radius:5px;padding:4px 7px;flex:none;
+  white-space:nowrap;margin-top:1px
+}
+.ex ol{list-style:none;counter-reset:s;padding:0 13px 11px;margin:0}
+.ex ol li{
+  counter-increment:s;position:relative;padding-left:21px;font-size:14px;
+  color:var(--ink-2);margin-bottom:6px;line-height:1.4
+}
+.ex ol li::before{
+  content:counter(s);position:absolute;left:0;top:1px;
+  font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:700;color:var(--mute)
+}
+.ex ol li b{color:var(--ink);font-weight:600}
+.stop{
+  display:flex;gap:9px;background:var(--brick-soft);border-top:1px solid #F5CFC1;
+  padding:9px 13px;align-items:flex-start
+}
+.stop em{
+  font-style:normal;font-family:"JetBrains Mono",monospace;font-size:9.5px;font-weight:700;
+  letter-spacing:.1em;color:var(--brick);flex:none;margin-top:2px
+}
+.stop span{font-size:13px;color:#8E2F19;line-height:1.38}
+
+/* ---- misc blocks ---- */
+.note{background:var(--amber-soft);border:1px solid #EBDCAE;border-radius:9px;padding:11px 13px;margin-bottom:9px}
+.note b{display:block;font-size:13px;margin-bottom:4px}
+.note p{font-size:13.5px;color:#5E4A0C;line-height:1.42}
+.alert{background:var(--brick-soft);border:1px solid #F5CFC1;border-radius:9px;padding:11px 13px;margin-bottom:9px}
+.alert b{display:block;font-size:13px;margin-bottom:4px;color:var(--brick)}
+.alert p,.alert li{font-size:13.5px;color:#8E2F19;line-height:1.42}
+.alert ul{margin:5px 0 0 16px}
+.alert li{margin-bottom:3px}
+
+ul.tick{list-style:none;margin:6px 0 0}
+ul.tick li{position:relative;padding-left:17px;font-size:14px;color:var(--ink-2);margin-bottom:6px;line-height:1.4}
+ul.tick li::before{content:"";position:absolute;left:3px;top:9px;width:5px;height:5px;
+  background:var(--accent);border-radius:50%}
+ul.tick li b{color:var(--ink);font-weight:600}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+table th{
+  font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--mute);text-align:left;font-weight:600;padding:0 0 6px;border-bottom:1px solid var(--line)
+}
+table th:last-child,table td:last-child{text-align:right}
+table td{padding:7px 0;border-bottom:1px solid var(--line);color:var(--ink-2);vertical-align:top}
+table tr:last-child td{border-bottom:none}
+td.num{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--ink);white-space:nowrap;padding-left:8px}
+td.ok{color:var(--accent)}
+
+details{background:var(--card);border:1px solid var(--line);border-radius:9px;margin-bottom:9px}
+summary{
+  padding:12px 13px;font-weight:600;font-size:14.5px;cursor:pointer;list-style:none;
+  display:flex;align-items:center;gap:8px
+}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";margin-left:auto;font-family:"JetBrains Mono",monospace;
+  font-weight:700;color:var(--mute);font-size:16px}
+details[open] summary::after{content:"–"}
+details .body{padding:0 13px 13px}
+details .body p{font-size:14px;color:var(--ink-2);margin-bottom:7px}
+
+.ladder{border-left:2px solid var(--line);margin:2px 0 0 6px;padding-left:0}
+.rung{position:relative;padding:0 0 14px 18px}
+.rung::before{content:"";position:absolute;left:-6px;top:5px;width:9px;height:9px;
+  border-radius:50%;background:var(--accent);border:2px solid var(--paper)}
+.rung b{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.06em;
+  color:var(--accent);display:block;text-transform:uppercase}
+.rung span{font-size:14px;color:var(--ink-2);display:block;margin-top:3px;line-height:1.4}
+.rung:last-child{padding-bottom:2px}
+
+.daytag{
+  display:inline-block;font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:#fff;
+  padding:4px 8px;border-radius:5px;margin:14px 0 9px
+}
+.meal{border-left:2px solid var(--accent);padding-left:11px;margin-bottom:12px}
+.meal b{font-size:13.5px;display:block}
+.meal .kcal{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--mute);margin-left:6px;font-weight:600}
+.meal ul{list-style:none;margin-top:4px}
+.meal li{font-size:13.5px;color:var(--ink-2);padding-left:11px;position:relative;margin-bottom:3px;line-height:1.4}
+.meal li::before{content:"—";position:absolute;left:0;color:var(--mute)}
+
+/* ---- bottom nav ---- */
+nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);
+  padding-bottom:env(safe-area-inset-bottom)
+}
+nav .row{display:flex;max-width:600px;margin:0 auto}
+nav button{
+  flex:1;background:none;border:none;color:#A78F9E;padding:11px 2px 12px;
+  font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;cursor:pointer;position:relative;transition:color .18s
+}
+nav button .ico{display:block;font-family:"Unbounded",sans-serif;font-size:15px;font-weight:800;
+  margin-bottom:3px;letter-spacing:-.02em}
+nav button[aria-selected="true"]{color:#fff}
+nav button[aria-selected="true"]::before{
+  content:"";position:absolute;top:0;left:22%;right:22%;height:2.5px;background:#F2A3C2
+}
+nav button:focus-visible{outline:2px solid #F2A3C2;outline-offset:-3px}
+footer{padding:18px 0 6px;font-size:12px;color:var(--mute);line-height:1.45;border-top:1px solid var(--line);margin-top:16px}
+
+/* ---- схемы упражнений ---- */
+.ex-fig{background:#FDF6F8;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:4px 8px}
+.ex-fig svg{display:block;width:100%;height:auto}
+.ex-fig .b{fill:none;stroke:#2B1A25;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.ex-fig .m{fill:none;stroke:#9E3A63;stroke-width:5.5;stroke-linecap:round;stroke-linejoin:round}
+.ex-fig .g{fill:none;stroke:#D3BFC8;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:7 6}
+.ex-fig .h{fill:#2B1A25}
+.ex-fig .p{fill:#F0E2E8;stroke:#DCC6D0;stroke-width:2}
+.ex-fig .fl{stroke:#E0CBD4;stroke-width:2.5;stroke-linecap:round}
+.ex-fig .ar{fill:none;stroke:#9E3A63;stroke-width:2.5;stroke-linecap:round}
+.ex-fig .ah{fill:#9E3A63}
+.figkey{display:flex;gap:12px;flex-wrap:wrap;font-family:"JetBrains Mono",monospace;font-size:9.5px;
+  letter-spacing:.04em;color:var(--mute);text-transform:uppercase;padding:8px 2px 2px}
+.figkey i{font-style:normal;display:flex;align-items:center;gap:5px}
+.figkey s{text-decoration:none;width:14px;height:3px;border-radius:2px;display:block}
+
+/* ---- режим тренировки ---- */
+#fab{position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);z-index:25;display:none;
+  border:none;border-radius:999px;background:var(--accent);color:#fff;
+  font-family:"Golos Text",sans-serif;font-weight:700;font-size:15px;
+  padding:14px 26px;box-shadow:0 6px 20px rgba(43,26,37,.3);cursor:pointer}
+body[data-tab="p2"] #fab{display:block}
+#fab:active{transform:translateX(-50%) scale(.97)}
+#fab:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+
+#ov{position:fixed;inset:0;z-index:60;background:var(--paper);display:flex;flex-direction:column}
+#ov[hidden]{display:none}
+#setup,#run,#done{display:flex;flex-direction:column;flex:1;min-height:0}
+#setup[hidden],#run[hidden],#done[hidden]{display:none}
+
+.ov-head{display:flex;align-items:center;padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+.ov-head b{font-family:"Unbounded",sans-serif;font-weight:600;font-size:16px;
+  text-transform:uppercase;letter-spacing:-.01em}
+.ov-x{margin-left:auto;background:none;border:1px solid var(--line);border-radius:8px;
+  padding:7px 11px;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:600;
+  color:var(--ink-2);cursor:pointer}
+.ov-x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ov-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;
+  max-width:600px;width:100%;margin:0 auto}
+.ov-foot{padding:12px 16px calc(14px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);background:var(--card)}
+.ov-lbl{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--mute);margin:0 0 8px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:18px}
+.day{padding:12px 0;border-radius:9px;border:1px solid var(--line);background:var(--card);
+  font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--ink-2);cursor:pointer}
+.day.rest{color:var(--mute)}
+.day.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:18px}
+.pcard b{font-family:"Unbounded",sans-serif;font-weight:600;font-size:17px;display:block;line-height:1.15}
+.pcard span{font-size:14px;color:var(--ink-2);display:block;margin-top:6px;line-height:1.42}
+.pcard.rest{background:var(--amber-soft);border-color:#EBDCAE}
+.swap{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.swap button{background:none;border:1px solid var(--accent);color:var(--accent);border-radius:8px;
+  padding:9px 13px;font-family:"Golos Text",sans-serif;font-size:13px;font-weight:600;cursor:pointer}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.seg button{padding:13px 6px;border-radius:9px;border:1px solid var(--line);background:var(--card);
+  font-family:"Golos Text",sans-serif;font-size:13px;font-weight:600;color:var(--ink-2);
+  cursor:pointer;line-height:1.3}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.hint{font-size:13.5px;color:var(--mute);line-height:1.42}
+button.big{width:100%;border:none;border-radius:11px;background:var(--accent);color:#fff;
+  font-family:"Golos Text",sans-serif;font-weight:700;font-size:17px;padding:16px;cursor:pointer}
+button.big:disabled{background:var(--line);color:var(--mute);cursor:default}
+button.big:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+.run-head{display:flex;align-items:center;padding:14px 16px 10px;max-width:600px;width:100%;margin:0 auto}
+.run-head .cnt{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;
+  color:var(--mute);letter-spacing:.08em}
+.bar{height:3px;background:var(--line)}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+.run-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 6px;
+  max-width:600px;width:100%;margin:0 auto}
+.run-foot{display:flex;gap:9px;padding:12px 14px calc(14px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);background:var(--card);max-width:600px;width:100%;margin:0 auto}
+.run-foot .prev{width:58px;flex:none;border:1px solid var(--line);background:var(--card);
+  border-radius:11px;font-size:19px;color:var(--ink-2);cursor:pointer}
+.run-foot .prev:disabled{opacity:.35;cursor:default}
+#run .ex{border:none;background:none;margin:0;border-radius:0}
+#run .ex-top{padding:0 0 11px}
+#run .ex-ttl h4{font-size:21px;line-height:1.18}
+#run .ex-ttl .why{font-size:14px;margin-top:5px}
+#run .ex-vol{font-size:14px;padding:6px 9px}
+#run .ex-fig{border:1px solid var(--line);border-radius:10px;margin-bottom:13px}
+#run .ex ol{padding:0}
+#run .ex ol li{font-size:16px;line-height:1.46;margin-bottom:11px;padding-left:24px}
+#run .ex ol li::before{font-size:12px;top:2px}
+#run .stop{border:1px solid #F5CFC1;border-radius:10px;padding:11px 13px}
+#run .stop span{font-size:14.5px}
+
+#done{align-items:center;justify-content:center;text-align:center;padding:28px}
+#done .star{font-size:38px;color:var(--accent);line-height:1}
+#done h2{font-family:"Unbounded",sans-serif;font-weight:800;font-size:27px;line-height:1.14;
+  letter-spacing:-.02em;margin:18px 0 10px;max-width:340px}
+#done .sub{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--mute);
+  letter-spacing:.07em;margin-bottom:14px;text-transform:uppercase}
+#done .msg{font-size:14.5px;color:var(--ink-2);max-width:330px;line-height:1.45;margin-bottom:26px}
+#done button.big{max-width:320px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="kicker">План · Света · Бали</div>
+    <h1>Плотное тело,<br>а не просто минус вес</h1>
+    <p>Три силовые в неделю, коврик и лавка, ребёнок рядом. Кардио не нужно — дефицит делает еда, форму делает сила.</p>
+  </header>
+
+<!-- ============ 1. СТАРТ ============ -->
+<section class="panel on" id="p1">
+
+  <div class="figs">
+    <div class="fig"><b>61–62</b><i>кг цель</i></div>
+    <div class="fig"><b>0,4–0,5</b><i>кг в неделю</i></div>
+    <div class="fig"><b>~16</b><i>недель</i></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Главный ответ</b><span>прочитать один раз</span></div>
+    <div class="card">
+      <h3>Почему при похудении становится мягче</h3>
+      <p class="lede">Когда вес уходит без силовых и без достаточного белка, вместе с жиром уходит и мышца. Объём уменьшается, а плотности под кожей нет — отсюда ощущение, что стало хуже, хотя цифра на весах лучше.</p>
+      <p>Ягодица большая по объёму, но объём этот сейчас в основном не мышечный. Задача не «убрать» её, а поменять состав: снять жир и подложить под кожу мышцу. Поэтому в плане три вещи держатся жёстко:</p>
+      <ul class="tick">
+        <li><b>Умеренный дефицит.</b> Не 1200 ккал. Резкий дефицит — прямой путь к потере мышц.</li>
+        <li><b>Белок 125–135 г каждый день.</b> Это не «желательно», это условие, при котором мышца остаётся.</li>
+        <li><b>Прогрессия нагрузки.</b> Одни и те же 15 повторений без веса через месяц перестают что-либо менять.</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="sec">
+    <div class="sec-h"><b>Тело не станет шире</b><span>частый страх</span></div>
+
+    <div class="card">
+      <p class="lede">Короткий ответ: не станет. Ни талия, ни руки, ни плечи, ни грудная клетка.</p>
+    </div>
+
+    <div class="card">
+      <h3>Почему это не получится, даже если захотеть</h3>
+      <p>Тестостерона — гормона, который отвечает за рост мышц, — у женщины в 10–20 раз меньше, чем у мужчины. Это главная причина, по которой женское тело не набирает объём так, как мужское.</p>
+      <p>Вторая причина важнее первой: мышца растёт только тогда, когда еды больше, чем тело тратит. Все 16 недель ты будешь есть меньше, чем тратишь. В таком режиме мышца в лучшем случае сохраняется, а вырасти заметно физически не может.</p>
+      <p>Женщины, которые выглядят массивно, идут к этому годами и специально: большие веса, много еды, отдельные программы под каждую мышцу. Случайно так не получается.</p>
+    </div>
+
+    <div class="card">
+      <h3>Что будет с размерами</h3>
+      <p>Ориентировочные цифры при потере 6–8 кг. У всех немного по-разному, но направление всегда одно.</p>
+      <table>
+        <tr><td><b>Талия</b></td><td class="num">−5…−9 см</td></tr>
+        <tr><td><b>Бёдра и ягодица</b></td><td class="num">−3…−6 см</td></tr>
+        <tr><td><b>Обхват руки</b></td><td class="num">−1…−2 см</td></tr>
+        <tr><td>Мышца, которая добавится в ягодице</td><td class="num">+0,5 см</td></tr>
+      </table>
+      <p>То есть ягодица станет меньше по объёму и плотнее на ощупь одновременно — это не противоречие, а разный состав того же места. Вес 61–62 кг при росте 168 см — это стройное телосложение, а не спортивно-массивное.</p>
+    </div>
+
+    <div class="card">
+      <h3>Талия</h3>
+      <p>Боковые мышцы живота действительно могут стать толще. Но для этого нужны наклоны в сторону с тяжёлой гантелей в руке и годы такой работы. В плане таких упражнений нет.</p>
+      <p>Мёртвый жук, планка и птица-собака работают по-другому: мышцы там удерживают положение тела, а не двигают вес. От такой работы объём почти не растёт. Зато глубокий пресс начинает работать как встроенный корсет, и талия становится уже.</p>
+    </div>
+
+    <div class="card">
+      <h3>Руки</h3>
+      <p>На верх тела в плане два упражнения — тяга и отжимания. Это шесть подходов в неделю.</p>
+      <p>Когда еды меньше, чем тело тратит, женщина набирает примерно 0,5–1,5 кг мышц <b>на всё тело</b> за четыре месяца. На одну руку из этого приходятся доли миллиметра. При этом с рук уходит жир, поэтому обхват руки за четыре месяца обычно становится <b>меньше</b> на 1–2 см. Рука станет плотнее, а не толще.</p>
+    </div>
+
+    <div class="card">
+      <h3>Плечи</h3>
+      <p>Ширина плеч — это длина ключицы, то есть кости. У взрослого человека она не меняется ни от каких упражнений.</p>
+      <p>Объём может добавить только мышца поверх сустава, а она растёт от жимов гантелей над головой. Таких упражнений в плане нет.</p>
+    </div>
+
+    <div class="card">
+      <h3>Грудная клетка</h3>
+      <p>У взрослых она не расширяется. «Раздышать грудную клетку» — старый миф из бодибилдинга.</p>
+      <p>В плане происходит обратное: дыхательное упражнение в разминке учит опускать нижние рёбра, чтобы они не торчали вперёд. Торс от этого выглядит уже, а не шире.</p>
+    </div>
+
+    <div class="note">
+      <b>Первые 2–4 недели тело может показаться крупнее</b>
+      <p>От непривычной нагрузки мышцы начинают удерживать больше воды. Ноги ощущаются плотнее, сантиметр может показать плюс несколько миллиметров, джинсы садятся иначе. Это вода, а не мышца, и она уходит к 4–6 неделе. Это самая частая причина, по которой женщины бросают силовые на третьей неделе — а бросают ровно перед тем, как начинается результат.</p>
+    </div>
+
+    <div class="card">
+      <h3>Чего в плане нет специально</h3>
+      <ul class="tick">
+        <li>Наклонов в сторону с гантелей</li>
+        <li>Скручиваний с весом на груди</li>
+        <li>Жимов над головой</li>
+        <li>Ходьбы с тяжёлыми гантелями в руках</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>А вот обратное — правда</b>
+      <p>Если убрать тягу и отжимания, станет хуже. Когда еды меньше, чем тело тратит, мышцы уходят в первую очередь оттуда, где нет нагрузки. Именно потеря мышц в руках и спине даёт ту самую мягкость, из-за которой всё и начиналось. Эти два упражнения ничего не добавляют — они сохраняют то, что уже есть.</p>
+    </div>
+
+    <div class="card">
+      <h3>Честно про сроки</h3>
+      <p>За 16 недель ягодица изменится в основном за счёт двух вещей: уйдёт жир и мышца станет плотнее. Заметный рост мышцы начнётся позже — когда вес придёт к цели и ты перейдёшь на питание без дефицита. Вот там сила, набранная за эти месяцы, и сработает в полную силу.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Про гиперлордоз — честно</b><span>без страшилок</span></div>
+    <div class="card">
+      <p class="lede">Наклон таза вперёд есть примерно у трёх женщин из четырёх. Сам по себе он не болезнь и не диагноз, требующий «исправления».</p>
+      <p>При наклоне таза живот визуально выдаётся вперёд даже при небольшом проценте жира, а ягодица находится в растянутом положении и хуже включается в привычных движениях. Это и создаёт картинку, которая не нравится.</p>
+      <p>Растяжка сгибателей бедра снимает ощущение зажатости на несколько часов, но положение таза сама по себе не меняет. Меняют его четыре вещи: умение опускать рёбра на выдохе, сильный глубокий пресс, сильная ягодица и меньше жира на животе. Все четыре в плане есть.</p>
+    </div>
+  </div>
+
+
+  <div class="sec">
+    <div class="sec-h"><b>Что значат слова из плана</b><span>если что-то непонятно</span></div>
+    <div class="card">
+      <ul class="tick">
+        <li><b>Дефицит.</b> Еды за день приходит меньше, чем тело тратит. Только в этом состоянии уходит жир.</li>
+        <li><b>Питание без дефицита (поддержка).</b> Ешь ровно столько, сколько тело тратит, и вес стоит на месте. Для тебя это примерно 2000 ккал.</li>
+        <li><b>Подход и повторение.</b> Повторение — одно движение. Подход — серия повторений подряд без паузы. Запись «3 × 12» значит три подхода по двенадцать повторений.</li>
+        <li><b>Амплитуда.</b> Насколько далеко ты уходишь в движении: как глубоко приседаешь, как низко опускаешь ногу. «Уменьшить амплитуду» — делать движение короче.</li>
+        <li><b>Подкрутить таз (копчик под себя).</b> Представь, что тазовые кости спереди тянутся вверх к рёбрам, а копчик уходит вперёд и вниз. Поясница при этом прижимается, прогиб пропадает.</li>
+        <li><b>Нейтральное положение таза.</b> Поясница не прогнута дугой и не скруглена. Среднее между двумя крайностями.</li>
+        <li><b>Рёбра вниз.</b> На полном выдохе передние нижние рёбра опускаются и перестают торчать вперёд. Ощущение, будто пресс подтянулся сам.</li>
+        <li><b>Разноимённые рука и нога.</b> Правая рука и левая нога — или наоборот.</li>
+        <li><b>Белая линия живота.</b> Вертикальная полоска соединительной ткани посередине живота, между правой и левой половиной пресса.</li>
+        <li><b>Задняя поверхность бедра.</b> Мышцы сзади бедра, между ягодицей и коленом.</li>
+        <li><b>Калораж.</b> Сколько калорий ты съедаешь за день.</li>
+        <li><b>Клетчатка.</b> Часть овощей, фруктов и круп, которая не переваривается. Даёт сытость и нормальную работу кишечника.</li>
+        <li><b>Протеин.</b> Белковый порошок. Разводится водой или молоком, одна мерная ложка даёт примерно 24 г белка.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Три теста</b><span>5 минут, сделать до старта</span></div>
+
+    <details>
+      <summary>1. Расхождение прямых мышц живота</summary>
+      <div class="body">
+        <p>Ребёнку 1,8 — этот тест обязателен. Посередине живота, между правой и левой половиной пресса, проходит полоска соединительной ткани — белая линия. Во время беременности она растягивается, и примерно у трети женщин остаётся растянутой даже через год. Это даёт ровно ту картину, которую ты описываешь: живот выдаётся вперёд и мягкий, хотя вес не критичный.</p>
+        <p><b>Как проверить:</b> лечь на спину, колени согнуты, стопы на полу. Положить пальцы поперёк живота на 3 см выше пупка. Слегка приподнять голову и плечи. Пальцами почувствовать: сколько пальцев помещается между валиками мышц и насколько глубоко они проваливаются. Повторить на уровне пупка и на 3 см ниже.</p>
+        <p><b>Как читать:</b> 1–2 пальца, дно под пальцами упругое — норма, работаем по плану. 2,5–3 пальца или дно мягкое, проваливается — план тот же, но убираем скручивания и следим за «гребнем» (см. ниже). Больше 3 пальцев, пупочная грыжа, боль — сначала специалист по восстановлению после родов, потом нагрузка.</p>
+        <p><b>«Гребень» (купол):</b> если при любом упражнении по средней линии живота вылезает вертикальный валик — нагрузка сейчас выше, чем держит соединительная ткань. Это единственный сигнал, по которому упражнение упрощается немедленно.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>2. Тазобедренные суставы</summary>
+      <div class="body">
+        <p><b>Тест 1.</b> Лёжа на спине, пятку одной ноги положить на колено другой, колено уронить в сторону. Боль в паху или колено высоко и не идёт вниз — отметить.</p>
+        <p><b>Тест 2.</b> Лёжа на спине, согнуть ногу под 90°, притянуть колено к противоположному плечу и одновременно развернуть голень наружу. Резкая боль или щипок в паху — отметить.</p>
+        <p>Если хотя бы один тест даёт боль в паху — это не повод не тренироваться, это повод сходить к ортопеду и сделать рентген таза. В 32 года такая картина чаще всего означает одно из двух. Либо импинджмент — когда кости упираются друг в друга раньше, чем нога дошла до конца движения. Либо дисплазию — когда впадина сустава прикрывает головку бедра меньше, чем нужно. Оба состояния спокойно тренируются, но выбор упражнений и глубина зависят от того, что там на самом деле. До приёма — работаем строго в безболезненной амплитуде, все упражнения ниже это позволяют.</p>
+        <p><b>Чего в плане нет из-за суставов:</b> приседаний с широкой постановкой, сумо, плие, глубоких выпадов, разведений ног, «бабочки» и приседов ниже параллели.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>3. Тазовое дно</summary>
+      <div class="body">
+        <p>Подтекает ли при чихании, кашле, прыжке, смехе. Есть ли ощущение тяжести или давления вниз к концу дня.</p>
+        <p>Если да — это распространено после родов и хорошо лечится, но планка и любые прыжки без работы с тазовым дном будут усугублять. На Бали есть физиотерапевты, работающие с этим (women's health physio). До консультации: убрать прыжки, планку держать не дольше 30 секунд, на каждом усилии делать выдох, а не задерживать дыхание.</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Как устроен план</b><span>логика в шести строках</span></div>
+    <div class="card">
+      <ul class="tick">
+        <li><b>Три силовые в неделю на всё тело.</b> В дефиците мышца сохраняется только там, где есть нагрузка. Верх тела в плане не для «рук», а чтобы не терять мышцу по всему телу.</li>
+        <li><b>Нагрузка растёт каждые две недели.</b> Без веса тело перестаёт меняться примерно на 6–8 неделе. Нужны разборные гантели и резинки — это вся покупка.</li>
+        <li><b>Узкая постановка стоп во всех упражнениях.</b> Никаких широких приседов, сумо, плие и разведений — тазобедренные суставы работают в безболезненной амплитуде.</li>
+        <li><b>Живот убирается не скручиваниями.</b> Работают три вещи вместе: уходит жир, укрепляется глубокий пресс, появляется привычка держать рёбра опущенными.</li>
+        <li><b>Кардио не требуется.</b> Дефицит создаёт еда, форму создаёт сила. Ходьба и плавание — приятный бонус, а не условие.</li>
+        <li><b>Дефицит небольшой, но длинный.</b> 16 недель по 0,4–0,5 кг в неделю выглядят медленно на бумаге, но именно такой темп люди доводят до конца, а жёсткий — бросают.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. ТРЕНИРОВКИ ============ -->
+<section class="panel" id="p2">
+
+  <div class="sec">
+    <div class="sec-h"><b>График</b><span>3 раза в неделю</span></div>
+    <div class="card">
+      <p class="lede">Пн — А · Ср — B · Пт — А. Следующая неделя: Пн — B · Ср — А · Пт — B. И так по кругу.</p>
+      <p>Между тренировками минимум день отдыха. Тренировка занимает 35–45 минут вместе с разминкой. Если день сорвался — не догоняй, просто сделай следующую по очереди.</p>
+    </div>
+    <div class="note">
+      <b>Инвентарь</b>
+      <p>Коврик и лавка уже есть. Докупить две вещи: <b>разборные гантели</b> (пара, до 10–12 кг каждая) и <b>комплект резинок</b> — длинная лента плюс мини-петли (короткие резиновые кольца, надеваются на ноги). Гантели закрывают тягу, заходы, выпады и мостик; резинки — тягу и отведения. Tokopedia, Shopee или Decathlon в Денпасаре, ориентир 1–2 млн рупий за гантели и 150–400 тыс. за резинки. Без веса прогрессия встанет к 6–8 неделе, поэтому это не опция.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Разминка</b><span>7 минут · перед каждой</span></div>
+    <div class="figkey">
+      <i><s style="background:#9E3A63"></s>рабочая часть</i>
+      <i><s style="background:#2B1A25"></s>остальное тело</i>
+      <i><s style="background:#D3BFC8"></s>второе положение</i>
+    </div>
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">Р1</span>
+        <div class="ex-ttl"><h4>Дыхание лёжа, ноги на лавке</h4><div class="why">Главное упражнение при прогибе в пояснице. Учит опускать рёбра</div></div>
+        <span class="ex-vol">5 циклов</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Лёжа на спине, голени на лавке, бёдра и колени под прямым углом"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><rect class="p" x="152" y="70" width="74" height="48" rx="3"/><path class="b" d="M47 106 L120 108"/><path class="b" d="M57 106 L88 116 L112 110"/><path class="m" d="M120 108 L122 74 L188 72"/><path class="m" d="M188 72 L196 82"/><circle class="h" cx="36" cy="103" r="9"/><path class="ar" d="M96 76 L96 93"/><path class="ah" d="M91 91 L101 91 L96 100 Z"/></svg></div>
+      <ol>
+        <li>Лечь на спину, голени на лавке, бёдра и колени под 90°.</li>
+        <li><b>Подкрутить таз</b> так, чтобы поясница легла на пол без просвета.</li>
+        <li>Вдох носом на 4 счёта в бока и в спину, живот не выпячивать.</li>
+        <li><b>Выдох ртом на 8 счётов до полного нуля</b>, будто дуешь через трубочку. В конце выдоха рёбра сами опускаются вниз, пресс включается — вот это ощущение и есть рабочее положение на всю тренировку.</li>
+      </ol>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">Р2</span>
+        <div class="ex-ttl"><h4>Кошка-корова</h4><div class="why">Подвижность поясницы и таза</div></div>
+        <span class="ex-vol">8 повт</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="На четвереньках, спина округляется вверх; пунктиром — прогиб"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="g" d="M62 74 Q106 94 150 74"/><path class="m" d="M62 74 Q106 48 150 74"/><path class="b" d="M62 74 L60 116"/><path class="b" d="M150 74 L152 116 L190 114"/><path class="b" d="M190 114 L198 106"/><circle class="h" cx="50" cy="88" r="9"/><path class="ar" d="M106 46 L106 33"/><path class="ah" d="M101 35 L111 35 L106 26 Z"/></svg></div>
+      <ol>
+        <li>На четвереньках. Вдох — мягкий прогиб в грудном отделе.</li>
+        <li>Выдох — круглая спина, копчик подкручен под себя, пресс подтянут.</li>
+      </ol>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">Р3</span>
+        <div class="ex-ttl"><h4>Круги в тазобедренном суставе лёжа</h4><div class="why">Питание сустава через движение под контролем</div></div>
+        <span class="ex-vol">5 × 2 стороны</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Лёжа на спине, колено рисует круг"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="b" d="M47 106 L120 109"/><path class="b" d="M57 106 L88 116 L112 111"/><path class="b" d="M120 109 L182 113 L192 104"/><path class="m" d="M120 107 L131 62 L156 94"/><circle class="h" cx="36" cy="103" r="9"/><ellipse cx="131" cy="60" rx="27" ry="19" fill="none" stroke="#9E3A63" stroke-width="2.5" stroke-dasharray="5 5"/><path class="ah" d="M152 50 L164 58 L150 64 Z"/></svg></div>
+      <ol>
+        <li>Лёжа на спине, одна нога согнута, колено поднято.</li>
+        <li>Медленно (5 сек на круг) рисовать коленом круг: вверх → наружу → вниз → внутрь.</li>
+        <li><b>Только там, где не больно.</b> Круг маленький — нормально. Он будет расти сам за 3–4 недели.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Щелчок с болью или щипок в паху — уменьшить круг вдвое. Безболезненный щелчок без боли — можно продолжать.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">Р4</span>
+        <div class="ex-ttl"><h4>Растяжка сгибателей бедра в выпаде</h4><div class="why">Снимает ощущение зажатости спереди</div></div>
+        <span class="ex-vol">30 сек × 2</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Выпад на одно колено, таз подкручен, корпус подаётся вперёд"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="m" d="M40 116 L78 116 L98 72"/><path class="m" d="M40 116 L33 106"/><path class="b" d="M98 72 L104 30"/><path class="b" d="M98 72 L150 74 L152 116"/><path class="b" d="M152 116 L176 116"/><path class="b" d="M103 36 L130 58 L150 72"/><circle class="h" cx="106" cy="19" r="9"/><path class="ar" d="M106 88 L129 88"/><path class="ah" d="M127 83 L127 93 L136 88 Z"/></svg></div>
+      <ol>
+        <li>Выпад на одно колено, оба угла по 90°, под колено подложить коврик.</li>
+        <li><b>Сначала подкрутить таз под себя</b> и сжать ягодицу задней ноги — только после этого подать корпус вперёд на пару сантиметров.</li>
+        <li>Если подкрутить таз и не двигаться вперёд вообще — натяжение уже будет. Значит, вперёд идти не надо.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Тянет в пояснице, а не спереди в бедре — таз не подкручен. Вернуться к пункту 2.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">Р5</span>
+        <div class="ex-ttl"><h4>Мостик на активацию</h4><div class="why">Разбудить ягодицу перед рабочими подходами</div></div>
+        <span class="ex-vol">15 повт</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Подъём таза лёжа на полу; пунктиром — нижнее положение"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="g" d="M52 110 L118 112 L158 100"/><path class="b" d="M52 108 L118 76"/><path class="m" d="M118 76 L158 84 L160 116"/><path class="b" d="M160 116 L184 116"/><path class="b" d="M56 106 L92 116 L120 113"/><circle class="h" cx="40" cy="104" r="9"/><path class="ar" d="M124 68 L124 49"/><path class="ah" d="M119 51 L129 51 L124 42 Z"/></svg></div>
+      <ol>
+        <li>Лёжа на полу, стопы на ширине таза. Подъём таза, вверху пауза 1 сек, сжать ягодицы.</li>
+        <li>Цель — почувствовать жжение в ягодице, а не поднять высоко.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ДЕНЬ A -->
+  <div class="sec">
+    <div class="sec-h"><b>День А</b><span>ягодицы, задняя поверхность бедра, спина</span></div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">A1</span>
+        <div class="ex-ttl"><h4>Ягодичный мостик с опорой на лавку</h4><div class="why">Самая высокая нагрузка на ягодицу из доступных дома</div></div>
+        <span class="ex-vol">4 × 12–15</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Лопатки на лавке, таз поднят до прямой линии; пунктиром — низ"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><rect class="p" x="18" y="68" width="70" height="50" rx="3"/><path class="g" d="M148 104 L192 98"/><path class="b" d="M84 62 L148 60"/><path class="m" d="M148 60 L194 62 L196 116"/><path class="b" d="M196 116 L220 116"/><path class="b" d="M86 66 L120 80 L146 68"/><circle class="h" cx="73" cy="51" r="9"/><path class="ar" d="M152 52 L152 33"/><path class="ah" d="M147 35 L157 35 L152 26 Z"/></svg></div>
+      <ol>
+        <li>Сесть на пол спиной к лавке. Край лавки — <b>под нижним краем лопаток</b>, высота лавки 35–40 см.</li>
+        <li>Стопы на ширине таза, строго параллельно. Проверка: в верхней точке голень вертикальна. Колени уходят вперёд — стопы дальше; тянет заднюю поверхность бедра — стопы ближе.</li>
+        <li><b>Подбородок прижат к груди, смотреть на колени всё время.</b> Это удерживает рёбра внизу и не даёт пояснице прогнуться.</li>
+        <li>Выдох. <b>Сначала подкрутить копчик, потом поднимать таз</b> — именно в этом порядке. Давить пятками.</li>
+        <li>Вверху корпус и бёдра образуют прямую линию. <b>Пауза 2 секунды</b>, ягодицы сжаты максимально.</li>
+        <li>Вниз медленно, 3 секунды. Внизу не отдыхать, сразу следующее.</li>
+        <li>С 5-й недели с весом: гантель лежит поперёк таза, под неё — сложенное полотенце, иначе будет давить на кость.</li>
+        <li>Отдых между подходами 75–90 секунд.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Если вверху поясница прогибается и рёбра «раскрываются» к потолку — поднимаешь слишком высоко. Опусти амплитуду на 5 см. Прямая линия здесь важнее высоты.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">A2</span>
+        <div class="ex-ttl"><h4>Румынская тяга</h4><div class="why">Главное упражнение на форму. Ягодица + задняя поверхность бедра</div></div>
+        <span class="ex-vol">3 × 10–12</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Наклон с прямой спиной, таз уходит назад, гантели вдоль ног"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="g" d="M96 54 L100 18"/><path class="b" d="M108 116 L110 80 L94 54"/><path class="b" d="M92 116 L128 116"/><path class="m" d="M94 54 L152 46"/><path class="b" d="M148 50 L152 82"/><rect x="138" y="82" width="28" height="10" rx="5" fill="#9E3A63"/><circle class="h" cx="165" cy="41" r="9"/><path class="ar" d="M94 56 L69 56"/><path class="ah" d="M71 51 L71 61 L62 56 Z"/></svg></div>
+      <ol>
+        <li>Стопы на ширине таза, параллельно. Узкая постановка — суставам безопасно.</li>
+        <li>Гантели в опущенных руках перед бёдрами, ладони повёрнуты к себе.</li>
+        <li>Колени чуть мягкие и <b>дальше не сгибаются</b> — всё движение идёт из таза.</li>
+        <li>Вдох. <b>Таз отводится назад</b>, как будто закрываешь дверь ягодицами. Корпус наклоняется следом, спина прямая, вес скользит вдоль ног.</li>
+        <li>Опускаться <b>ровно до того места, где чувствуется натяжение задней поверхности бедра</b> — обычно чуть ниже колена. Ниже не надо, ниже начинает работать поясница.</li>
+        <li>Выдох, толкнуть таз вперёд, вверху дожать ягодицы.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Спина округлилась в пояснице или потянуло поясницу вместо задней поверхности бедра — амплитуда слишком глубокая. Поднимись на 10 см выше и не иди дальше.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">A3</span>
+        <div class="ex-ttl"><h4>Тяга резинкой к животу</h4><div class="why">Средняя спина. Опускает рёбра — живот визуально подбирается</div></div>
+        <span class="ex-vol">3 × 12–15</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Сидя, тяга резинки к нижним рёбрам; пунктиром — вытянутые руки"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="b" d="M74 58 L70 104"/><path class="b" d="M70 104 L138 108 L184 104"/><path class="b" d="M184 104 L190 92"/><path class="g" d="M74 62 L118 80 L158 98"/><path d="M102 90 Q142 106 182 100" fill="none" stroke="#9E3A63" stroke-width="3"/><path class="m" d="M74 62 L64 88 L102 90"/><circle class="h" cx="72" cy="46" r="9"/><path class="ar" d="M142 68 L119 68"/><path class="ah" d="M121 63 L121 73 L112 68 Z"/></svg></div>
+      <ol>
+        <li>Сесть на пол, ноги вперёд. Резинку накинуть на стопы, концы в руках.</li>
+        <li>Тянуть к нижним рёбрам, <b>локти скользят вдоль корпуса</b>, лопатки идут вниз и назад.</li>
+        <li>В конце паузa 1 сек. Возврат медленно, 3 секунды.</li>
+        <li>Без резинки: колено и одна рука на лавке, во второй руке гантель — тяга к поясу, 3 × 10 на руку.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Плечи поехали к ушам — вес великий или лопатки не опущены. Сбрось натяжение.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">A4</span>
+        <div class="ex-ttl"><h4>Мёртвый жук</h4><div class="why">Глубокий пресс. Именно он держит живот, а не кубики</div></div>
+        <span class="ex-vol">3 × 8–10 / стор</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Лёжа на спине, опускаются разноимённые рука и нога"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="b" d="M52 102 L130 104"/><path class="b" d="M58 102 L58 56"/><path class="m" d="M58 102 L28 66"/><path class="b" d="M130 104 L130 60 L170 62"/><path class="m" d="M130 104 L174 98 L208 106"/><path class="m" d="M208 106 L214 96"/><circle class="h" cx="40" cy="98" r="9"/><path class="ar" d="M150 82 L171 82"/><path class="ah" d="M169 77 L169 87 L178 82 Z"/></svg></div>
+      <ol>
+        <li>Спина, колени 90°, руки вертикально вверх.</li>
+        <li><b>Полный выдох ртом, рёбра вниз, поясница прижата к коврику без просвета.</b> Это исходное — и это уже работа. Проверить рукой: между поясницей и полом ладонь не проходит.</li>
+        <li>На выдохе медленно, за 3 секунды, опустить руку за голову и <b>противоположную</b> ногу вниз: правая рука — левая нога. Пятка пола не касается.</li>
+        <li>Вдох на возврате. Поясница всё это время не отрывается ни на миллиметр.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Поясница отошла от пола или по средней линии живота вылез вертикальный валик — опускай ногу вдвое меньше. Лучше 10 см с прижатой поясницей, чем полная амплитуда с прогибом.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">A5</span>
+        <div class="ex-ttl"><h4>Боковая планка с колен</h4><div class="why">Боковые мышцы живота держат таз ровно. Талия</div></div>
+        <span class="ex-vol">3 × 25–35 сек</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Боковая планка с колен; пунктиром — провисший таз"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="g" d="M66 72 L140 108 L176 112"/><path class="b" d="M62 116 L100 116"/><path class="b" d="M62 116 L66 72"/><path class="m" d="M66 72 L140 92 L176 110"/><path class="b" d="M176 110 L206 96"/><path class="b" d="M70 76 L136 92"/><circle class="h" cx="54" cy="60" r="9"/><path class="ar" d="M140 80 L140 63"/><path class="ah" d="M135 65 L145 65 L140 56 Z"/></svg></div>
+      <ol>
+        <li>На боку, локоть строго под плечом, колени согнуты под 90°.</li>
+        <li>Поднять таз до прямой линии колено — таз — плечо.</li>
+        <li>Дышать ровно, не задерживать. Ягодицы слегка напряжены.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Таз провис или ушёл назад — время вышло, ставь его на пол. Держать «как-нибудь» смысла нет.</span></div>
+    </div>
+  </div>
+
+  <!-- ДЕНЬ B -->
+  <div class="sec">
+    <div class="sec-h"><b>День B</b><span>ноги по одной, верх, кор</span></div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">B1</span>
+        <div class="ex-ttl"><h4>Заход на лавку</h4><div class="why">Ягодица под большой нагрузкой без глубокого сгибания сустава</div></div>
+        <span class="ex-vol">3 × 8–10 / ногу</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Заход на лавку одной ногой, корпус наклонён вперёд"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><rect class="p" x="126" y="84" width="96" height="34" rx="3"/><path class="m" d="M148 84 L138 52 L106 60"/><path class="m" d="M148 84 L176 84"/><path class="b" d="M106 60 L116 22"/><path class="b" d="M106 60 L92 90 L96 116"/><path class="b" d="M96 116 L72 116"/><path class="b" d="M114 28 L96 56 L94 78"/><circle class="h" cx="119" cy="12" r="9"/><path class="ar" d="M58 74 L58 53"/><path class="ah" d="M53 55 L63 55 L58 46 Z"/></svg></div>
+      <ol>
+        <li>Лавка 30–40 см. Начать с низкой: выше — больше ягодица, но и больше сгибание в суставе.</li>
+        <li>Поставить <b>всю стопу</b> на лавку, наклонить корпус вперёд на 20–30°.</li>
+        <li>Встать <b>только за счёт ноги на лавке</b>. Вторая нога не отталкивается от пола — можно даже поднять носок.</li>
+        <li>Вверху пауза 1 сек. Вниз 3 секунды, коснуться пола носком и сразу обратно.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Боль или зажатие в паху — лавка слишком высокая. Снизь на 10 см. Колено уходит внутрь — ставь стопу и разворачивай колено наружу к мизинцу.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">B2</span>
+        <div class="ex-ttl"><h4>Статичный выпад назад</h4><div class="why">Ягодица + передняя поверхность бедра, без разведения ног</div></div>
+        <span class="ex-vol">3 × 10–12 / ногу</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Статичный выпад назад, ноги на ширине таза"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="m" d="M140 116 L142 80 L112 64"/><path class="m" d="M130 116 L162 116"/><path class="b" d="M112 64 L122 26"/><path class="b" d="M112 64 L82 98 L62 114"/><path class="b" d="M62 114 L54 116"/><path class="b" d="M120 32 L104 60 L104 84"/><circle class="h" cx="125" cy="16" r="9"/><path class="ar" d="M184 48 L184 71"/><path class="ah" d="M179 69 L189 69 L184 78 Z"/></svg></div>
+      <ol>
+        <li>Шаг назад. <b>Ноги стоят как на двух рельсах, на ширине таза</b>, а не на одной линии — так устойчивее и безопаснее для сустава.</li>
+        <li>Корпус наклонён вперёд примерно на 30°, спина прямая. Наклон уводит нагрузку из колена в ягодицу.</li>
+        <li>Вдох — вниз, заднее колено идёт к полу. <b>Глубина — до первого дискомфорта в паху, не дальше.</b></li>
+        <li>Выдох — толкнуться пяткой передней ноги, вверху не выпрямлять колено до щелчка.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Щипок спереди в паху — уменьшить глубину на треть. Заваливается корпус вбок — сделать шаг назад чуть шире по ширине.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">B3</span>
+        <div class="ex-ttl"><h4>Отжимания с опорой рук на лавку</h4><div class="why">Верх тела. Форма рук и осанка</div></div>
+        <span class="ex-vol">3 × 8–12</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Отжимание с руками на лавке; пунктиром — нижнее положение"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><rect class="p" x="146" y="64" width="78" height="54" rx="3"/><path class="g" d="M154 58 L100 82 L52 108"/><path class="b" d="M160 64 L154 40"/><path class="m" d="M154 40 L100 68 L52 100"/><path class="b" d="M52 100 L44 116"/><circle class="h" cx="167" cy="33" r="9"/><path class="ar" d="M104 26 L104 45"/><path class="ah" d="M99 43 L109 43 L104 52 Z"/></svg></div>
+      <ol>
+        <li>Руки на лавке чуть шире плеч, тело — прямая линия от макушки до пяток.</li>
+        <li><b>Ягодицы напряжены, рёбра опущены</b> — иначе поясница провиснет.</li>
+        <li>Вниз 2–3 сек до касания грудью, локти под 45° к телу, не в стороны.</li>
+        <li>Прогрессия: лавка → опора ниже (ступенька) → пол с колен → пол.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Поясница провисла или таз ушёл вверх — сделай опору выше. Форма важнее количества.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">B4</span>
+        <div class="ex-ttl"><h4>Одноногий мостик с пола</h4><div class="why">Удваивает нагрузку на ягодицу без единого килограмма веса</div></div>
+        <span class="ex-vol">3 × 12–15 / ногу</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Мостик с одной опорной ногой, вторая подтянута к груди"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="b" d="M52 108 L118 76"/><path class="m" d="M118 76 L158 84 L160 116"/><path class="b" d="M160 116 L184 116"/><path class="b" d="M118 76 L100 46 L128 66"/><path class="b" d="M56 106 L82 80 L98 50"/><circle class="h" cx="40" cy="104" r="9"/><path class="ar" d="M198 76 L198 57"/><path class="ah" d="M193 59 L203 59 L198 50 Z"/></svg></div>
+      <ol>
+        <li>Лёжа на полу, одна стопа на полу под коленом, вторую ногу подтянуть к груди и придержать руками.</li>
+        <li>Поднять таз, вверху <b>пауза 2 секунды</b>, ягодицу сжать.</li>
+        <li>Таз держать ровно, не заваливать на сторону опорной ноги.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Свело заднюю поверхность бедра — поставь стопу ближе к тазу и осознанно жми пяткой, а не носком.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">B5</span>
+        <div class="ex-ttl"><h4>Птица-собака</h4><div class="why">Учит держать таз неподвижным, когда двигаются ноги</div></div>
+        <span class="ex-vol">3 × 8 / стор</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Четвереньки, вытянуты разноимённые рука и нога"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="b" d="M62 72 L150 72"/><path class="b" d="M62 72 L60 116"/><path class="b" d="M150 72 L152 116 L188 114"/><path class="b" d="M188 114 L196 106"/><path class="m" d="M62 72 L22 58"/><path class="m" d="M150 72 L212 58"/><rect x="95" y="59" width="24" height="10" rx="2" fill="#F0E2E8" stroke="#DCC6D0" stroke-width="2"/><circle class="h" cx="48" cy="88" r="9"/></svg></div>
+      <ol>
+        <li>Четвереньки, ладони под плечами, колени под тазом. Спина нейтральная.</li>
+        <li>Вытянуть вперёд руку и назад <b>противоположную</b> ногу: правая рука — левая нога. До линии корпуса, не выше.</li>
+        <li>Пауза 2 сек, вернуть медленно.</li>
+        <li>Проверка: положить на поясницу телефон — он не должен съезжать.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>Таз развернулся или поясница провалилась — тянешь ногу слишком высоко. Опусти до уровня таза.</span></div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-top">
+        <span class="ex-no">B6</span>
+        <div class="ex-ttl"><h4>Планка с подкрученным тазом</h4><div class="why">Не «держать тело», а активно тянуть таз к рёбрам</div></div>
+        <span class="ex-vol">3 × 30–40 сек</span>
+      </div>
+      <div class="ex-fig"><svg viewBox="0 0 240 130" role="img" aria-label="Планка на предплечьях с подкрученным тазом; пунктиром — провис"><line class="fl" x1="8" y1="118" x2="232" y2="118"/><path class="g" d="M74 80 L140 110 L200 110"/><path class="b" d="M70 116 L106 116"/><path class="b" d="M70 116 L74 80"/><path class="m" d="M74 80 L140 94 L200 108"/><path class="b" d="M200 108 L212 116"/><circle class="h" cx="60" cy="72" r="9"/><path class="ar" d="M140 84 L140 65"/><path class="ah" d="M135 67 L145 67 L140 58 Z"/></svg></div>
+      <ol>
+        <li>На предплечьях, локти под плечами.</li>
+        <li><b>Копчик подкрутить под себя, ягодицы сжать, рёбра опустить.</b> Поясница становится плоской или чуть круглой — это правильно.</li>
+        <li>30 секунд в таком положении тяжелее и полезнее, чем 2 минуты с прогибом.</li>
+      </ol>
+      <div class="stop"><em>СТОП</em><span>По средней линии живота появился вертикальный валик — сразу перейти на планку с колен или заменить на боковую планку.</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Прогрессия</b><span>иначе всё встанет</span></div>
+    <div class="card">
+      <p class="lede">Правило одно: последние 2–3 повтора должны быть тяжёлыми при чистой технике. Если можешь сделать на 5 больше плана — пора добавлять.</p>
+    </div>
+    <div class="ladder">
+      <div class="rung"><b>Недели 1–2</b><span>Нижняя граница повторов, без веса. Задача — научиться держать нейтральный таз и дышать. Не гнаться за нагрузкой.</span></div>
+      <div class="rung"><b>Недели 3–4</b><span>Верхняя граница повторов + пауза 2 сек в верхней точке всех ягодичных упражнений.</span></div>
+      <div class="rung"><b>Недели 5–6</b><span>Гантели 5–8 кг в A1, A2, B1, B2. Повторы возвращаются к нижней границе.</span></div>
+      <div class="rung"><b>Недели 7–8</b><span>+2–3 кг. В A1 добавить пятый подход.</span></div>
+      <div class="rung"><b>Недели 9–16</b><span>+2–3 кг каждые две недели, пока техника остаётся чистой. К 16-й неделе 18–20 кг в мостике — нормальная цифра.</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Версия на 15 минут</b><span>когда ребёнок не дал</span></div>
+    <div class="card">
+      <p class="lede">Это не «поражение», это запасная тренировка. Сделанная на 60% в три раза лучше пропущенной.</p>
+      <ul class="tick">
+        <li>Ягодичный мостик на лавке — 3 × 15</li>
+        <li>Статичный выпад назад — 2 × 12 на ногу</li>
+        <li>Мёртвый жук — 2 × 10 на сторону</li>
+        <li>Планка — 2 × 30 сек</li>
+      </ul>
+      <p>Разминку сократить до дыхания лёжа и мостика на активацию — 2 минуты.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. ЕДА ============ -->
+<section class="panel" id="p3">
+
+  <div class="figs">
+    <div class="fig"><b>1650</b><i>ккал в день</i></div>
+    <div class="fig"><b>130</b><i>г белка</i></div>
+    <div class="fig"><b>2,5–3</b><i>л воды</i></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Цифры и откуда они</b><span>считаем один раз</span></div>
+    <div class="card">
+      <table>
+        <tr><td>Тело тратит в полном покое, если весь день лежать (168 см, 68 кг, 32 года)</td><td class="num">1410</td></tr>
+        <tr><td>С учётом быта, ребёнка и трёх силовых</td><td class="num">~2000</td></tr>
+        <tr><td><b>Рабочий калораж, дефицит ~18%</b></td><td class="num">1600–1700</td></tr>
+      </table>
+      <p>Меньше 1500 не опускаться. При жёстком дефиците первым уходит то, ради чего всё затевается — мышца.</p>
+    </div>
+    <div class="card">
+      <h3>Распределение</h3>
+      <table>
+        <tr><td><b>Белок</b> — держит мышцу и насыщает</td><td class="num">125–135 г</td></tr>
+        <tr><td><b>Жиры</b> — минимум для гормонов</td><td class="num">55–65 г</td></tr>
+        <tr><td><b>Углеводы</b> — остаток, силы на тренировку</td><td class="num">150–180 г</td></tr>
+        <tr><td><b>Клетчатка</b> — сытость и кишечник</td><td class="num">25–30 г</td></tr>
+      </table>
+      <p>Белок разбить на 4 приёма по 30–35 г. Один большой белковый приём в день работает хуже, чем четыре средних.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Без весов</b><span>если считать нет времени</span></div>
+    <div class="card">
+      <p class="lede">Первые 3–4 недели лучше повзвешивать — глаз ошибается на 30–40% и почти всегда в сторону «больше». Дальше можно перейти на ладони.</p>
+      <table>
+        <tr><td><b>Белок</b> — кусок размером с ладонь без пальцев и такой же толщины</td><td class="num">4× в день</td></tr>
+        <tr><td><b>Углеводы</b> — горка размером с твой кулак</td><td class="num">3× в день</td></tr>
+        <tr><td><b>Жиры</b> — порция размером с большой палец</td><td class="num">3× в день</td></tr>
+        <tr><td><b>Овощи</b> — две полные горсти</td><td class="num">3–4× в день</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Свободно</b><span>можно не считать</span></div>
+    <div class="card">
+      <p class="lede">Эти продукты трудно переесть: в них мало калорий на большой объём. Из них строится основа тарелки.</p>
+      <ul class="tick">
+        <li><b>Мясо и птица.</b> Куриная грудка, филе индейки, постная говядина, телятина, кролик.</li>
+        <li><b>Рыба белая.</b> Треска, минтай, судак, хек, дорадо, сибас, какап, барамунди.</li>
+        <li><b>Морепродукты.</b> Креветки, кальмар, мидии, осьминог.</li>
+        <li><b>Яйца.</b> Целые, до 3 штук в день. Белки — сколько угодно.</li>
+        <li><b>Творог до 5%, натуральный йогурт без добавок, кефир.</b></li>
+        <li><b>Тофу и темпе</b> — запечённые или на гриле.</li>
+        <li><b>Овощи почти все.</b> Огурцы, помидоры, капуста любая, брокколи, кабачки, баклажаны, перец, стручковая фасоль, шпинат, салаты, редис, лук, зелень, грибы. Свёкла и морковь тоже — просто в них чуть больше сахара.</li>
+        <li><b>Напитки.</b> Вода, чай, кофе без сахара и сиропа, минералка.</li>
+        <li><b>Приправы.</b> Все специи и травы, лимон, лайм, уксус, горчица без сахара, томатная паста, чеснок, самбал. Соевый соус — вкус бесплатный, но соли много.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Под контролем</b><span>и как именно</span></div>
+    <div class="card">
+      <p class="lede">Здесь продукты хорошие, но плотные по калориям. Их не убирают — их отмеряют. Ошибка почти всегда в жирах, а не в углеводах.</p>
+    </div>
+
+    <div class="card">
+      <h3>Жиры — главный источник лишнего</h3>
+      <table>
+        <tr><th>Продукт</th><th>Норма в день</th></tr>
+        <tr><td>Масло любое: оливковое, подсолнечное, кокосовое, сливочное<br><span style="color:var(--mute)">1 ч. л. = 45 ккал</span></td><td class="num">2–3 ч. л.</td></tr>
+        <tr><td>Орехи и семечки<br><span style="color:var(--mute)">горсть = 150 ккал</span></td><td class="num">20–25 г</td></tr>
+        <tr><td>Авокадо</td><td class="num">половина</td></tr>
+        <tr><td>Сыр твёрдый</td><td class="num">30 г</td></tr>
+        <tr><td>Сметана 10–15%</td><td class="num">1–2 ст. л.</td></tr>
+        <tr><td>Красная рыба, скумбрия, сельдь</td><td class="num">100–120 г</td></tr>
+      </table>
+      <p><b>Как контролировать:</b> масло только мерной ложкой, никогда не лить из бутылки на глаз. Разница между «чайная ложка» и «плеснула» — 200 ккал за один приём.</p>
+    </div>
+
+    <div class="card">
+      <h3>Гарниры и хлеб</h3>
+      <table>
+        <tr><th>Продукт</th><th>Порция</th></tr>
+        <tr><td>Гречка, рис, киноа, булгур, перловка</td><td class="num">130–150 г готового</td></tr>
+        <tr><td>Овсянка</td><td class="num">40–50 г сухой</td></tr>
+        <tr><td>Картофель варёный или печёный</td><td class="num">150–200 г</td></tr>
+        <tr><td>Макароны из твёрдых сортов</td><td class="num">60–70 г сухих</td></tr>
+        <tr><td>Хлеб ржаной или цельнозерновой</td><td class="num">1–2 куска</td></tr>
+      </table>
+      <p><b>Как контролировать:</b> накладывать порцию сразу на тарелку, а не есть из кастрюли. Гарнир — три раза в день, не четыре.</p>
+    </div>
+
+    <div class="card">
+      <h3>Молочное и фрукты</h3>
+      <table>
+        <tr><th>Продукт</th><th>Порция</th></tr>
+        <tr><td>Творог 5–9%</td><td class="num">150–200 г</td></tr>
+        <tr><td>Молоко</td><td class="num">200 мл</td></tr>
+        <tr><td>Ягоды, яблоко, груша, цитрусы</td><td class="num">свободнее</td></tr>
+        <tr><td>Банан, манго, виноград, хурма</td><td class="num">1 порция с кулак</td></tr>
+      </table>
+      <p><b>Как контролировать:</b> фруктов 2–3 порции в день, лучше до 18:00. Ягоды и яблоко можно почти не считать, сладкие фрукты — считать.</p>
+    </div>
+
+    <div class="card">
+      <h3>Соль и алкоголь</h3>
+      <p><b>Соль и соевый соус.</b> Калорий нет, но избыток задерживает воду — весы показывают плюс, лицо и ноги отекают. Это не жир, но нервирует. Держать в разумных рамках, особенно накануне взвешивания.</p>
+      <p><b>Алкоголь.</b> Считать как еду, а не как напиток. Бокал вина — 130 ккал, пиво 0,5 — 210, коктейль — 250–400.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Редко и осознанно</b><span>не запрет, а частота</span></div>
+    <div class="card">
+      <p class="lede">Это не список «нельзя». Это список того, что стоит дорого по калориям и мало даёт по сытости и белку. Раз в неделю-две — нормально. Каждый день — дефицита не будет.</p>
+      <table>
+        <tr><th>Что</th><th>Ккал</th></tr>
+        <tr><td>Майонез, 1 ст. л.</td><td class="num">100</td></tr>
+        <tr><td>Колбаса варёная, 100 г</td><td class="num">280</td></tr>
+        <tr><td>Колбаса копчёная, сосиски, 100 г</td><td class="num">340–450</td></tr>
+        <tr><td>Пельмени варёные, 200 г</td><td class="num">500</td></tr>
+        <tr><td>Картошка жареная, 200 г</td><td class="num">390</td></tr>
+        <tr><td>Пирожок, чебурек, беляш, 1 шт.</td><td class="num">300–450</td></tr>
+        <tr><td>Круассан, булка, 1 шт.</td><td class="num">280–400</td></tr>
+        <tr><td>Печенье, 3 шт.</td><td class="num">150–220</td></tr>
+        <tr><td>Шоколад, половина плитки</td><td class="num">270</td></tr>
+        <tr><td>Сгущёнка, варенье, 2 ст. л.</td><td class="num">120–160</td></tr>
+        <tr><td>Чипсы, маленькая пачка</td><td class="num">300</td></tr>
+        <tr><td>Сливочный соус к пасте, порция</td><td class="num">250–350</td></tr>
+        <tr><td>Сок, лимонад, 300 мл</td><td class="num">130–150</td></tr>
+      </table>
+      <p>Полезно сравнить: весь дневной дефицит — примерно 350 ккал. Один чебурек или полплитки шоколада съедают его целиком.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Как готовить</b><span>та же еда, разные калории</span></div>
+    <div class="card">
+      <p class="lede">Одно и то же куриное филе может быть 165 ккал или 400 ккал. Разница только в способе приготовления. Это самая большая и самая незаметная дыра.</p>
+      <table>
+        <tr><th>Способ</th><th>Добавляет</th></tr>
+        <tr><td>Варка, на пару</td><td class="num ok">0</td></tr>
+        <tr><td>Духовка на пергаменте</td><td class="num ok">0</td></tr>
+        <tr><td>Гриль, сухая сковорода с покрытием</td><td class="num ok">0</td></tr>
+        <tr><td>Тушение в воде или бульоне</td><td class="num ok">0</td></tr>
+        <tr><td>Жарка на 1 ч. л. масла</td><td class="num">+45</td></tr>
+        <tr><td>Жарка «на глаз», 3 ст. л. масла</td><td class="num">+270</td></tr>
+        <tr><td>Панировка в муке или сухарях</td><td class="num">+120</td></tr>
+        <tr><td>Фритюр</td><td class="num">+250–400</td></tr>
+      </table>
+      <p><b>Практика:</b> сковорода с хорошим покрытием и пергамент для духовки закрывают 90% готовки без единой капли масла. Масло добавлять в готовое блюдо ложкой, а не на сковороду.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Домашняя кухня</b><span>как есть привычное</span></div>
+    <div class="card">
+      <p class="lede">Ничего из этого не нужно убирать. Почти любое домашнее блюдо становится рабочим после одной-двух правок.</p>
+      <table>
+        <tr><th>Блюдо</th><th>Что поменять</th></tr>
+        <tr><td><b>Борщ, щи, овощной суп</b></td><td>Без зажарки, на курице или индейке. Сметана 1 ст. л. вместо трёх. Суп — одно из лучших блюд при похудении: много объёма, мало калорий</td></tr>
+        <tr><td><b>Солянка, рассольник</b></td><td>Вместо колбасы и копчёностей — отварная говядина или курица</td></tr>
+        <tr><td><b>Котлеты</b></td><td>Фарш из индейки или курицы, в духовке. Вместо батона в фарш — овсянка или кабачок. Жареная котлета дороже запечённой на 150 ккал</td></tr>
+        <tr><td><b>Пюре</b></td><td>На молоке, без сливочного масла или с 5 г. Картофель сам по себе не проблема — проблема в масле</td></tr>
+        <tr><td><b>Гречка с курицей</b></td><td>Менять нечего. Это база</td></tr>
+        <tr><td><b>Оливье</b></td><td>Колбасу на курицу, майонез на греческий йогурт с горчицей. Было 300 ккал на 100 г, стало 110</td></tr>
+        <tr><td><b>Селёдка под шубой</b></td><td>То же: йогурт вместо майонеза, слои тоньше</td></tr>
+        <tr><td><b>Цезарь</b></td><td>Курица гриль, соус отдельно, гренки убрать или половину</td></tr>
+        <tr><td><b>Сырники</b></td><td>Творог 5%, 1 ст. л. муки, в духовке или на сухой сковороде. Отличный завтрак, ничего убирать не надо</td></tr>
+        <tr><td><b>Творожная запеканка</b></td><td>Хороший вариант. Без сахара, подсластить бананом или яблоком</td></tr>
+        <tr><td><b>Каши</b></td><td>На воде или воде пополам с молоком. Вместо сахара — ягоды или половина банана</td></tr>
+        <tr><td><b>Блины</b></td><td>Раз в неделю, 2 штуки, начинка творожная. Сгущёнка и варенье — отдельная история, не каждый раз</td></tr>
+        <tr><td><b>Паста</b></td><td>Твёрдые сорта, 60–70 г сухих. Соус томатный с фаршем индейки. Сливочные соусы — редко</td></tr>
+        <tr><td><b>Плов</b></td><td>На куриной грудке. Риса 130 г готового на порцию, масла 1 ст. л. на всю кастрюлю</td></tr>
+        <tr><td><b>Голубцы, перец фаршированный</b></td><td>Хорошо как есть. Фарш из индейки, тушить, а не жарить</td></tr>
+        <tr><td><b>Пицца</b></td><td>Раз в две недели, 2 куска. Не половина</td></tr>
+        <tr><td><b>Бутерброд</b></td><td>Ржаной хлеб, творожный сыр 15 г, рыба или индейка, огурец. Это нормальный перекус, а не нарушение</td></tr>
+        <tr><td><b>Салат овощной</b></td><td>Заправка — 1 ч. л. масла с лимоном или йогурт с горчицей. Заправка «на глаз» дороже самого салата</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Замены один в один</b><span>вкус тот же, калории другие</span></div>
+    <div class="card">
+      <table>
+        <tr><th>Вместо</th><th>Экономия</th></tr>
+        <tr><td>Майонез 2 ст. л. → греческий йогурт с горчицей</td><td class="num">−170</td></tr>
+        <tr><td>Колбаса 100 г → отварная индейка 100 г</td><td class="num">−150</td></tr>
+        <tr><td>Сметана 25%, 3 ст. л. → сметана 10%, 1 ст. л.</td><td class="num">−125</td></tr>
+        <tr><td>Картошка жареная → запечённая, тот же вес</td><td class="num">−200</td></tr>
+        <tr><td>Курица жареная на глаз → та же в духовке</td><td class="num">−200</td></tr>
+        <tr><td>Пельмени 200 г → грудка 150 г с гречкой</td><td class="num">−110</td></tr>
+        <tr><td>Гранола 50 г в йогурт → ягоды 100 г</td><td class="num">−185</td></tr>
+        <tr><td>Кофе с сиропом → кофе с молоком без сахара</td><td class="num">−120</td></tr>
+        <tr><td>Сок 300 мл → вода с лимоном</td><td class="num">−135</td></tr>
+        <tr><td>Масло на глаз → мерная ложка</td><td class="num">−150…−250</td></tr>
+      </table>
+      <p>Замена пельменей на курицу с гречкой даёт ещё и плюс 29 г белка. Это как раз целый приём пищи по белку — из ничего.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>День дома</b><span>~1645 ккал · белок 148 г</span></div>
+
+    <div class="meal">
+      <b>Завтрак<span class="kcal">390 ккал · Б 41</span></b>
+      <ul>
+        <li>Сырники в духовке: творог 5% — 200 г, яйцо, 1 ст. л. муки</li>
+        <li>Сметана 10% — 1 ст. л.</li>
+        <li>Кофе или чай без сахара</li>
+      </ul>
+    </div>
+
+    <div class="meal">
+      <b>Обед<span class="kcal">540 ккал · Б 52</span></b>
+      <ul>
+        <li>Борщ без зажарки — 300 мл</li>
+        <li>Куриная грудка запечённая — 120 г</li>
+        <li>Гречка — 130 г готовой</li>
+        <li>Ржаной хлеб — 1 кусок, огурец</li>
+      </ul>
+    </div>
+
+    <div class="meal">
+      <b>Перекус<span class="kcal">195 ккал · Б 17</span></b>
+      <ul>
+        <li>Натуральный йогурт — 150 г</li>
+        <li>Ягоды — 100 г, орехи — 10 г</li>
+        <li>Или творог 150 г с корицей</li>
+      </ul>
+    </div>
+
+    <div class="meal">
+      <b>Ужин<span class="kcal">440 ккал · Б 38</span></b>
+      <ul>
+        <li>Белая рыба запечённая — 180 г</li>
+        <li>Картофель печёный — 180 г</li>
+        <li>Овощи тушёные — 250 г, 1 ч. л. масла</li>
+      </ul>
+    </div>
+
+    <div class="meal">
+      <b>Если осталось место<span class="kcal">80 ккал</span></b>
+      <ul>
+        <li>Яблоко или груша</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Если едим в кафе</b><span>здесь же и Бали</span></div>
+    <div class="card">
+      <ul class="tick">
+        <li><b>Главный приём.</b> Мясо или рыба на гриле плюс овощи. В любой кухне такое блюдо есть.</li>
+        <li><b>Соус отдельно.</b> Это одна фраза, которая экономит 200–300 ккал. По-английски: <i>sauce on the side, please</i>.</li>
+        <li><b>Гарнир.</b> Рис, картофель печёный или овощи вместо картошки фри.</li>
+        <li><b>В местной кухне</b> смотреть на слова <b>bakar</b> и <b>panggang</b> — это гриль. <b>Goreng</b> — жареное во фритюре.</li>
+        <li><b>Самбал можно</b> — это чили, калорий почти нет. <b>Кечап манис нельзя</b> — это сахарный сироп.</li>
+        <li><b>Завтрак в кафе:</b> омлет из 2–3 яиц, четверть авокадо, один тост. Не смузи-боул.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Ловушки Бали</b><span>выглядят полезно, стоят дорого</span></div>
+    <div class="card">
+      <table>
+        <tr><th>Что</th><th>Ккал</th></tr>
+        <tr><td>Смузи-боул с гранолой и мёдом</td><td class="num">450–700</td></tr>
+        <tr><td>Nasi goreng, mie goreng</td><td class="num">650–900</td></tr>
+        <tr><td>Es kopi susu — кофе с пальмовым сахаром</td><td class="num">180–250</td></tr>
+        <tr><td>Свежевыжатый сок, 300 мл</td><td class="num">150–200</td></tr>
+        <tr><td>Pisang goreng, 2 шт.</td><td class="num">~350</td></tr>
+        <tr><td>Арахисовый соус, 3 ст. л.</td><td class="num">~200</td></tr>
+        <tr><td>Bintang 0,62 л</td><td class="num">~250</td></tr>
+        <tr><td class="ok">Целый кокос — можно спокойно</td><td class="num ok">90–120</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Что покупать на Бали</b><span>список для магазина</span></div>
+    <div class="card">
+      <h3>Белок</h3>
+      <ul class="tick">
+        <li><b>Яйца</b> — самый дешёвый белок на острове, 6 г в штуке.</li>
+        <li><b>Dada ayam</b> — куриная грудка. Pepito, Papaya, Grand Lucky, Frestive.</li>
+        <li><b>Рыба:</b> kakap (снэппер), tuna, barramundi, mahi-mahi. Дешевле всего на рынке Kedonganan, там же почистят.</li>
+        <li><b>Креветки и кальмар</b> — быстро готовятся, много белка, мало жира.</li>
+        <li><b>Темпе и тофу</b> — местные и очень дешёвые. В темпе 19 г белка на 100 г.</li>
+        <li><b>Сывороточный протеин</b> — Tokopedia или Shopee. Порция даёт 24 г белка в дни, когда готовить некогда. С ребёнком такие дни будут.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Привычные продукты</h3>
+      <ul class="tick">
+        <li><b>Творог.</b> Труднее всего. Ищется в крупных супермаркетах, у местных сыроварен и в русских магазинах с доставкой. Запасной вариант — делать самой из молока и лимонного сока, получается за полчаса.</li>
+        <li><b>Сметана.</b> Продаётся как sour cream, есть почти везде. Брать самую нежирную.</li>
+        <li><b>Гречка.</b> Есть в Pepito, Grand Lucky, на Tokopedia и в русских магазинах.</li>
+        <li><b>Ржаной и цельнозерновой хлеб.</b> В пекарнях, а не в обычных супермаркетах — там в основном сладкий белый.</li>
+        <li><b>Греческий йогурт и скир.</b> Есть, но дорого. Дешевле: обычный plain yogurt плюс мерная ложка протеина.</li>
+        <li><b>Овсянка, киноа, булгур</b> — есть в крупных супермаркетах.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Как это выдержать</b><span>про запреты</span></div>
+    <div class="card">
+      <ul class="tick">
+        <li><b>Правило 80 на 20.</b> Восемь приёмов пищи из десяти — по плану, два — как пойдёт. Это единственный формат, который живёт дольше месяца.</li>
+        <li><b>Никаких «табу».</b> Жёсткие запреты в среднем держатся три недели, потом срыв, потом чувство вины, потом всё сначала. Частота работает, запрет — нет.</li>
+        <li><b>Планировать вкусное заранее.</b> Если в субботу пицца — это не срыв, а часть недели. Срыв — это когда съел незапланированно и решил, что неделя пропала.</li>
+        <li><b>Считать неделю, а не день.</b> Один день с перебором ничего не меняет. Меняет неделя.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Вода</b><span>жара и тренировки</span></div>
+    <div class="card">
+      <ul class="tick">
+        <li><b>2,5–3 л в сутки.</b> На Бали потери с потом выше, чем кажется, даже без спорта.</li>
+        <li>Чай, кофе, вода из супов и овощей идут в общий зачёт. Кофе не обезвоживает — это миф.</li>
+        <li>Практика: бутылка 1 л на кухне и вторая с собой. Две за день — база, остальное доберётся.</li>
+        <li>Если сильно потеешь — щепотка соли и лайм в воду. <b>Pocari Sweat считать как еду:</b> в бутылке ~130 ккал сахара.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. КОНТРОЛЬ ============ -->
+<section class="panel" id="p4">
+
+  <div class="sec">
+    <div class="sec-h"><b>Как мерить</b><span>чтобы не сойти с ума</span></div>
+    <div class="card">
+      <ul class="tick">
+        <li><b>Вес — каждое утро</b>, после туалета, до еды и воды. Записывать. Смотреть <b>только среднее за 7 дней</b> и сравнивать со средним прошлой недели.</li>
+        <li><b>Талия — раз в две недели</b>, утром: на уровне пупка и в самом узком месте. Часто это меняется, когда вес стоит.</li>
+        <li><b>Фото — раз в месяц.</b> Один и тот же угол, свет, одежда, время суток. Это самый честный измеритель из всех.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <b>Вес будет скакать на ±1,5 кг</b>
+      <p>Соль, углеводы накануне, фаза цикла, жара, стул, сон. Это вода, а не жир. Жир физически не может прибавиться на килограмм за сутки. Отсюда и правило смотреть среднее за неделю, а не отдельный день.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Плато</b><span>что делать</span></div>
+    <div class="card">
+      <p class="lede">Плато — это когда средний вес за неделю не двигается <b>три недели подряд</b>. Не пять дней.</p>
+      <ul class="tick">
+        <li><b>Шаг 1.</b> Три дня всё взвешивать. В 8 случаях из 10 калораж просто уполз вверх — масло, соусы, кусочки за ребёнком.</li>
+        <li><b>Шаг 2.</b> Если нет — убрать 100–150 ккал в день. <b>Одно изменение за раз</b>, не резать сразу всё.</li>
+        <li><b>Шаг 3.</b> После 10 недель дефицита сделать неделю без него: есть примерно 2000 ккал, то есть столько, сколько тело тратит. Это не «откат» и не потеря результата — после такой недели вес обычно идёт дальше охотнее.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Сон</b><span>самый недооценённый рычаг</span></div>
+    <div class="card">
+      <p class="lede">При недосыпе меньше 6 часов в дефиците доля потерянного веса, приходящаяся на мышцу, растёт заметно, а тяга к сладкому — тоже. С ребёнком 1,8 это не теория.</p>
+      <ul class="tick">
+        <li>Лечь на 40 минут раньше даст больше, чем четвёртая тренировка в неделю.</li>
+        <li>В плохо спавшую ночь — не отменяй тренировку, сделай версию на 15 минут.</li>
+        <li>Белковый завтрак в первый час после подъёма заметно снижает тягу к сладкому во второй половине дня.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Чек-лист недели</b><span>всё, что нужно отследить</span></div>
+    <div class="card">
+      <ul class="tick">
+        <li>3 тренировки сделаны</li>
+        <li>Белок 4 раза в день, 7 дней</li>
+        <li>Вода 2,5 л, 7 дней</li>
+        <li>Вес записан 7 раз, посчитано среднее</li>
+        <li>Раз в две недели — талия. Раз в месяц — фото</li>
+        <li>Раз в 2 недели — прибавка по лестнице прогрессии</li>
+      </ul>
+      <p>Шесть из шести не обязательно. Четыре из шести каждую неделю в течение четырёх месяцев дадут результат, который не даст ни одна идеальная неделя.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Что будет после 16 недель</b><span>это проект, а не образ жизни</span></div>
+
+    <div class="card">
+      <p class="lede">У плана есть дата окончания. Дальше начинается режим, который стоит примерно час в неделю.</p>
+    </div>
+
+    <div class="card">
+      <h3>Что заканчивается насовсем</h3>
+      <ul class="tick">
+        <li><b>Взвешивание еды.</b> Оно нужно первые 3–4 недели, чтобы поставить глаз. Дальше не нужно никогда.</li>
+        <li><b>Дефицит.</b> После цели ты переходишь на 2000 ккал — это столько, сколько тело тратит.</li>
+        <li><b>Ежедневные весы.</b> Станут раз в неделю.</li>
+        <li><b>Три тренировки в неделю.</b> Станут двумя, а в тяжёлые недели одной.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Что остаётся</h3>
+      <ul class="tick">
+        <li><b>Две тренировки по 25–30 минут.</b> Чтобы удержать набранную мышцу, нужно примерно втрое меньше работы, чем чтобы её набрать. Это не мнение, это то, что показывают исследования по минимальной нагрузке.</li>
+        <li><b>Белок четыре раза в день.</b> К этому моменту это уже не подсчёт, а привычка покупать и готовить определённые продукты.</li>
+        <li><b>Весы раз в неделю.</b> Полминуты.</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>Одно правило вместо постоянного контроля</b>
+      <p>Если средний вес за неделю ушёл выше цели на 2 кг — вернуться в лёгкий дефицит на 3–4 недели и снова выйти. Обычно это случается пару раз в год, чаще всего после праздников или поездок. Всё остальное время думать про еду не нужно.</p>
+    </div>
+
+    <div class="card">
+      <h3>Честно про «навсегда»</h3>
+      <p>Совсем ничего не делать и сохранять результат не получится ни у кого — ни с планом, ни без него. Но разница между «подсесть на всю жизнь» и тем, что будет у тебя, огромная.</p>
+      <p>Через 16 недель техника будет в руках, порции — на глаз, а привычка брать белок — автоматической. Заново учиться не придётся. Поддержание стоит около часа в неделю, и это единственное, что действительно остаётся.</p>
+      <p>План специально построен так, чтобы не превращаться в одержимость: нет запрещённых продуктов, есть правило 80 на 20, вес смотрится средним за неделю, а не паникой каждое утро. Если начнёт появляться тревога вокруг еды или пропущенной тренировки — это сигнал сбавить, а не поднажать.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>Когда к врачу</b><span>не откладывать</span></div>
+    <div class="alert">
+      <b>Записаться, не дожидаясь</b>
+      <ul>
+        <li>Боль в паху при тестах на суставы, щелчки с болью, ощущение блока — ортопед, рентген таза</li>
+        <li>Расхождение больше 3 пальцев, выпячивание в области пупка, боль по средней линии — специалист по восстановлению после родов</li>
+        <li>Подтекание мочи, ощущение давления вниз — физиотерапевт по тазовому дну</li>
+        <li>Боль в пояснице, которая держится дольше двух дней после тренировки</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p>Ничего из этого не отменяет план — почти всё в нём безопасно и в этих случаях тоже. Но если суставы болят, честный ответ такой: без снимка мы гадаем, а со снимком подбираем глубину и высоту точно.</p>
+    </div>
+  </div>
+</section>
+
+  <footer>
+    Расчёты по формуле Миффлина — Сан-Жеора, это стандартный способ посчитать суточные затраты. Целевой белок — 1,8–1,9 г на каждый килограмм текущего веса. Скорость 0,4–0,5 кг в неделю выбрана как максимальная, при которой мышечная масса в дефиците сохраняется. План не заменяет очную консультацию — особенно по тазобедренным суставам.
+  </footer>
+</div>
+
+<button id="fab">Начать тренировку</button>
+
+<div id="ov" hidden>
+  <div id="setup">
+    <div class="ov-head">
+      <b>Тренировка</b>
+      <button class="ov-x" id="xSetup">Закрыть</button>
+    </div>
+    <div class="ov-body">
+      <p class="ov-lbl">Какой день</p>
+      <div class="days" id="days"></div>
+      <div id="plan"></div>
+      <p class="ov-lbl">Версия</p>
+      <div class="seg" id="ver">
+        <button data-v="full" aria-pressed="true">Полная<br>35–45 минут</button>
+        <button data-v="short" aria-pressed="false">Короткая<br>15 минут</button>
+      </div>
+      <p class="hint" id="hint"></p>
+    </div>
+    <div class="ov-foot"><button class="big" id="go">Поехали</button></div>
+  </div>
+
+  <div id="run" hidden>
+    <div class="run-head">
+      <span class="cnt" id="cnt"></span>
+      <button class="ov-x" id="fin">Завершить</button>
+    </div>
+    <div class="bar"><i id="barI"></i></div>
+    <div class="run-body" id="slot"></div>
+    <div class="run-foot">
+      <button class="prev" id="prev" aria-label="Предыдущее упражнение">&larr;</button>
+      <button class="big" id="next">Далее</button>
+    </div>
+  </div>
+
+  <div id="done" hidden>
+    <div class="star">&#10038;</div>
+    <h2>Света, ты большая молодец!</h2>
+    <p class="sub" id="doneSub"></p>
+    <p class="msg" id="doneMsg"></p>
+    <button class="big" id="ok">Готово</button>
+  </div>
+</div>
+
+<nav>
+  <div class="row" role="tablist">
+    <button role="tab" aria-selected="true" data-t="p1"><span class="ico">01</span>Старт</button>
+    <button role="tab" aria-selected="false" data-t="p2"><span class="ico">02</span>Тренировки</button>
+    <button role="tab" aria-selected="false" data-t="p3"><span class="ico">03</span>Еда</button>
+    <button role="tab" aria-selected="false" data-t="p4"><span class="ico">04</span>Контроль</button>
+  </div>
+</nav>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* ---------- вкладки ---------- */
+  var tabs = [].slice.call(document.querySelectorAll('nav button'));
+  function setTab(id){
+    tabs.forEach(function(x){ x.setAttribute('aria-selected', x.dataset.t===id ? 'true':'false'); });
+    [].forEach.call(document.querySelectorAll('.panel'), function(p){ p.classList.toggle('on', p.id===id); });
+    document.body.setAttribute('data-tab', id);
+    window.scrollTo(0,0);
+  }
+  tabs.forEach(function(b){ b.addEventListener('click', function(){ setTab(b.dataset.t); }); });
+  document.body.setAttribute('data-tab','p1');
+
+  /* ---------- упражнения берём из самой страницы ---------- */
+  var EX = {};
+  [].forEach.call(document.querySelectorAll('#p2 .ex'), function(el){
+    var n = el.querySelector('.ex-no');
+    if(n) EX[n.textContent.trim()] = el;
+  });
+
+  var WARM  = ['\u04201','\u04202','\u04203','\u04204','\u04205'];
+  var DAYA  = ['A1','A2','A3','A4','A5'];
+  var DAYB  = ['B1','B2','B3','B4','B5','B6'];
+  var SHORT = [['\u04201','5 циклов'],['\u04205','15 повт'],['A1','3 \u00D7 15'],
+               ['B2','2 \u00D7 12 / ногу'],['A4','2 \u00D7 10 / стор'],['B6','2 \u00D7 30 сек']];
+
+  var DN   = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  var SLOT = {1:0, 3:1, 5:2};
+
+  var today = new Date();
+  var sel = today.getDay();
+  var ver = 'full';
+  var override = null;
+
+  function letterFor(d){
+    var x = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    x.setDate(x.getDate() - ((x.getDay()+6)%7));
+    var wk = Math.round((x - new Date(2026,0,5)) / 604800000);
+    var n = wk*3 + SLOT[d];
+    return (((n%2)+2)%2)===0 ? 'A' : 'B';
+  }
+  function plan(){
+    if(override) return override;
+    return (sel in SLOT) ? letterFor(sel) : null;
+  }
+  function pl(n,a,b,c){
+    var x=n%10, y=n%100;
+    if(x===1 && y!==11) return a;
+    if(x>=2 && x<=4 && (y<10 || y>=20)) return b;
+    return c;
+  }
+
+  function drawDays(){
+    var h='';
+    [1,2,3,4,5,6,0].forEach(function(d){
+      h += '<button class="day'+(d===sel?' on':'')+((d in SLOT)?'':' rest')+'" data-d="'+d+'">'+DN[d]+'</button>';
+    });
+    $('days').innerHTML = h;
+  }
+
+  function drawPlan(){
+    var p = $('plan'), L = plan();
+    if(ver === 'short'){
+      p.innerHTML = '<div class="pcard"><b>Короткая тренировка</b>'
+        + '<span>Шесть карточек, около 15 минут. Подходит для любого дня.</span></div>';
+    } else if(!L){
+      p.innerHTML = '<div class="pcard rest"><b>'+DN[sel]+' \u2014 день отдыха</b>'
+        + '<span>Мышца растёт в дни отдыха, а не на тренировке. Но если очень хочется \u2014 выбери, какой день сделать.</span>'
+        + '<div class="swap"><button data-o="A">Сделать день А</button>'
+        + '<button data-o="B">Сделать день B</button></div></div>';
+    } else {
+      var n = (L==='A') ? DAYA.length : DAYB.length;
+      var sub = (L==='A') ? 'Ягодицы, задняя поверхность бедра, спина'
+                          : 'Ноги по одной, верх тела, кор';
+      var other = (L==='A') ? 'B' : 'A';
+      p.innerHTML = '<div class="pcard"><b>День '+(L==='A'?'А':'B')+'</b>'
+        + '<span>'+sub+'. Разминка и '+n+' '+pl(n,'упражнение','упражнения','упражнений')
+        + ' \u2014 всего '+(WARM.length+n)+' '+pl(WARM.length+n,'карточка','карточки','карточек')+'.</span>'
+        + '<div class="swap"><button data-o="'+other+'">Поменять на день '
+        + (other==='A'?'А':'B')+'</button></div></div>';
+    }
+    $('hint').textContent = (ver==='short')
+      ? 'Когда времени нет совсем. Тренировка, сделанная на 60%, в три раза лучше пропущенной.'
+      : 'Отдых между подходами указан прямо в карточках упражнений.';
+    $('go').disabled = build().length === 0;
+  }
+
+  function build(){
+    var out = [];
+    if(ver === 'short'){
+      SHORT.forEach(function(p){ if(EX[p[0]]) out.push([EX[p[0]], p[1]]); });
+      return out;
+    }
+    var L = plan();
+    if(!L) return out;
+    WARM.forEach(function(k){ if(EX[k]) out.push([EX[k], null]); });
+    (L==='A'?DAYA:DAYB).forEach(function(k){ if(EX[k]) out.push([EX[k], null]); });
+    return out;
+  }
+
+  /* ---------- прохождение ---------- */
+  var list = [], idx = 0, t0 = 0, title = '';
+
+  function show(){
+    var it = list[idx];
+    var c  = it[0].cloneNode(true);
+    if(it[1]){ var v = c.querySelector('.ex-vol'); if(v) v.textContent = it[1]; }
+    var slot = $('slot');
+    slot.innerHTML = '';
+    slot.appendChild(c);
+    slot.scrollTop = 0;
+    $('cnt').textContent = (idx+1) + ' / ' + list.length;
+    $('barI').style.width = ((idx+1)/list.length*100) + '%';
+    $('prev').disabled = (idx === 0);
+    $('next').textContent = (idx === list.length-1) ? 'Готово' : 'Далее';
+  }
+
+  function openOv(){
+    override = null;
+    $('ov').hidden = false;
+    $('setup').hidden = false;
+    $('run').hidden = true;
+    $('done').hidden = true;
+    document.body.style.overflow = 'hidden';
+    drawDays(); drawPlan();
+  }
+  function closeOv(){
+    $('ov').hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  $('fab').addEventListener('click', openOv);
+  $('xSetup').addEventListener('click', closeOv);
+  $('fin').addEventListener('click', closeOv);
+  $('ok').addEventListener('click', closeOv);
+
+  $('days').addEventListener('click', function(e){
+    var b = e.target.closest('.day'); if(!b) return;
+    sel = +b.dataset.d; override = null;
+    drawDays(); drawPlan();
+  });
+
+  $('plan').addEventListener('click', function(e){
+    var b = e.target.closest('[data-o]'); if(!b) return;
+    override = b.dataset.o;
+    drawPlan();
+  });
+
+  $('ver').addEventListener('click', function(e){
+    var b = e.target.closest('[data-v]'); if(!b) return;
+    ver = b.dataset.v;
+    [].forEach.call(this.children, function(x){
+      x.setAttribute('aria-pressed', x===b ? 'true':'false');
+    });
+    drawPlan();
+  });
+
+  $('go').addEventListener('click', function(){
+    list = build();
+    if(!list.length) return;
+    idx = 0; t0 = Date.now();
+    title = (ver==='short') ? 'Короткая тренировка' : 'День ' + (plan()==='A' ? 'А' : 'B');
+    $('setup').hidden = true;
+    $('run').hidden = false;
+    show();
+  });
+
+  $('prev').addEventListener('click', function(){ if(idx>0){ idx--; show(); } });
+
+  $('next').addEventListener('click', function(){
+    if(idx < list.length-1){ idx++; show(); return; }
+    var m = Math.max(1, Math.round((Date.now()-t0)/60000));
+    $('doneSub').textContent = title + ' \u00B7 ' + list.length + ' '
+      + pl(list.length,'упражнение','упражнения','упражнений') + ' \u00B7 ' + m + ' мин';
+    $('doneMsg').textContent = (ver==='short')
+      ? 'Короткая тренировка тоже считается. Главное — что она была.'
+      : 'Отметь галочку в чек-листе недели. Следующая тренировка — через день.';
+    $('run').hidden = true;
+    $('done').hidden = false;
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !$('ov').hidden) closeOv();
+  });
+})();
+</script>
+</body>
+</html>
