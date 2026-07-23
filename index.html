@@ -149,6 +149,8 @@ body.no-anim *{animation:none!important}
 .lock-toggle.on{background:var(--acc)}
 .lock-toggle.on i{transform:translateX(18px)}
 .lock-info b{display:block;font-size:12.5px;font-weight:750}
+.auth-modal-ava{width:64px;height:64px;font-size:24px;margin:0 auto 10px;box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--mc,var(--line))}
+.bio-hint{font-size:11px;color:var(--faint);text-align:center;margin-top:2px}
 .lock-set{display:flex;align-items:center;gap:8px;margin-top:9px;padding:10px 12px;border-radius:14px;
   background:var(--acc-soft);color:var(--acc-ink);font-size:12.5px;font-weight:750}
 .lock-set span{flex:1}
@@ -964,7 +966,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
           <div class="lock-info"><b>Пароль на заметку</b></div>
         </div>
         <div id="f-lock-slot"></div>
-        <input class="field hidden" id="f-lock-pass" type="password" inputmode="text" placeholder="Придумайте пароль" maxlength="32" autocomplete="new-password" style="margin-top:9px">
+        <input class="field hidden" id="f-lock-pass" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Придумайте код из цифр" maxlength="12" autocomplete="off" style="margin-top:9px">
       </div>
 
       <div class="fgroup">
@@ -1061,16 +1063,41 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
     <div class="call-actions" id="call-actions"></div>
   </div>
 
+  <!-- ВХОД В ПРОФИЛЬ -->
+  <div class="overlay top-anchor hidden" id="auth-overlay">
+    <div class="modal">
+      <span class="ava auth-modal-ava" id="auth-ava">•</span>
+      <h3 id="auth-name">Профиль</h3>
+      <p id="auth-msg">Введите пароль</p>
+      <input class="field" id="auth-pass" type="password" placeholder="Пароль" maxlength="64" autocomplete="current-password" style="margin-bottom:9px">
+      <button class="btn btn-acc" id="auth-ok" style="margin-bottom:9px">Войти</button>
+      <button class="btn btn-dark hidden" id="auth-bio" style="margin-bottom:9px"></button>
+      <button class="btn btn-soft" data-close="auth-overlay">Отмена</button>
+    </div>
+  </div>
+
+  <!-- СМЕНА ПАРОЛЯ -->
+  <div class="overlay top-anchor hidden" id="pass-overlay">
+    <div class="modal">
+      <h3>Пароль профиля</h3>
+      <p>Минимум 4 символа. Можно буквы, цифры и знаки.</p>
+      <input class="field" id="pass-old" type="password" placeholder="Текущий пароль" maxlength="64" autocomplete="current-password" style="margin-bottom:9px">
+      <input class="field" id="pass-new" type="password" placeholder="Новый пароль" maxlength="64" autocomplete="new-password" style="margin-bottom:9px">
+      <input class="field" id="pass-new2" type="password" placeholder="Повторите новый" maxlength="64" autocomplete="new-password" style="margin-bottom:9px">
+      <div class="row2">
+        <button class="btn btn-soft" data-close="pass-overlay">Отмена</button>
+        <button class="btn btn-acc" id="pass-save">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ПАРОЛЬ ЗАМЕТКИ -->
   <div class="overlay top-anchor hidden" id="lock-overlay">
     <div class="modal">
-      <h3>Заметка под паролем</h3>
+      <h3>Заметка под кодом</h3>
       <p id="lock-msg">Введите пароль, чтобы открыть</p>
-      <input class="field" id="lock-input" type="password" inputmode="numeric" placeholder="Пароль" maxlength="32" style="margin-bottom:9px" autocomplete="off">
-      <div class="row2">
-        <button class="btn btn-soft" data-close="lock-overlay">Отмена</button>
-        <button class="btn btn-acc" id="lock-ok">Открыть</button>
-      </div>
+      <input class="field" id="lock-input" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Код" maxlength="12" style="margin-bottom:9px" autocomplete="off">
+      <button class="btn btn-soft" data-close="lock-overlay">Отмена</button>
     </div>
   </div>
 
@@ -1898,7 +1925,8 @@ function renderNotifCard(){
     'Это устройство получает сигналы о дедлайнах, новых и назначенных делах. Включите то же на остальных устройствах семьи.'
     + (VAPID_PUBLIC ? '<br>Пуши в закрытое приложение: <b>' + (pushSubActive ? 'работают' : (S.familyCode ? 'подключаются…' : 'нужен код семьи')) + '</b>' : ''),
     '<button class="btn btn-soft" data-notif="test">Проверить все уведомления</button>'
-    + '<button class="btn btn-soft" id="open-perms" style="margin-top:8px">Разрешения приложения</button>');
+    + '<button class="btn btn-soft" id="open-perms" style="margin-top:8px">Разрешения приложения</button>'
+    + '<button class="btn btn-soft" id="open-pass" style="margin-top:8px">Пароль профиля</button>');
   else if(p==='denied') el.innerHTML = box('err','Уведомления запрещены',
     'Разрешите уведомления для этого сайта в настройках браузера, затем вернитесь сюда.');
   else el.innerHTML = box('off','Уведомления выключены',
@@ -2045,7 +2073,12 @@ const SYNC = {
     this.pulling = true;
     try{
       const d = await this.rpc('hub_pull', {p_fid:S.familyCode});
-      if(d && d.state) this.applyRemote(d.state, d.rev);
+      if(d && d.state){
+        let st;
+        try{ st = await decJSON(d.state); }
+        catch(e){ setSyncStatus('err'); toast('Не удалось расшифровать данные семьи','⚠️'); this.pulling=false; return; }
+        this.applyRemote(st, d.rev);
+      }
       else { S.syncRev = 0; this.seeded = true; this.push(); }   // в облаке пусто — заливаем своё
       setSyncStatus('on');
       this.flushImages();
@@ -2115,7 +2148,8 @@ const SYNC = {
     this.pushing = true;
     try{
       const snap = this.snapshot();
-      const d = await this.rpc('hub_push', {p_fid:S.familyCode, p_base_rev:S.syncRev||0, p_state:JSON.parse(JSON.stringify(snap))});
+      const payload = await encJSON(JSON.parse(JSON.stringify(snap)));
+      const d = await this.rpc('hub_push', {p_fid:S.familyCode, p_base_rev:S.syncRev||0, p_state:payload});
       if(d && d.ok){
         S.syncRev = d.rev; this.lastSent = JSON.stringify(snap); persistLocal();
         try{ this.chan && this.chan.send({type:'broadcast', event:'sync', payload:{cid:this.cid, rev:d.rev}}); }catch(e){}
@@ -2126,7 +2160,7 @@ const SYNC = {
         if(marked){ persistLocal(); if(activeScreen==='chat') renderChat(); }
       } else if(d){                       // конфликт: сливаем и пробуем снова
         this.pushing = false;
-        this.applyRemote(d.state, d.rev);
+        try{ this.applyRemote(await decJSON(d.state), d.rev); }catch(e){ setSyncStatus('err'); }
         return;
       }
     }catch(e){
@@ -2140,7 +2174,8 @@ const SYNC = {
     try{
       const blob = await DB.get('img', id);
       if(!blob){ S.pendingImg = (S.pendingImg||[]).filter(x=>x!==id); return; }
-      await this.rpc('hub_img_put', {p_fid:S.familyCode, p_id:id, p_data: await blobToB64(blob)});
+      const b64 = await blobToB64(blob);
+      await this.rpc('hub_img_put', {p_fid:S.familyCode, p_id:id, p_data: await encText(b64)});
       S.pendingImg = (S.pendingImg||[]).filter(x=>x!==id);
       persistLocal();
     }catch(e){ queuePendingImg(id); }
@@ -2148,8 +2183,9 @@ const SYNC = {
   async imgGet(id){
     if(!this.enabled() || !this.client) return null;
     try{
-      const b64 = await this.rpc('hub_img_get', {p_fid:S.familyCode, p_id:id});
+      let b64 = await this.rpc('hub_img_get', {p_fid:S.familyCode, p_id:id});
       if(!b64) return null;
+      b64 = await decText(b64);
       const blob = b64toBlob(b64);
       await DB.set('img', id, blob);
       return blob;
@@ -3334,6 +3370,159 @@ async function doCancelForm(){
   F.editingId ? show('detail') : show('main');
 }
 
+/* ---------- ШИФРОВАНИЕ ОБЛАЧНЫХ ДАННЫХ ---------- */
+// Ключ выводится из кода семьи: расшифровать может только тот, у кого он есть.
+// В Supabase данные лежат зашифрованными (AES-GCM 256).
+let _cryptoKey = null, _cryptoKeyFor = null;
+async function familyKey(){
+  const code = S.familyCode || '';
+  if(!code) return null;
+  if(_cryptoKey && _cryptoKeyFor === code) return _cryptoKey;
+  if(!crypto?.subtle) return null;
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveKey']);
+  _cryptoKey = await crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:new TextEncoder().encode('family-hub/v1'), iterations:150000, hash:'SHA-256' },
+    base, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+  _cryptoKeyFor = code;
+  return _cryptoKey;
+}
+const _b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const _unb64 = s => Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+async function encJSON(obj){
+  const key = await familyKey();
+  const raw = JSON.stringify(obj);
+  if(!key) return obj;                                   // нет ключа — отправляем как есть
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, new TextEncoder().encode(raw));
+  return { __enc:1, iv:_b64(iv), d:_b64(ct) };
+}
+async function decJSON(payload){
+  if(!payload || typeof payload !== 'object') return payload;
+  if(!payload.__enc) return payload;                     // старые незашифрованные данные
+  const key = await familyKey();
+  if(!key) throw new Error('no-key');
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:_unb64(payload.iv)}, key, _unb64(payload.d));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function encText(str){
+  const key = await familyKey();
+  if(!key) return str;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, new TextEncoder().encode(str));
+  return 'enc1:' + _b64(iv) + ':' + _b64(ct);
+}
+async function decText(str){
+  if(typeof str !== 'string' || !str.startsWith('enc1:')) return str;
+  const key = await familyKey();
+  if(!key) throw new Error('no-key');
+  const [, iv, d] = str.split(':');
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:_unb64(iv)}, key, _unb64(d));
+  return new TextDecoder().decode(pt);
+}
+
+/* ---------- ВХОД В ПРОФИЛЬ ---------- */
+const DEFAULT_PASS = '0000';
+let authPending = null;                 // id профиля, в который входим
+
+function memberPassHash(m){ return m && m.pass ? m.pass : lockHash(DEFAULT_PASS); }
+function bioKey(mid){ return 'fh-bio-' + (S.familyCode||'') + '-' + mid; }
+function bioAvailable(){
+  return !!(window.PublicKeyCredential && navigator.credentials && location.protocol === 'https:');
+}
+function bioEnabled(mid){ try{ return !!localStorage.getItem(bioKey(mid)); }catch(e){ return false; } }
+function b64u(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function fromB64u(s){
+  s = s.replace(/-/g,'+').replace(/_/g,'/');
+  const bin = atob(s + '==='.slice((s.length + 3) % 4));
+  return Uint8Array.from(bin, c=>c.charCodeAt(0));
+}
+async function bioRegister(mid){
+  if(!bioAvailable()) { toast('Биометрия недоступна на этом устройстве','⚠️'); return false; }
+  try{
+    const m = member(mid);
+    const cred = await navigator.credentials.create({ publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rp: { name: 'Семейный Хаб' },
+      user: { id: new TextEncoder().encode(mid), name: m?.name || 'user', displayName: m?.name || 'user' },
+      pubKeyCredParams: [{type:'public-key', alg:-7}, {type:'public-key', alg:-257}],
+      authenticatorSelection: { authenticatorAttachment:'platform', userVerification:'required', residentKey:'preferred' },
+      timeout: 60000, attestation: 'none',
+    }});
+    if(!cred) return false;
+    localStorage.setItem(bioKey(mid), b64u(cred.rawId));
+    toast('Вход по биометрии включён','👍');
+    return true;
+  }catch(e){ toast('Не удалось включить биометрию','⚠️'); return false; }
+}
+async function bioVerify(mid){
+  if(!bioAvailable() || !bioEnabled(mid)) return false;
+  try{
+    const id = fromB64u(localStorage.getItem(bioKey(mid)));
+    const as = await navigator.credentials.get({ publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials: [{ type:'public-key', id }],
+      userVerification: 'required', timeout: 60000,
+    }});
+    return !!as;
+  }catch(e){ return false; }
+}
+function openAuth(mid){
+  const m = member(mid); if(!m) return;
+  authPending = mid;
+  const ava = $('auth-ava');
+  ava.style.setProperty('--mc', m.color);
+  ava.innerHTML = m.avatarId ? `<img data-img="${m.avatarId}" alt="">` : esc(m.name.trim()[0].toUpperCase());
+  hydrateImages($('auth-overlay'));
+  $('auth-name').textContent = m.name;
+  $('auth-msg').textContent = m.pass ? 'Введите пароль' : 'Пароль по умолчанию: 0000';
+  $('auth-pass').value = '';
+  const bio = $('auth-bio');
+  if(bioAvailable() && bioEnabled(mid)){
+    bio.classList.remove('hidden');
+    bio.innerHTML = ICON.person(16) + ' Войти по биометрии';
+  } else bio.classList.add('hidden');
+  $('auth-overlay').classList.remove('hidden');
+  setTimeout(()=>$('auth-pass').focus(), 160);
+}
+function doLogin(mid){
+  authPending = null;
+  $('auth-overlay').classList.add('hidden');
+  S.currentUser = mid;
+  persist(); applyTheme(); resubscribePush(); show('main');
+  haptic('ok');
+  // предложим включить биометрию, если доступна и ещё не включена
+  if(bioAvailable() && !bioEnabled(mid)){
+    setTimeout(()=>{
+      confirmDlg('Входить по биометрии?', 'Отпечаток или Face ID вместо ввода пароля на этом устройстве.', 'Включить', false, ()=>bioRegister(mid));
+    }, 900);
+  }
+}
+function tryAuth(){
+  const mid = authPending; if(!mid) return;
+  const m = member(mid); if(!m) return;
+  const v = $('auth-pass').value;
+  if(!v) return;
+  if(lockHash(v) === memberPassHash(m)) doLogin(mid);
+  else { haptic('err'); $('auth-pass').value = ''; toast('Неверный пароль','⚠️'); }
+}
+function openPassChange(){
+  $('pass-old').value = ''; $('pass-new').value = ''; $('pass-new2').value = '';
+  $('pass-overlay').classList.remove('hidden');
+  setTimeout(()=>$('pass-old').focus(), 160);
+}
+function savePassChange(){
+  const m = member(S.currentUser); if(!m) return;
+  const oldv = $('pass-old').value, nv = $('pass-new').value, nv2 = $('pass-new2').value;
+  if(lockHash(oldv) !== memberPassHash(m)){ haptic('err'); toast('Текущий пароль неверный','⚠️'); return; }
+  if(nv.length < 4){ toast('Минимум 4 символа','⚠️'); return; }
+  if(nv !== nv2){ toast('Новые пароли не совпадают','⚠️'); return; }
+  m.pass = lockHash(nv);
+  S.metaUpdatedAt = Date.now();
+  persist(); renderFamily();
+  $('pass-overlay').classList.add('hidden');
+  haptic('ok'); toast('Пароль изменён','🔒');
+}
+
 /* ---------- ПАРОЛЬ НА ЗАМЕТКУ ---------- */
 // простой хеш (не криптостойкий, но защищает от случайного просмотра)
 function lockHash(pass){
@@ -3350,7 +3539,7 @@ function relockAll(){ unlocked.clear(); }
 function askUnlock(taskId, then){
   const t = task(taskId); if(!t) return;
   lockPending = { taskId, then };
-  $('lock-msg').textContent = 'Введите пароль, чтобы открыть «' + (t.title||'заметку') + '»';
+  $('lock-msg').textContent = 'Введите код, чтобы открыть «' + (t.title||'заметку') + '»';
   $('lock-input').value = '';
   $('lock-overlay').classList.remove('hidden');
   setTimeout(()=>$('lock-input').focus(), 160);
@@ -3384,7 +3573,7 @@ function renderLockRow(){
   } else {
     slot.innerHTML = '';
     inp.classList.toggle('hidden', !F.lockOn);
-    inp.placeholder = 'Придумайте пароль';
+    inp.placeholder = 'Придумайте код из цифр';
   }
 }
 
@@ -4556,7 +4745,7 @@ function addMember(){
     return;
   }
   if(!name){ toast('Введите имя','⚠️'); $('fam-name').focus(); return; }
-  S.members.push({ id:uid('m_'), name, avatarId:famNewAvatarId, color:MEMBER_COLORS[S.members.length % MEMBER_COLORS.length] });
+  S.members.push({ id:uid('m_'), name, avatarId:famNewAvatarId, color:MEMBER_COLORS[S.members.length % MEMBER_COLORS.length], pass:lockHash(DEFAULT_PASS) });
   if(famNewAvatarId){ queuePendingImg(famNewAvatarId); SYNC.imgPut(famNewAvatarId); }
   S.metaUpdatedAt = Date.now();
   famNewAvatarId = null;
@@ -4680,12 +4869,12 @@ document.addEventListener('pointercancel', ()=>{ clearLP(); swReset(true); }, {p
 document.addEventListener('click', e=>{
   const el = t => e.target.closest(t);
   let x;
-  if(x = el('[data-login]')){ S.currentUser = x.dataset.login; persist(); applyTheme(); resubscribePush(); show('main'); return; }
+  if(x = el('[data-login]')){ openAuth(x.dataset.login); return; }
   if(el('[data-goto-family]')){ show('family'); return; }
   if(x = el('[data-nav]')){ show(x.dataset.nav); return; }
   if(x = el('[data-tab]')){ S.currentTab = x.dataset.tab; searchQ=''; $('search-input').value=''; $('search-wrap').classList.remove('has-q'); if(activeScreen!=='main') show('main'); else renderMain(); persist(); return; }
   if(el('#fab')){ openForm(); return; }
-  if(el('.hdr-profile')){ confirmDlg('Сменить профиль?','Вы вернётесь на экран выбора членов семьи.','Выйти',false,()=>{ S.currentUser=null; persist(); show('auth'); }); return; }
+  if(el('.hdr-profile')){ confirmDlg('Сменить профиль?','Вы вернётесь на экран выбора членов семьи.','Выйти',false,()=>{ S.currentUser=null; relockAll(); persist(); show('auth'); }); return; }
   if(x = el('[data-geotoggle]')){
     const id = x.dataset.geotoggle;
     geoHidden.has(id) ? geoHidden.delete(id) : geoHidden.add(id);
@@ -4870,12 +5059,21 @@ document.addEventListener('click', e=>{
     const f = (tk?.files||[]).find(z=>z.id===id);
     openStoredFile(id, f?.name, f?.type); return; }
   if(x = el('[data-rm-img]')){ const i=Number(x.dataset.rmImg); F.removedImageIds.push(F.imageIds[i]); F.imageIds.splice(i,1); renderFormPhotos(); return; }
+  if(el('#auth-ok')){ tryAuth(); return; }
+  if(el('#auth-bio')){
+    const mid = authPending;
+    bioVerify(mid).then(ok=>{ if(ok) doLogin(mid); else toast('Не удалось подтвердить','⚠️'); });
+    return; }
+  if(el('#auth-overlay') && !el('.modal')){ $('auth-overlay').classList.add('hidden'); authPending=null; return; }
+  if(el('#open-pass')){ openPassChange(); return; }
+  if(el('#pass-save')){ savePassChange(); return; }
+  if(el('#pass-overlay') && !el('.modal')){ $('pass-overlay').classList.add('hidden'); return; }
   if(el('#f-lock-clear')){ F.lockKeep = false; F.lockOn = false; F.lockHash = null; $('f-lock-pass').value=''; renderLockRow(); haptic('warn'); toast('Пароль будет снят после сохранения','🔓'); return; }
   if(el('#f-lock-btn')){
     F.lockOn = !F.lockOn;
     if(!F.lockOn){ F.lockKeep = false; F.lockHash = null; $('f-lock-pass').value=''; }
     renderLockRow(); haptic('tap'); return; }
-  if(el('#lock-ok')){ tryUnlock(); return; }
+
   if(el('#lock-overlay') && !el('.modal')){ $('lock-overlay').classList.add('hidden'); lockPending=null; return; }
   if(x = el('[data-dict]')){ dictStart(x.dataset.dict, x); return; }
   if(x = el('[data-md]')){ mdWrap(x.dataset.md); return; }
@@ -5012,8 +5210,17 @@ $('fam-ava-input').addEventListener('change', e=>{ handleAvatarFile(e.target.fil
 $('f-title').addEventListener('input', e=>e.target.classList.remove('err'));
 $('f-desc').addEventListener('input', autoGrowDesc);
 $('f-lock-pass').addEventListener('input', e=>{
-  const v = e.target.value.trim();
+  e.target.value = e.target.value.replace(/\D/g,'');       // только цифры
+  const v = e.target.value;
   if(F) F.lockHash = v ? lockHash(v) : null;    // фиксируем сразу, не полагаясь на DOM при сохранении
+});
+$('auth-pass').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); tryAuth(); } });
+$('pass-new2').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); savePassChange(); } });
+$('lock-input').addEventListener('input', e=>{
+  e.target.value = e.target.value.replace(/\D/g,'');
+  // как только код совпал — открываем сразу, без кнопки
+  const t = lockPending && task(lockPending.taskId);
+  if(t && e.target.value && lockHash(e.target.value) === t.lock) tryUnlock();
 });
 $('f-desc').addEventListener('scroll', ()=>{ const hl=$('md-hl'); if(hl) hl.scrollTop = $('f-desc').scrollTop; });
 $('md-input1').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); if(mdPendingKind==='link') $('md-input2').focus(); else mdConfirm(); } });
