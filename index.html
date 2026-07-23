@@ -151,6 +151,7 @@ body.no-anim *{animation:none!important}
 .call-overlay.video .call-ava{width:56px;height:56px;font-size:20px}
 .call-overlay.video .call-card b{font-size:16px}
 .call-remote{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0C0D0F;z-index:1}
+.call-remote.off{opacity:0;pointer-events:none;z-index:0}
 .call-local{position:absolute;right:14px;top:calc(env(safe-area-inset-top) + 14px);width:104px;height:150px;
   object-fit:cover;border-radius:16px;background:#16181D;z-index:3;box-shadow:0 8px 26px rgba(0,0,0,.45);transform:scaleX(-1)}
 .call-overlay.video .call-local{top:auto;bottom:calc(120px + env(safe-area-inset-bottom))}
@@ -959,7 +960,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
   <!-- НИЖНЯЯ НАВИГАЦИЯ -->
   <!-- ЗВОНОК -->
   <div class="call-overlay hidden" id="call-overlay">
-    <video class="call-remote hidden" id="call-remote" autoplay playsinline></video>
+    <video class="call-remote off" id="call-remote" autoplay playsinline muted></video>
     <video class="call-local hidden" id="call-local" autoplay playsinline muted></video>
     <div class="call-card" id="call-card">
       <span class="ava call-ava" id="call-ava">•</span>
@@ -3210,13 +3211,30 @@ function callCleanup(){
   try{ call.camStream && call.camStream.getTracks().forEach(t=>t.stop()); }catch(e){}
   const lv = $('call-local'), rv = $('call-remote');
   if(lv){ lv.srcObject = null; lv.classList.add('hidden'); }
-  if(rv){ rv.srcObject = null; rv.classList.add('hidden'); }
+  if(rv){ rv.srcObject = null; rv.classList.add('off'); rv.muted = true; }
   $('call-overlay').classList.remove('video');
   const au = $('call-audio'); if(au){ au.srcObject = null; au.remove(); }
   call = null;
   $('call-overlay').classList.add('hidden');
 }
+function bindCallActions(){
+  const acts = $('call-actions');
+  if(!acts || acts._bound) return;
+  acts._bound = true;
+  acts.addEventListener('click', e=>{
+    const b = e.target.closest('[data-call]');
+    if(!b) return;
+    e.preventDefault(); e.stopPropagation();
+    const a = b.dataset.call;
+    if(a==='accept') acceptCall();
+    else if(a==='mute') toggleMute();
+    else if(a==='cam') toggleCamera();
+    else if(a==='spk') toggleSpeaker();
+    else hangCall();
+  });
+}
 function renderCall(){
+  bindCallActions();
   if(!call){ $('call-overlay').classList.add('hidden'); return; }
   const m = member(call.peer);
   const ava = $('call-ava');
@@ -3243,7 +3261,7 @@ function renderCall(){
   const ov = $('call-overlay');
   const showRemote = !!call.remoteVideo, showLocal = !!call.camOn;
   ov.classList.toggle('video', showRemote || showLocal);
-  $('call-remote').classList.toggle('hidden', !showRemote);
+  $('call-remote').classList.toggle('off', !showRemote);
   $('call-local').classList.toggle('hidden', !showLocal);
   ov.classList.remove('hidden');
 }
@@ -3258,14 +3276,17 @@ async function buildPeer(isCaller){
   pc.ontrack = e=>{
     if(e.track.kind === 'video'){
       const rv = $('call-remote');
-      rv.srcObject = e.streams[0] || new MediaStream([e.track]);
+      if(!rv.srcObject) rv.srcObject = e.streams[0] || new MediaStream([e.track]);
       e.track.onunmute = ()=>{ call && (call.remoteVideo = true); renderCall(); };
       e.track.onmute   = ()=>{ call && (call.remoteVideo = false); renderCall(); };
       e.track.onended  = ()=>{ call && (call.remoteVideo = false); renderCall(); };
       if(call) call.remoteVideo = !e.track.muted;
       renderCall();
     } else {
-      au.srcObject = e.streams[0] || new MediaStream([e.track]);
+      const st = e.streams[0] || new MediaStream([e.track]);
+      call.remoteStream = st;
+      au.srcObject = st;
+      au.play().catch(()=>{});
       applySpeaker();
     }
   };
@@ -3284,7 +3305,7 @@ async function startCall(peerId){
   if(!SYNC.chan){ toast('Нет связи с семьёй','⚠️'); return; }
   const m = member(peerId); if(!m) return;
   try{
-    call = { id: uid('call_'), peer:peerId, state:'out', muted:false, camOn:false, speaker:true, remoteVideo:false };
+    call = { id: uid('call_'), peer:peerId, state:'out', muted:false, camOn:false, speaker:false, remoteVideo:false };
     renderCall();
     const { pc, stream } = await buildPeer(true);
     call.pc = pc; call.stream = stream;
@@ -3342,43 +3363,68 @@ async function toggleCamera(){
   }catch(e){ toast('Нет доступа к камере','⚠️'); }
 }
 // громкая связь / разговорный динамик
+// 1) пробуем переключить устройство вывода (setSinkId)
+// 2) если нельзя — переносим звук между <audio> и <video>: у медиаэлементов
+//    разные маршруты вывода на мобильных, video обычно идёт в громкий динамик
 async function applySpeaker(){
-  const au = $('call-audio'); if(!au || !call) return;
-  if(typeof au.setSinkId !== 'function') return;      // не поддерживается — тихо выходим
+  if(!call) return { ok:false, how:'none' };
+  const au = $('call-audio'), vd = $('call-remote');
+  const stream = call.remoteStream;
+  if(!stream) return { ok:false, how:'none' };
+
+  // способ 1: смена устройства вывода
+  if(au && typeof au.setSinkId === 'function'){
+    try{
+      const devs = await navigator.mediaDevices.enumerateDevices();
+      const outs = devs.filter(d=>d.kind==='audiooutput' && d.deviceId);
+      const find = re => outs.find(d=>re.test((d.label||'').toLowerCase()));
+      const target = call.speaker
+        ? (find(/speaker|громк|динам/) || outs.find(d=>d.deviceId==='default'))
+        : (find(/earpiece|receiver|handset|разговор/) || outs.find(d=>d.deviceId!=='default') || outs.find(d=>d.deviceId==='default'));
+      if(target){ await au.setSinkId(target.deviceId); return { ok:true, how:'sink' }; }
+    }catch(e){}
+  }
+
+  // способ 2: маршрут через <video> (громкая) либо <audio> (обычный)
   try{
-    const devs = await navigator.mediaDevices.enumerateDevices();
-    const outs = devs.filter(d=>d.kind==='audiooutput');
-    if(!outs.length) return;
-    const find = re => outs.find(d=>re.test(d.label.toLowerCase()));
-    const target = call.speaker
-      ? (find(/speaker|громк|динам/) || outs.find(d=>d.deviceId==='default') || outs[0])
-      : (find(/earpiece|receiver|разговор/) || outs.find(d=>d.deviceId==='default') || outs[0]);
-    if(target) await au.setSinkId(target.deviceId);
+    if(call.speaker){
+      if(au) { au.srcObject = null; au.muted = true; }
+      if(vd){ vd.muted = false; vd.volume = 1; if(!vd.srcObject) vd.srcObject = stream; await vd.play().catch(()=>{}); }
+    } else {
+      if(vd) vd.muted = true;
+      if(au){ au.muted = false; au.volume = 1; au.srcObject = stream; await au.play().catch(()=>{}); }
+    }
+    return { ok:true, how:'element' };
   }catch(e){}
+  return { ok:false, how:'none' };
 }
 async function toggleSpeaker(){
   if(!call) return;
   call.speaker = !call.speaker;
-  const au = $('call-audio');
-  if(au && typeof au.setSinkId !== 'function'){
-    toast(call.speaker ? 'Громкая связь' : 'Обычный режим', '🔊');
-  } else {
-    await applySpeaker();
-    toast(call.speaker ? 'Громкая связь включена' : 'Громкая связь выключена', '🔊');
-  }
+  const r = await applySpeaker();
   renderCall(); haptic('tap');
+  if(r.ok) toast(call.speaker ? 'Громкая связь включена' : 'Динамик разговора', '🔊');
+  else toast('Браузер не даёт переключать вывод — используйте системный регулятор', '⚠️');
 }
 function toggleMute(){
-  if(!call || !call.stream) return;
+  if(!call) return;
   call.muted = !call.muted;
-  call.stream.getAudioTracks().forEach(t=>t.enabled = !call.muted);
+  const on = !call.muted;
+  try{ call.stream && call.stream.getAudioTracks().forEach(t=>t.enabled = on); }catch(e){}
+  // и на всякий случай — через отправителей соединения
+  try{
+    call.pc && call.pc.getSenders().forEach(s=>{
+      if(s.track && s.track.kind==='audio') s.track.enabled = on;
+    });
+  }catch(e){}
   renderCall(); haptic('tap');
+  toast(call.muted ? 'Микрофон выключен' : 'Микрофон включён', '🎙️');
 }
 async function onRtcSignal(d){
   if(!d || !d.to || d.to !== S.currentUser) return;      // не нам
   if(d.k === 'offer'){
     if(call){ rtcSend({k:'busy', id:d.id, to:d.from, from:S.currentUser}); return; }
-    call = { id:d.id, peer:d.from, state:'in', muted:false, camOn:false, speaker:true, remoteVideo:false, pendingOffer:d.sdp, pendingIce:[] };
+    call = { id:d.id, peer:d.from, state:'in', muted:false, camOn:false, speaker:false, remoteVideo:false, pendingOffer:d.sdp, pendingIce:[] };
     renderCall(); haptic('strong');
     call.ringTimer = setTimeout(()=>{ if(call && call.state==='in') callCleanup(); }, 45000);
     return;
