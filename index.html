@@ -151,10 +151,15 @@ body.no-anim *{animation:none!important}
 .lock-info b{display:block;font-size:12.5px;font-weight:750}
 .lock-info span{font-size:11px;color:var(--faint)}
 .lock-badge{display:inline-flex;align-items:center;gap:4px;color:var(--amber-ink,var(--mut))}
+.d-lock{display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 13px;border-radius:14px;
+  background:var(--acc-soft);color:var(--acc-ink);font-size:12px;font-weight:750}
+.lock-on-hint{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:11px;font-weight:750;color:var(--acc)}
 
 .drop-box{background:var(--card);border-radius:18px;padding:10px;box-shadow:var(--shadow), inset 0 0 0 1px var(--ring)}
 .drop-box .photo-drop{box-shadow:none;background:var(--soft)}
+.drop-box .pv-grid,.drop-box .file-list{margin-top:0}
 .drop-box .pv-grid:not(:empty),.drop-box .file-list:not(:empty){margin-top:9px}
+.pv-grid:empty,.file-list:empty{display:none}
 
 /* ===== SOS ===== */
 .sos-btn{position:relative;width:95px;height:38px;border-radius:19px;background:#E5484D;color:#fff;
@@ -239,7 +244,7 @@ body.no-anim *{animation:none!important}
 .voice-chip.mine .vc-play{background:#fff;color:var(--acc)}
 .vc-play:active{transform:scale(.88)}
 .voice-chip.full{display:flex;width:100%;box-sizing:border-box}
-#f-voice-box{width:100%}
+#f-voice-box{width:100%;margin-top:10px}
 #f-voice-box .voice-chip{width:100%}
 .vc-wave{position:relative;display:flex;align-items:center;gap:2.5px;height:24px;flex:1;min-width:56px;overflow:hidden}
 .vc-wave i{position:relative;z-index:2;flex:1;background:var(--line);border-radius:99px;min-width:2px}
@@ -653,7 +658,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
   tab-size:2;margin:0;border:1.5px solid var(--line);border-top:none;
 }
 .md-hl{position:absolute;inset:0;pointer-events:none;color:var(--ink);overflow:hidden;background:var(--card);border-color:var(--line)}
-.md-area{position:relative;width:100%;min-height:110px;max-height:800px;resize:none;overflow-y:auto;
+.md-area{display:block;position:relative;width:100%;min-height:110px;max-height:800px;resize:none;overflow-y:auto;
   outline:none;background:transparent;color:transparent;caret-color:var(--acc);-webkit-text-fill-color:transparent;scrollbar-width:none;border-color:transparent}
 .md-area::-webkit-scrollbar{display:none}
 .md-hl{scrollbar-width:none}.md-hl::-webkit-scrollbar{display:none}
@@ -2408,8 +2413,7 @@ function cardHTML(t){
   const imgs = (t.lock && !unlocked.has(t.id)) ? [] : (t.imageIds||[]);
   if(imgs.length){
     thumbs = `<div class="thumbs">` +
-      imgs.slice(0,4).map((id,i)=>`<img data-img="${id}" data-lb="${t.id}" data-idx="${i}" alt="">`).join('') +
-      (imgs.length>4?`<span class="more">+${imgs.length-4}</span>`:'') + `</div>`;
+      imgs.slice(0,5).map((id,i)=>`<img data-img="${id}" data-lb="${t.id}" data-idx="${i}" alt="">`).join('') + `</div>`;
   }
   let side;
   if(t.type==='tasks'){
@@ -2766,6 +2770,8 @@ function renderDetail(){
       imgs.map((id,i)=>`<img data-img="${id}" data-lb="${t.id}" data-idx="${i}" alt="">`).join('') + `</div>`;
   }
 
+  const lockHtml = t.lock
+    ? `<div class="d-lock">${ICON.eye(15)}<span>Заметка защищена паролем</span></div>` : '';
   const voiceHtml = t.voice
     ? `<div class="d-sec" style="margin-top:16px"><b>Голосовая метка</b></div>
        <div style="margin-top:8px">${voiceChipHTML(t.voice,{full:true})}</div>`
@@ -2810,7 +2816,7 @@ function renderDetail(){
     <div class="d-history">${history}</div>
     ${info}
     ${t.description?`<div class="d-desc md-render">${renderMarkdown(t.description)}</div>`:`<div class="d-desc empty-desc">Без описания</div>`}
-    ${chkHtml}${voiceHtml}${gal}${filesHtml}
+    ${lockHtml}${voiceHtml}${chkHtml}${gal}${filesHtml}
     <div class="d-actions">${actions}</div>`;
   hydrateImages(body);
   requestAnimationFrame(()=>{ layoutDetailActions(); });
@@ -3143,10 +3149,12 @@ function renderFormDocs(){
   $('f-docs').innerHTML = F.files.map(f=>fileRowHTML(f, true)).join('');
 }
 async function handleDocs(files){
-  const arr = Array.from(files||[]);
+  let arr = Array.from(files||[]);
   if(!arr.length) return;
   F.files = F.files || [];
-  if(F.files.length + arr.length > 5){ toast('Максимум 5 файлов','⚠️'); return; }
+  const freeF = 5 - F.files.length;
+  if(freeF <= 0){ toast('Уже 5 файлов — больше нельзя','⚠️'); return; }
+  if(arr.length > freeF){ toast(`Добавлю только ${freeF} из ${arr.length} — лимит 5`,'⚠️'); arr = arr.slice(0, freeF); }
   for(const f of arr){
     if(f.size > 8*1024*1024){ toast(`«${f.name}» больше 8 МБ`,'⚠️'); continue; }
     try{
@@ -3198,12 +3206,18 @@ function addChkField(text='', id='', done=false){
     if(e.key==='Backspace' && !inp.value && $('f-checklist').children.length>1){ e.preventDefault(); const prev=div.previousElementSibling; div.remove(); prev?.querySelector('input')?.focus(); }
   });
   $('f-checklist').appendChild(div);
-  if(!text) inp.focus();
+  if(!text){
+    inp.focus();
+    // подкручиваем форму, чтобы поле не ушло под клавиатуру
+    setTimeout(()=>{ try{ inp.scrollIntoView({block:'center', behavior:'smooth'}); }catch(e){} }, 260);
+  }
 }
 async function handleFiles(files){
-  const arr = Array.from(files||[]);
+  let arr = Array.from(files||[]);
   if(!arr.length) return;
-  if(F.imageIds.length + arr.length > 5){ toast('Максимум 5 фото','⚠️'); return; }
+  const free = 5 - F.imageIds.length;
+  if(free <= 0){ toast('Уже 5 изображений — больше нельзя','⚠️'); return; }
+  if(arr.length > free){ toast(`Добавлю только ${free} из ${arr.length} — лимит 5`,'⚠️'); arr = arr.slice(0, free); }
   toast('Обрабатываю фото…','⏳');
   for(const f of arr){
     try{
@@ -3232,7 +3246,8 @@ async function saveForm(asDraft){
   const rp = (F.type==='tasks' && F.date) ? F.repeat : null;
 
   // общие данные формы, чтобы не собирать дважды
-  F._pending = { title, desc, dl, rp, checklist, asDraft };
+  const lockPass = $('f-lock-pass').value.trim();
+  F._pending = { title, desc, dl, rp, checklist, asDraft, lockPass };
 
   if(F.editingId){
     const t = task(F.editingId); if(!t) return;
@@ -3244,7 +3259,7 @@ async function saveForm(asDraft){
       visibleTo:F.type==='notes'?[...F.visibility]:[], imageIds:[...F.imageIds],
       files:[...(F.files||[])], voice:F.voice||null,
       lock: F.type==='notes' && F.lockOn
-              ? (($('f-lock-pass').value.trim() ? lockHash($('f-lock-pass').value.trim()) : (F.lockKeep ? t.lock : null)))
+              ? (lockPass ? lockHash(lockPass) : (F.lockKeep ? t.lock : null))
               : null,
       checklist, updatedBy:S.currentUser, updatedAt:Date.now() });
     persist(); toast('Сохранено','✓');
@@ -3264,8 +3279,8 @@ function finalizeCreate(assignee, asDraft){
     assignedTo:F.type==='tasks'?(assignee||null):null, status:'pending', completed:false,
     visibleTo:F.type==='notes'?[...F.visibility]:[],
     createdBy:S.currentUser, updatedBy:S.currentUser,
-    lock: F.type==='notes' && F.lockOn && $('f-lock-pass').value.trim() ? lockHash($('f-lock-pass').value.trim()) : null,
-    isDraft:!!asDraft, pinnedBy:[], accepted: F.type==='tasks' && F.assignee===S.currentUser,
+    lock: (F.type==='notes' && F.lockOn && p.lockPass) ? lockHash(p.lockPass) : null,
+    isDraft:!!asDraft, pinnedBy:[], accepted: F.type==='tasks' && !!assignee && assignee===S.currentUser,
     imageIds:[...F.imageIds], files:[...(F.files||[])], voice:F.voice||null, checklist:p.checklist,
     updatedAt:Date.now(),
   };
@@ -3352,8 +3367,13 @@ function renderLockRow(){
   btn.innerHTML = '<i></i>';
   btn.classList.toggle('on', !!F.lockOn);
   inp.classList.toggle('hidden', !F.lockOn);
-  if(F.lockOn && F.lockKeep) sub.textContent = 'Пароль уже задан — оставьте поле пустым, чтобы не менять';
-  else sub.textContent = 'Открыть можно будет только по паролю';
+  if(F.lockOn && F.lockKeep){
+    sub.innerHTML = 'Пароль установлен. Оставьте поле пустым, чтобы не менять';
+    inp.placeholder = 'Новый пароль (необязательно)';
+  } else {
+    sub.textContent = 'Открыть можно будет только по паролю';
+    inp.placeholder = 'Придумайте пароль';
+  }
 }
 
 /* ---------- ДИКТОВКА (речь → текст) ---------- */
@@ -3378,15 +3398,15 @@ function dictStart(fieldId, btn){
   btn.classList.add('rec');
   haptic('med');
   toast('Говорите…','🎙️');
-  let finalTxt = '';
   r.onresult = e=>{
-    let interim = '';
-    for(let i=e.resultIndex;i<e.results.length;i++){
+    // пересобираем результат целиком из e.results — так не бывает дублей
+    let finals = '', interim = '';
+    for(let i=0;i<e.results.length;i++){
       const t = e.results[i][0].transcript;
-      if(e.results[i].isFinal) finalTxt += t;
-      else interim += t;
+      if(e.results[i].isFinal) finals += t; else interim += t;
     }
-    el.value = dictBase + finalTxt + interim;
+    const txt = (finals + interim).replace(/\s+/g,' ').trim();
+    el.value = (dictBase + txt).slice(0, el.maxLength > 0 ? el.maxLength : undefined);
     if(fieldId === 'f-desc') autoGrowDesc();
     el.dispatchEvent(new Event('input', {bubbles:true}));
   };
@@ -4422,7 +4442,8 @@ const CAM_SVG = '<span class="cam-badge"><svg viewBox="0 0 24 24" fill="none" st
 function renderFamily(){
   const fs = $('fam-sub'); if(fs) fs.textContent = `Участников: ${S.members.length}`;
   const genOpen = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===null).length;
-  const genRow = `<div class="fam-row" style="--mc:#5E7186">
+  const genRow = '';
+  const _genRowUnused = `<div class="fam-row" style="--mc:#5E7186">
       <span class="fam-ring ava-general">${ICON.users(19)}</span>
       <div class="fam-info"><b>Общее</b><span>${genOpen ? 'Открытых дел: '+genOpen : 'Дела без исполнителя'}</span></div>
     </div>`;
