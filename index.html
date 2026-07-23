@@ -149,6 +149,7 @@ body.no-anim *{animation:none!important}
 .lock-toggle.on{background:var(--acc)}
 .lock-toggle.on i{transform:translateX(18px)}
 .lock-info b{display:block;font-size:12.5px;font-weight:750}
+.bk-hint{font-size:11.5px;color:var(--faint);line-height:1.45;margin:2px 0 11px}
 .auth-modal-ava{width:64px;height:64px;font-size:24px;margin:0 auto 10px;box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--mc,var(--line))}
 .bio-hint{font-size:11px;color:var(--faint);text-align:center;margin-top:2px}
 .lock-set{display:flex;align-items:center;gap:8px;margin-top:9px;padding:10px 12px;border-radius:14px;
@@ -742,6 +743,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .fam-info{flex:1;min-width:0}
 .fam-info b{font-size:14px;display:block;letter-spacing:-.01em}
 .fam-info span{font-size:11px;color:var(--mut)}
+.fam-set{width:34px;height:34px;border-radius:12px;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s var(--spring)}
+.fam-set:active{transform:scale(.88)}
 .fam-del{width:34px;height:34px;border-radius:12px;background:var(--rose-soft);color:var(--rose);font-size:12px;font-weight:800;transition:transform .2s var(--spring)}
 .fam-del:active{transform:scale(.88)}
 .fam-add{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow);margin-top:18px}
@@ -1034,6 +1037,15 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div id="fam-list"></div>
       <div id="sync-card"></div>
       <div id="notif-card"></div>
+      <div class="fam-add" id="backup-card">
+        <span class="label-cap">Резервная копия</span>
+        <p class="bk-hint">Файл со всеми делами, заметками, чатом и настройками. Вложения не входят.</p>
+        <div class="row2">
+          <button class="btn btn-soft" id="bk-save">Сохранить</button>
+          <button class="btn btn-dark" id="bk-load">Импортировать</button>
+        </div>
+        <input type="file" id="bk-file" accept="application/json,.json" class="hidden">
+      </div>
       <div class="fam-add">
         <span class="label-cap">Новый член семьи</span>
         <input type="file" id="fam-ava-input" accept="image/*" class="hidden">
@@ -1061,6 +1073,23 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <span class="call-state" id="call-state">Соединение…</span>
     </div>
     <div class="call-actions" id="call-actions"></div>
+  </div>
+
+  <!-- НАСТРОЙКИ ПРОФИЛЯ -->
+  <div class="overlay sheet-mode hidden" id="mset-overlay">
+    <div class="sheet" id="mset-sheet"></div>
+  </div>
+
+  <!-- ПЕРЕИМЕНОВАНИЕ -->
+  <div class="overlay top-anchor hidden" id="rename-overlay">
+    <div class="modal">
+      <h3>Имя профиля</h3>
+      <input class="field" id="rename-input" placeholder="Имя" maxlength="20" style="margin-bottom:9px">
+      <div class="row2">
+        <button class="btn btn-soft" data-close="rename-overlay">Отмена</button>
+        <button class="btn btn-acc" id="rename-save">Сохранить</button>
+      </div>
+    </div>
   </div>
 
   <!-- ВХОД В ПРОФИЛЬ -->
@@ -2313,9 +2342,7 @@ function renderAuth(){
     <button class="auth-card" data-login="${m.id}" style="--mc:${m.color}">
       ${avaHTML(m,'ring')}<b>${esc(m.name)}</b>
     </button>`).join('') + `
-    <button class="auth-card" data-goto-family="1" style="border-style:dashed">
-      <span class="ava ring" style="--mc:#9B9CA4;font-size:22px;font-weight:600">+</span><b style="color:var(--mut)">Добавить</b>
-    </button>`;
+`;
   hydrateImages($('auth-grid'));
 }
 
@@ -3466,9 +3493,11 @@ async function bioVerify(mid){
     return !!as;
   }catch(e){ return false; }
 }
-function openAuth(mid){
+function openAuth(mid, locked){
   const m = member(mid); if(!m) return;
   authPending = mid;
+  profPassPending = null;
+  $('auth-overlay').querySelector('[data-close="auth-overlay"]').classList.toggle('hidden', !!locked);
   const ava = $('auth-ava');
   ava.style.setProperty('--mc', m.color);
   ava.innerHTML = m.avatarId ? `<img data-img="${m.avatarId}" alt="">` : esc(m.name.trim()[0].toUpperCase());
@@ -3482,13 +3511,24 @@ function openAuth(mid){
     bio.innerHTML = ICON.person(16) + ' Войти по биометрии';
   } else bio.classList.add('hidden');
   $('auth-overlay').classList.remove('hidden');
-  setTimeout(()=>$('auth-pass').focus(), 160);
+  // если биометрия настроена — предлагаем её сразу, не заставляя нажимать кнопку
+  if(bioAvailable() && bioEnabled(mid)){
+    setTimeout(async ()=>{
+      if(authPending !== mid) return;
+      const ok = await bioVerify(mid);
+      if(ok && authPending === mid) doLogin(mid);
+      else $('auth-pass').focus();
+    }, 250);
+  } else setTimeout(()=>$('auth-pass').focus(), 160);
 }
 function doLogin(mid){
-  authPending = null;
+  const wasLocked = appLocked;
+  authPending = null; appLocked = false;
+  markAway();
   $('auth-overlay').classList.add('hidden');
   S.currentUser = mid;
-  persist(); applyTheme(); resubscribePush(); show('main');
+  persist(); applyTheme(); resubscribePush();
+  if(!wasLocked) show('main'); else rerender();
   haptic('ok');
   // предложим включить биометрию, если доступна и ещё не включена
   if(bioAvailable() && !bioEnabled(mid)){
@@ -3498,29 +3538,158 @@ function doLogin(mid){
   }
 }
 function tryAuth(){
-  const mid = authPending; if(!mid) return;
-  const m = member(mid); if(!m) return;
   const v = $('auth-pass').value;
   if(!v) return;
+  // подтверждение доступа к настройкам профиля
+  if(profPassPending){
+    const pm = member(profPassPending.mid);
+    if(pm && lockHash(v) === memberPassHash(pm)){
+      const fn = profPassPending.then; profPassPending = null;
+      $('auth-overlay').classList.add('hidden');
+      haptic('ok'); if(fn) fn();
+    } else { haptic('err'); $('auth-pass').value=''; toast('Неверный пароль','⚠️'); }
+    return;
+  }
+  const mid = authPending; if(!mid) return;
+  const m = member(mid); if(!m) return;
   if(lockHash(v) === memberPassHash(m)) doLogin(mid);
   else { haptic('err'); $('auth-pass').value = ''; toast('Неверный пароль','⚠️'); }
 }
+let passTarget = null;
 function openPassChange(){
   $('pass-old').value = ''; $('pass-new').value = ''; $('pass-new2').value = '';
   $('pass-overlay').classList.remove('hidden');
   setTimeout(()=>$('pass-old').focus(), 160);
 }
 function savePassChange(){
-  const m = member(S.currentUser); if(!m) return;
+  const m = member(passTarget || S.currentUser); if(!m) return;
   const oldv = $('pass-old').value, nv = $('pass-new').value, nv2 = $('pass-new2').value;
   if(lockHash(oldv) !== memberPassHash(m)){ haptic('err'); toast('Текущий пароль неверный','⚠️'); return; }
   if(nv.length < 4){ toast('Минимум 4 символа','⚠️'); return; }
   if(nv !== nv2){ toast('Новые пароли не совпадают','⚠️'); return; }
   m.pass = lockHash(nv);
   S.metaUpdatedAt = Date.now();
+  passTarget = null;
   persist(); renderFamily();
   $('pass-overlay').classList.add('hidden');
   haptic('ok'); toast('Пароль изменён','🔒');
+}
+
+/* ---------- АВТОБЛОКИРОВКА ---------- */
+const AWAY_KEY = 'fh-away-at';
+let appLocked = false;
+function markAway(){ try{ localStorage.setItem(AWAY_KEY, String(Date.now())); }catch(e){} }
+function awayMs(){
+  try{ const v = Number(localStorage.getItem(AWAY_KEY)||0); return v ? Date.now()-v : 0; }catch(e){ return 0; }
+}
+function appUnlockedRecently(){ return !appLocked && awayMs() < 60e3; }
+function needsRelock(){
+  const m = member(S.currentUser); if(!m) return false;
+  const mins = lockAfterOf(m);
+  if(mins < 0) return false;                 // «никогда»
+  return awayMs() >= mins * 60e3;
+}
+function lockApp(){
+  if(appLocked || !S.currentUser) return;
+  appLocked = true;
+  dictStop(); relockAll();
+  openAuth(S.currentUser, true);
+}
+function checkAutoLock(){ if(!appLocked && S.currentUser && needsRelock()) lockApp(); }
+
+/* ---------- НАСТРОЙКИ ПРОФИЛЯ ---------- */
+const LOCK_OPTS = [
+  { v:0,    t:'Сразу' },
+  { v:1,    t:'Через 1 минуту' },
+  { v:5,    t:'Через 5 минут' },
+  { v:60,   t:'Через 1 час' },
+  { v:-1,   t:'Никогда' },
+];
+const lockAfterOf = m => (m && typeof m.lockAfter === 'number') ? m.lockAfter : 5;
+const lockAfterText = m => (LOCK_OPTS.find(o=>o.v===lockAfterOf(m))||LOCK_OPTS[2]).t;
+
+let msetId = null;
+function openMemberSettings(mid){
+  // доступ к настройкам — только по паролю этого профиля
+  const m = member(mid); if(!m) return;
+  msetId = mid;
+  askProfilePass(mid, ()=>renderMemberSettings());
+}
+function renderMemberSettings(){
+  const m = member(msetId); if(!m) return;
+  let h = `<div class="sheet-grip"></div><div class="sheet-title">${esc(m.name)}</div>`;
+  h += `<button class="sheet-btn" data-mset="name">${ICO.edit}Изменить имя</button>`;
+  h += `<button class="sheet-btn" data-mset="ava">${ICON.camera(18)}Изменить фото</button>`;
+  h += `<button class="sheet-btn" data-mset="pass">${ICON.eye(18)}Изменить пароль</button>`;
+  h += `<button class="sheet-btn" data-mset="lock">${ICON.bell(18)}Блокировка: ${lockAfterText(m)}</button>`;
+  if(bioAvailable())
+    h += `<button class="sheet-btn" data-mset="bio">${ICON.person(18)}${bioEnabled(m.id)?'Отключить биометрию':'Включить биометрию'}</button>`;
+  if(S.members.length > 1)
+    h += `<div class="sheet-div"></div><button class="sheet-btn rose" data-mset="del">${ICO.del}Удалить профиль</button>`;
+  $('mset-sheet').innerHTML = h;
+  $('mset-overlay').classList.remove('hidden');
+}
+function openLockPicker(){
+  const m = member(msetId); if(!m) return;
+  const cur = lockAfterOf(m);
+  let h = `<div class="sheet-grip"></div><div class="sheet-title">Запрашивать вход</div>`;
+  h += LOCK_OPTS.map(o=>`<button class="sheet-btn ${o.v===cur?'green':''}" data-lockafter="${o.v}">${o.v===cur?ICO.done:'<span style="width:18px"></span>'}${o.t}</button>`).join('');
+  $('mset-sheet').innerHTML = h;
+}
+// подтверждение паролем профиля перед доступом к его настройкам
+let profPassPending = null;
+function askProfilePass(mid, then){
+  const m = member(mid); if(!m) return;
+  if(mid === S.currentUser && appUnlockedRecently()){ then(); return; }
+  profPassPending = { mid, then };
+  const ava = $('auth-ava');
+  ava.style.setProperty('--mc', m.color);
+  ava.innerHTML = m.avatarId ? `<img data-img="${m.avatarId}" alt="">` : esc(m.name.trim()[0].toUpperCase());
+  hydrateImages($('auth-overlay'));
+  $('auth-name').textContent = m.name;
+  $('auth-msg').textContent = 'Пароль профиля для доступа к настройкам';
+  $('auth-pass').value = '';
+  $('auth-bio').classList.add('hidden');
+  authPending = null;
+  $('auth-overlay').classList.remove('hidden');
+  setTimeout(()=>$('auth-pass').focus(), 160);
+}
+
+/* ---------- РЕЗЕРВНАЯ КОПИЯ ---------- */
+function backupSave(){
+  const data = {
+    app:'family-hub', v:1, at:Date.now(), familyCode:S.familyCode||'',
+    members:S.members, labels:S.labels, tasks:S.tasks, chat:S.chat||[], geo:S.geo||{},
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'family-hub-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 8000);
+  toast('Резервная копия сохранена','💾');
+}
+async function backupLoad(file){
+  try{
+    const txt = await file.text();
+    const d = JSON.parse(txt);
+    if(!d || d.app !== 'family-hub' || !Array.isArray(d.tasks)) { toast('Это не файл резервной копии','⚠️'); return; }
+    const when = d.at ? new Date(d.at).toLocaleString('ru-RU') : 'неизвестно';
+    confirmDlg('Импортировать копию?',
+      `Копия от ${when}: участников ${d.members?.length||0}, записей ${d.tasks.length}. Текущие данные будут заменены.`,
+      'Импортировать', true, ()=>{
+        S.members = d.members || S.members;
+        S.labels  = d.labels  || S.labels;
+        S.tasks   = d.tasks   || [];
+        S.chat    = d.chat    || [];
+        S.geo     = d.geo     || {};
+        S.metaUpdatedAt = Date.now();
+        if(S.currentUser && !member(S.currentUser)) S.currentUser = null;
+        persist(); SYNC.push();
+        toast('Данные восстановлены','✅');
+        S.currentUser ? show('family') : show('auth');
+      });
+  }catch(e){ toast('Не удалось прочитать файл','⚠️'); }
 }
 
 /* ---------- ПАРОЛЬ НА ЗАМЕТКУ ---------- */
@@ -4686,7 +4855,7 @@ function renderFamily(){
       </button>
       <div class="fam-info"><b>${esc(m.name)}</b><span>${open ? 'Открытых дел: '+open : 'Нет открытых дел'}</span></div>
       ${m.id!==S.currentUser?`<button class="fam-call" data-call-to="${m.id}" title="Позвонить">${ICON.phone(17)}</button>`:''}
-      ${S.members.length>1?`<button class="fam-del" data-del-mem="${m.id}">✕</button>`:''}
+      <button class="fam-set" data-mem-set="${m.id}" title="Настройки профиля">${ICON.dots(17)}</button>
     </div>`;
   }).join('');
   hydrateImages($('fam-list'));
@@ -4754,6 +4923,7 @@ function addMember(){
 }
 function delMember(id){
   const m = member(id); if(!m) return;
+  if(S.members.length <= 1){ toast('Нельзя удалить последний профиль','⚠️'); haptic('warn'); return; }
   confirmDlg('Удалить профиль?', `Дела ${m.name} станут общими. Профиль будет удалён.`, 'Удалить', true, async ()=>{
     if(m.avatarId){ try{ await DB.del('img', m.avatarId); }catch(e){} urlCache.delete(m.avatarId); SYNC.imgDel(m.avatarId); }
     S.members = S.members.filter(x=>x.id!==id);
@@ -5059,6 +5229,33 @@ document.addEventListener('click', e=>{
     const f = (tk?.files||[]).find(z=>z.id===id);
     openStoredFile(id, f?.name, f?.type); return; }
   if(x = el('[data-rm-img]')){ const i=Number(x.dataset.rmImg); F.removedImageIds.push(F.imageIds[i]); F.imageIds.splice(i,1); renderFormPhotos(); return; }
+  if(x = el('[data-mem-set]')){ openMemberSettings(x.dataset.memSet); return; }
+  if(x = el('[data-mset]')){
+    const a = x.dataset.mset, m = member(msetId);
+    if(!m) return;
+    if(a==='name'){ $('mset-overlay').classList.add('hidden'); $('rename-input').value = m.name; $('rename-overlay').classList.remove('hidden'); setTimeout(()=>$('rename-input').focus(),160); }
+    if(a==='ava'){ $('mset-overlay').classList.add('hidden'); famAvaTarget = m.id; $('fam-ava-input').click(); }
+    if(a==='pass'){ $('mset-overlay').classList.add('hidden'); passTarget = m.id; openPassChange(); }
+    if(a==='lock'){ openLockPicker(); }
+    if(a==='bio'){
+      if(bioEnabled(m.id)){ try{ localStorage.removeItem(bioKey(m.id)); }catch(e){} toast('Биометрия отключена','🔓'); renderMemberSettings(); }
+      else bioRegister(m.id).then(()=>renderMemberSettings());
+    }
+    if(a==='del'){ $('mset-overlay').classList.add('hidden'); delMember(m.id); }
+    return; }
+  if(x = el('[data-lockafter]')){
+    const m = member(msetId);
+    if(m){ m.lockAfter = Number(x.dataset.lockafter); S.metaUpdatedAt = Date.now(); persist(); }
+    renderMemberSettings(); haptic('tap'); return; }
+  if(el('#mset-overlay') && !el('.sheet')){ $('mset-overlay').classList.add('hidden'); return; }
+  if(el('#rename-save')){
+    const m = member(msetId), v = $('rename-input').value.trim();
+    if(!v){ toast('Введите имя','⚠️'); return; }
+    if(m){ m.name = v; S.metaUpdatedAt = Date.now(); persist(); renderFamily(); rerender(); }
+    $('rename-overlay').classList.add('hidden'); toast('Имя обновлено','✏️'); return; }
+  if(el('#rename-overlay') && !el('.modal')){ $('rename-overlay').classList.add('hidden'); return; }
+  if(el('#bk-save')){ backupSave(); return; }
+  if(el('#bk-load')){ $('bk-file').click(); return; }
   if(el('#auth-ok')){ tryAuth(); return; }
   if(el('#auth-bio')){
     const mid = authPending;
@@ -5162,6 +5359,7 @@ $('f-new-label').addEventListener('keydown', e=>{
 $('f-file').addEventListener('change', e=>{ handleFiles(e.target.files); e.target.value=''; });
 $('f-doc-input').addEventListener('change', e=>{ handleDocs(e.target.files); e.target.value=''; });
 $('chat-file').addEventListener('change', e=>{ chatAttachFiles(e.target.files); e.target.value=''; });
+$('bk-file').addEventListener('change', e=>{ if(e.target.files[0]) backupLoad(e.target.files[0]); e.target.value=''; });
 $('chat-input').addEventListener('input', ()=>{ autoGrowChat(); chatToggleSendMic(); });
 (function(){
   const mic = $('chat-mic');
@@ -5276,17 +5474,24 @@ document.addEventListener('keydown', e=>{
   sosBind();
   applyTheme();
   try{ history.replaceState({screen:'root'}, ''); }catch(e){}
-  if(S.currentUser && member(S.currentUser)){ show('main'); maybeAskPerms(); startGeoBackground(); } else show('auth');
+  if(S.currentUser && member(S.currentUser)){
+    show('main'); maybeAskPerms(); startGeoBackground();
+    checkAutoLock();                       // после перезапуска — по настройке профиля
+  } else show('auth');
   SYNC.start();
   checkDeadlines();
   setInterval(checkDeadlines, 30000);
   setTimeout(ensurePushSub, 2500);
   window.addEventListener('online', ()=>SYNC.pull());
-  document.addEventListener('visibilitychange', ()=>{ markUiState(); if(document.hidden){ persistNow(); } else SYNC.pull(); });
+  document.addEventListener('visibilitychange', ()=>{
+    markUiState();
+    if(document.hidden){ persistNow(); markAway(); }
+    else { checkAutoLock(); SYNC.pull(); }
+  });
   window.addEventListener('focus', markUiState);
   window.addEventListener('blur', markUiState);
   startUiBeat();
-  window.addEventListener('pagehide', persistNow);
+  window.addEventListener('pagehide', ()=>{ persistNow(); markAway(); });
   window.addEventListener('beforeunload', persistNow);
   /* защищённая регистрация SW: не ломает открытие файла напрямую */
   if('serviceWorker' in navigator && location.protocol.startsWith('http')){
