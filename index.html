@@ -142,6 +142,38 @@ body.no-anim *{animation:none!important}
 .f-item.active span{color:var(--ink)}
 .f-cnt{position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--mc,var(--mut));color:#fff!important;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--bg);z-index:1;text-shadow:0 1px 1px rgba(0,0,0,.15)}
 
+/* ===== ГОЛОСОВЫЕ ===== */
+.voice-chip{display:inline-flex;align-items:center;gap:9px;padding:8px 12px;border-radius:99px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);max-width:100%}
+.voice-chip.mine{background:rgba(255,255,255,.2);box-shadow:none}
+.vc-play{width:32px;height:32px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .18s var(--spring)}
+.voice-chip.mine .vc-play{background:#fff;color:var(--acc)}
+.vc-play:active{transform:scale(.88)}
+.vc-wave{display:flex;align-items:center;gap:2.5px;height:22px;flex:1;min-width:56px}
+.vc-wave i{flex:1;background:var(--line);border-radius:99px;min-width:2.5px}
+.voice-chip.mine .vc-wave i{background:rgba(255,255,255,.55)}
+.vc-wave i:nth-child(1){height:32%}.vc-wave i:nth-child(2){height:62%}.vc-wave i:nth-child(3){height:100%}
+.vc-wave i:nth-child(4){height:48%}.vc-wave i:nth-child(5){height:80%}.vc-wave i:nth-child(6){height:38%}
+.vc-wave i:nth-child(7){height:92%}.vc-wave i:nth-child(8){height:54%}.vc-wave i:nth-child(9){height:70%}
+.vc-wave i:nth-child(10){height:34%}
+.vc-dur{font-size:11.5px;font-weight:750;color:var(--mut);flex-shrink:0;font-variant-numeric:tabular-nums}
+.voice-chip.mine .vc-dur{color:rgba(255,255,255,.9)}
+.vc-rm{width:24px;height:24px;border-radius:50%;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* запись в форме */
+.v-rec-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:46px;border-radius:15px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);font-size:12.5px;font-weight:700;color:var(--mut);transition:all .2s var(--spring)}
+.v-rec-btn.rec{background:var(--rose);color:#fff;box-shadow:0 4px 16px color-mix(in srgb,var(--rose) 40%,transparent)}
+.v-rec-btn.rec .rdot{width:9px;height:9px;border-radius:50%;background:#fff;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+/* запись в чате */
+.chat-rec{display:flex;align-items:center;gap:10px;flex:1;height:42px;padding:0 14px;border-radius:21px;background:var(--rose-soft,var(--soft));color:var(--rose);font-size:12.5px;font-weight:700;overflow:hidden}
+.chat-rec .rdot{width:9px;height:9px;border-radius:50%;background:var(--rose);animation:blink 1s infinite;flex-shrink:0}
+.chat-rec .rtime{font-variant-numeric:tabular-nums;flex-shrink:0}
+.chat-rec .rhint{margin-left:auto;color:var(--mut);font-weight:650;white-space:nowrap;transition:opacity .15s}
+.chat-rec.will-cancel{background:var(--rose);color:#fff}
+.chat-rec.will-cancel .rdot{background:#fff}
+.chat-rec.will-cancel .rhint{color:#fff}
+.chat-mic{background:var(--acc);color:#fff}
+.chat-mic.rec{transform:scale(1.15);background:var(--rose)}
+
 /* ===== РАЗРЕШЕНИЯ ===== */
 .perm-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
 .perm-item{display:flex;align-items:flex-start;gap:11px;padding:12px 13px;border-radius:16px;background:var(--soft);text-align:left}
@@ -180,6 +212,7 @@ body.no-anim *{animation:none!important}
 .geo-row .gi span.off{color:var(--rose);font-weight:700}
 .geo-go{width:34px;height:34px;border-radius:11px;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .18s var(--spring)}
 .geo-go:active{transform:scale(.88)}
+.geo-go.live{background:var(--rose);color:#fff;animation:blink 1.4s infinite}
 
 /* ===== ЧАТ ===== */
 .hdr-ava-btn{padding:0;background:none;border-radius:50%}
@@ -199,7 +232,16 @@ body.no-anim *{animation:none!important}
 .b-text{font-size:13.5px;line-height:1.45;white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word}
 .b-text a{color:var(--acc-ink);text-decoration:underline;word-break:break-all}
 .msg.mine .b-text a{color:#fff;text-decoration:underline}
-.b-time{font-size:9.5px;color:var(--faint);margin-top:3px;text-align:right}
+.b-time{font-size:9.5px;color:var(--faint);margin-top:3px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:5px}
+.b-read{display:inline-flex;align-items:center;margin-right:1px}
+.r-ava{width:8px;height:8px;font-size:5px;border-radius:50%;box-shadow:0 0 0 1px var(--card);flex-shrink:0}
+.msg.mine .r-ava{box-shadow:0 0 0 1px var(--acc)}
+.b-read .r-ava:not(:first-child){margin-left:-2.6px}
+.b-ok{display:inline-flex;color:var(--acc);opacity:.85}
+.msg.mine .b-ok{color:rgba(255,255,255,.9)}
+.b-retry{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--rose);color:#fff}
+/* +6px между сообщениями разных людей */
+.msg:not(.stack){margin-top:6px}
 .msg.mine .b-time{color:rgba(255,255,255,.75)}
 .b-edited{font-style:italic;opacity:.8}
 .b-imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:5px;margin-top:6px}
@@ -406,8 +448,8 @@ body.no-anim *{animation:none!important}
 .d-fab-wrap.open .d-fab{transform:scale(.92)}
 .d-fab .ic{width:24px;height:24px;stroke-width:2.4}
 .d-fab-items{display:flex;flex-direction:column;align-items:flex-end;gap:9px;pointer-events:none}
-.d-fab-items button{display:flex;align-items:center;gap:9px;padding:10px 16px;border-radius:99px;
-  background:var(--card);color:var(--ink);font-size:12.5px;font-weight:700;white-space:nowrap;
+.d-fab-items button{display:flex;align-items:center;gap:11px;padding:12px 19px;border-radius:99px;
+  background:var(--card);color:var(--ink);font-size:15px;font-weight:700;white-space:nowrap;
   box-shadow:var(--shadow-lg);opacity:0;transform:translateY(14px) scale(.9);
   transition:opacity .22s var(--spring),transform .22s var(--spring)}
 .d-fab-items button.btn-acc{background:var(--acc);color:#fff}
@@ -503,12 +545,12 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
   white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word;
   tab-size:2;margin:0;border:1.5px solid var(--line);border-top:none;
 }
-.md-hl{position:absolute;inset:0;pointer-events:none;color:var(--ink);overflow:hidden;background:var(--card);border-color:transparent!important}
+.md-hl{position:absolute;inset:0;pointer-events:none;color:var(--ink);overflow:hidden;background:var(--card);border-color:var(--line)}
 .md-area{position:relative;width:100%;min-height:110px;max-height:800px;resize:none;overflow-y:auto;
-  outline:none;background:transparent;color:transparent;caret-color:var(--acc);-webkit-text-fill-color:transparent;scrollbar-width:none}
+  outline:none;background:transparent;color:transparent;caret-color:var(--acc);-webkit-text-fill-color:transparent;scrollbar-width:none;border-color:transparent}
 .md-area::-webkit-scrollbar{display:none}
 .md-hl{scrollbar-width:none}.md-hl::-webkit-scrollbar{display:none}
-.md-area:focus, .md-editor:focus-within .md-hl{border-color:var(--acc)}
+.md-editor:focus-within .md-hl{border-color:var(--acc)}
 /* подсветка только цветом — вес и размер НЕ трогаем (иначе сдвиг курсора) */
 .md-hl .b{color:#111318;font-weight:500}
 .md-hl .i{color:var(--acc-ink)}
@@ -529,6 +571,23 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .md-render li{margin:2px 0}
 .md-render a{color:var(--acc-ink);text-decoration:underline;word-break:break-all}
 .md-render code{background:var(--soft);padding:1px 5px;border-radius:6px;font-size:.9em;font-family:ui-monospace,Menlo,monospace}
+.md-render h5,.md-render h6{font-size:12px;font-weight:800;margin:6px 0 3px;color:var(--mut)}
+.md-pre{background:var(--soft);border-radius:12px;padding:11px 13px;margin:8px 0;overflow-x:auto;position:relative;box-shadow:inset 0 0 0 1px var(--ring)}
+.md-pre code{background:none;padding:0;font-size:12px;line-height:1.5;white-space:pre;display:block}
+.md-pre[data-lang]::before{content:attr(data-lang);position:absolute;top:6px;right:10px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.md-quote{border-left:3px solid var(--acc);background:var(--acc-soft);border-radius:0 12px 12px 0;padding:8px 12px;margin:8px 0;color:var(--mut)}
+.md-quote p:last-child{margin:0}
+.md-hr{border:none;border-top:1px solid var(--line);margin:12px 0}
+.md-table-wrap{overflow-x:auto;margin:9px 0;border-radius:12px;box-shadow:inset 0 0 0 1px var(--ring)}
+.md-table{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--card)}
+.md-table th,.md-table td{padding:8px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.md-table th{background:var(--soft);font-weight:800;font-size:11.5px}
+.md-table tr:last-child td{border-bottom:none}
+.md-render ol{margin:4px 0 8px;padding-left:20px}
+.md-render li.md-task{list-style:none;margin-left:-18px;display:flex;align-items:flex-start;gap:7px}
+.md-cb{width:15px;height:15px;border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0;margin-top:2px}
+.md-cb.on{background:var(--acc);box-shadow:none}
+.md-render img{max-width:100%;border-radius:10px;margin:6px 0}
 .md-render strong{font-weight:800}.md-render del{color:var(--faint)}
 .md-render br{line-height:.5}
 .photo-drop{width:100%;background:var(--card);border:2px dashed var(--line);border-radius:18px;padding:18px;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--mut);font-size:12.5px;font-weight:650;transition:all .2s}
@@ -682,9 +741,9 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
     <header class="hdr">
       <div class="hdr-row">
         <div class="hdr-title" id="hdr-title">Дела<small id="hdr-sub"></small></div>
-        <div class="hdr-actions">
-          <button class="icon-btn" id="btn-theme" title="Тема оформления"></button>
-          <button class="hdr-ava-btn" id="hdr-profile" title="Профиль"><span class="ava hdr-ava" id="hdr-ava" style="--mc:#9B9CA4">•</span></button>
+<div class="hdr-actions">
+          <button class="icon-btn btn-theme" title="Тема оформления"></button>
+          <button class="hdr-ava-btn hdr-profile" title="Профиль"><span class="ava hdr-ava" style="--mc:#9B9CA4">•</span></button>
         </div>
       </div>
       <div class="search-wrap" id="search-wrap">
@@ -814,6 +873,11 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         </button>
         <div class="file-list" id="f-docs"></div>
       </div>
+
+      <div class="fgroup">
+        <span class="label-cap">Голосовая метка</span>
+        <div id="f-voice-box"></div>
+      </div>
     </div>
     <div class="form-foot">
       <button class="btn btn-soft" id="f-draft">В черновики</button>
@@ -823,11 +887,15 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 
   <!-- СЕМЬЯ -->
   <section id="screen-family" class="screen hidden">
-    <div class="sub-hdr">
-      <button class="back-btn" data-nav="main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Назад</button>
-      <h2>Наша семья</h2>
-      <div class="sub-actions"></div>
-    </div>
+    <header class="hdr">
+      <div class="hdr-row">
+        <div class="hdr-title">Семья<small id="fam-sub"></small></div>
+        <div class="hdr-actions">
+          <button class="icon-btn btn-theme" title="Тема оформления"></button>
+          <button class="hdr-ava-btn hdr-profile" title="Профиль"><span class="ava hdr-ava" style="--mc:#9B9CA4">•</span></button>
+        </div>
+      </div>
+    </header>
     <div class="fam-body">
       <div id="sync-card"></div>
       <div id="notif-card"></div>
@@ -855,7 +923,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <h3>Разрешения</h3>
       <p>Чтобы приложение работало как надо</p>
       <div class="perm-list" id="perm-list"></div>
-      <button class="btn btn-soft" data-close="perm-overlay">Позже</button>
+      <button class="btn btn-soft" data-close="perm-overlay">Закрыть</button>
     </div>
   </div>
 
@@ -879,11 +947,12 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 
   <!-- ЭКРАН: ЧАТ -->
   <section id="screen-chat" class="screen hidden">
-    <header class="hdr chat-hdr">
-      <div class="hdr-top">
-        <div>
-          <h1 id="chat-title">Семейный чат</h1>
-          <p class="hdr-sub" id="chat-sub">Быстрые заметки для всех</p>
+    <header class="hdr">
+      <div class="hdr-row">
+        <div class="hdr-title">Чат<small id="chat-sub"></small></div>
+        <div class="hdr-actions">
+          <button class="icon-btn btn-theme" title="Тема оформления"></button>
+          <button class="hdr-ava-btn hdr-profile" title="Профиль"><span class="ava hdr-ava" style="--mc:#9B9CA4">•</span></button>
         </div>
       </div>
     </header>
@@ -894,10 +963,18 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         <span>Редактирование</span>
         <button type="button" id="chat-edit-cancel">Отмена</button>
       </div>
-      <div class="chat-input-row">
+      <div class="chat-input-row" id="chat-row-normal">
         <button class="chat-clip" id="chat-clip" title="Прикрепить"></button>
         <textarea id="chat-input" rows="1" placeholder="Сообщение…"></textarea>
-        <button class="chat-send" id="chat-send" title="Отправить"></button>
+        <button class="chat-clip chat-mic" id="chat-mic" title="Удерживайте для записи"></button>
+        <button class="chat-send hidden" id="chat-send" title="Отправить"></button>
+      </div>
+      <div class="chat-input-row hidden" id="chat-row-rec">
+        <div class="chat-rec" id="chat-rec">
+          <span class="rdot"></span><span class="rtime" id="chat-rec-time">0:00</span>
+          <span class="rhint" id="chat-rec-hint">← смахните, чтобы отменить</span>
+        </div>
+        <button class="chat-send" id="chat-mic-stop"></button>
       </div>
       <input type="file" id="chat-file" multiple class="hidden">
     </div>
@@ -1072,6 +1149,9 @@ const ICON = {
   head:(s)=>_svg('<path d="M6 4v16M18 4v16M6 12h12"/>',s),
   dots:(s)=>_svg('<circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/>',s),
   cal:(s)=>_svg('<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/>',s),
+  mic:(s)=>_svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/>',s),
+  play:(s)=>_svg('<path d="M7 5l12 7-12 7z" fill="currentColor" stroke="none"/>',s),
+  pause:(s)=>_svg('<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>',s),
   search:(s)=>_svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',s),
 };
 
@@ -1098,29 +1178,96 @@ function renderMarkdownInline(src){
   return s;
 }
 function renderMarkdown(src){
-  let s = esc(src);
-  // код `...`
-  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
-  // жирный **...** и курсив *...*
-  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
-  s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
-  // ссылки [text](url)
-  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-  // авто-ссылки
-  s = s.replace(/(^|[\s(])((https?:\/\/)[^\s<]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
-  // построчно: заголовки и списки
-  const lines = s.split('\n');
-  let out = '', inList = false;
-  for(let ln of lines){
-    const h = ln.match(/^(#{1,3})\s+(.*)$/);
-    const li = ln.match(/^\s*[-*]\s+(.*)$/);
-    if(li){ if(!inList){ out+='<ul>'; inList=true; } out+='<li>'+li[1]+'</li>'; continue; }
-    if(inList){ out+='</ul>'; inList=false; }
-    if(h){ const n=h[1].length; out+=`<h${n+2}>`+h[2]+`</h${n+2}>`; continue; }
-    if(ln.trim()==='') out+='<br>'; else out+='<p>'+ln+'</p>';
+  const lines = String(src||'').split('\n');
+  let out = '', i = 0;
+  const inline = s => {
+    s = esc(s);
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+    s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+    s = s.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$2" alt="$1">');
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    s = s.replace(/(^|[\s(])((https?:\/\/)[^\s<]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+    return s;
+  };
+  const splitRow = r => r.replace(/^\s*\|/,'').replace(/\|\s*$/,'').split('|').map(c=>c.trim());
+  while(i < lines.length){
+    let ln = lines[i];
+
+    // ```блок кода```
+    let m = ln.match(/^\s*```(\w*)\s*$/);
+    if(m){
+      const lang = m[1]; const buf = [];
+      i++;
+      while(i < lines.length && !/^\s*```\s*$/.test(lines[i])){ buf.push(lines[i]); i++; }
+      i++;
+      out += `<pre class="md-pre"${lang?` data-lang="${esc(lang)}"`:''}><code>${esc(buf.join('\n'))}</code></pre>`;
+      continue;
+    }
+
+    // таблица: строка с | и следующая — разделитель
+    if(/\|/.test(ln) && i+1 < lines.length && /^\s*\|?[\s:-]*-[-\s:|]*\|?\s*$/.test(lines[i+1]) && /\|/.test(lines[i+1])){
+      const head = splitRow(ln);
+      const align = splitRow(lines[i+1]).map(c=>{
+        const l = c.startsWith(':'), r = c.endsWith(':');
+        return r && l ? 'center' : r ? 'right' : l ? 'left' : '';
+      });
+      i += 2;
+      const rows = [];
+      while(i < lines.length && /\|/.test(lines[i]) && lines[i].trim()){ rows.push(splitRow(lines[i])); i++; }
+      out += '<div class="md-table-wrap"><table class="md-table"><thead><tr>' +
+        head.map((c,k)=>`<th${align[k]?` style="text-align:${align[k]}"`:''}>${inline(c)}</th>`).join('') +
+        '</tr></thead><tbody>' +
+        rows.map(r=>'<tr>'+r.map((c,k)=>`<td${align[k]?` style="text-align:${align[k]}"`:''}>${inline(c)}</td>`).join('')+'</tr>').join('') +
+        '</tbody></table></div>';
+      continue;
+    }
+
+    // > цитата (может быть многострочной)
+    if(/^\s*>\s?/.test(ln)){
+      const buf = [];
+      while(i < lines.length && /^\s*>\s?/.test(lines[i])){ buf.push(lines[i].replace(/^\s*>\s?/,'')); i++; }
+      out += `<blockquote class="md-quote">${renderMarkdown(buf.join('\n'))}</blockquote>`;
+      continue;
+    }
+
+    // --- горизонтальная линия
+    if(/^\s*(---|\*\*\*|___)\s*$/.test(ln)){ out += '<hr class="md-hr">'; i++; continue; }
+
+    // # заголовки
+    m = ln.match(/^(#{1,6})\s+(.*)$/);
+    if(m){ const n = Math.min(6, m[1].length + 2); out += `<h${n}>${inline(m[2])}</h${n}>`; i++; continue; }
+
+    // - [ ] чек-лист и обычные списки
+    if(/^\s*[-*+]\s+/.test(ln)){
+      const buf = [];
+      while(i < lines.length && /^\s*[-*+]\s+/.test(lines[i])){
+        let t = lines[i].replace(/^\s*[-*+]\s+/,'');
+        const cb = t.match(/^\[([ xX])\]\s+(.*)$/);
+        buf.push(cb
+          ? `<li class="md-task"><span class="md-cb ${cb[1].toLowerCase()==='x'?'on':''}">${cb[1].toLowerCase()==='x'?'✓':''}</span>${inline(cb[2])}</li>`
+          : `<li>${inline(t)}</li>`);
+        i++;
+      }
+      out += `<ul>${buf.join('')}</ul>`;
+      continue;
+    }
+
+    // 1. нумерованный список
+    if(/^\s*\d+[.)]\s+/.test(ln)){
+      const buf = [];
+      while(i < lines.length && /^\s*\d+[.)]\s+/.test(lines[i])){
+        buf.push(`<li>${inline(lines[i].replace(/^\s*\d+[.)]\s+/,''))}</li>`); i++;
+      }
+      out += `<ol>${buf.join('')}</ol>`;
+      continue;
+    }
+
+    if(!ln.trim()){ i++; continue; }
+    out += `<p>${inline(ln)}</p>`;
+    i++;
   }
-  if(inList) out+='</ul>';
   return out;
 }
 const MD_SPEC = {
@@ -1181,7 +1328,7 @@ async function pasteUrl(){
 function autoGrowDesc(){
   const ta = $('f-desc'); if(!ta) return;
   ta.style.height='auto';
-  const h = Math.min(800, Math.max(110, ta.scrollHeight));
+  const h = Math.min(800, Math.max(110, ta.scrollHeight + 2));   // +2px под нижнюю рамку
   ta.style.height = h+'px';
   highlightDesc();
 }
@@ -1259,6 +1406,8 @@ const defaultState = () => ({
   prefs:{},  // per-user: {catFilter, sort, view, calMonth}
   chat:[],   // [{id, author, text, imageIds[], files[], at, editedAt, deleted}]
   geo:{},    // { memberId: {lat, lng, acc, at} }
+  listen:{}, // { targetId: {by, at, done} } — запросы удалённой записи
+  listenClips:{}, // { targetId: {audioId, dur, at, by} }
   chatSeen:{}, // per-user: id последнего прочитанного сообщения
   familyCode:null, syncRev:0, pendingImg:[], metaUpdatedAt:0,
   members:[
@@ -1290,8 +1439,9 @@ function applyTheme(){
   const t = (S.currentUser ? (prefs().theme || S.theme) : S.theme) || 'auto';
   if(t === 'auto') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = t;
-  const b = $('btn-theme');
-  if(b){ b.innerHTML = THEME_ICONS[t]; b.classList.toggle('on', t !== 'auto'); }
+  document.querySelectorAll('.btn-theme').forEach(b=>{
+    b.innerHTML = THEME_ICONS[t]; b.classList.toggle('on', t !== 'auto');
+  });
   const metas = document.querySelectorAll('meta[name="theme-color"]');
   if(t === 'auto'){ if(metas[0]) metas[0].content = '#F4F4F2'; if(metas[1]) metas[1].content = '#0C0D0F'; }
   else metas.forEach(m => m.content = t === 'dark' ? '#0C0D0F' : '#F4F4F2');
@@ -1363,6 +1513,7 @@ function dataURLtoBlob(du){
 }
 async function deleteTaskFiles(t){
   for(const f of (t.files||[])){ try{ await DB.del('img', f.id); }catch(e){} SYNC.imgDel(f.id); }
+  if(t.voice?.id){ try{ await DB.del('img', t.voice.id); }catch(e){} SYNC.imgDel(t.voice.id); }
 }
 async function deleteTaskImages(t){
   for(const id of (t.imageIds||[])){
@@ -1633,7 +1784,7 @@ function setSyncStatus(s){
   syncState = s;
   if(!$('screen-family').classList.contains('hidden')) renderSyncCard();
 }
-function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], chat:st.chat||[], geo:st.geo||{}, generalAvatarId:st.generalAvatarId||null, metaUpdatedAt:st.metaUpdatedAt||0, tz:(typeof st.tz==='number'?st.tz:new Date().getTimezoneOffset()) }; }
+function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], chat:st.chat||[], geo:st.geo||{}, listen:st.listen||{}, listenClips:st.listenClips||{}, generalAvatarId:st.generalAvatarId||null, metaUpdatedAt:st.metaUpdatedAt||0, tz:(typeof st.tz==='number'?st.tz:new Date().getTimezoneOffset()) }; }
 function mergeStates(local, remote){
   local = normSnap(local); remote = normSnap(remote);
   const map = new Map();
@@ -1663,6 +1814,8 @@ function mergeStates(local, remote){
       });
       return g;
     })(),
+    listen: (()=>{ const o={}; [remote.listen||{}, local.listen||{}].forEach(src=>Object.keys(src).forEach(k=>{ if(!o[k]||(src[k]?.at||0)>=(o[k]?.at||0)) o[k]=src[k]; })); return o; })(),
+    listenClips: (()=>{ const o={}; [remote.listenClips||{}, local.listenClips||{}].forEach(src=>Object.keys(src).forEach(k=>{ if(!o[k]||(src[k]?.at||0)>=(o[k]?.at||0)) o[k]=src[k]; })); return o; })(),
     tasks: [...map.values()],
     metaUpdatedAt: Math.max(local.metaUpdatedAt||0, remote.metaUpdatedAt||0),
     tz: new Date().getTimezoneOffset(),
@@ -1739,6 +1892,8 @@ const SYNC = {
     S.members = merged.members; S.labels = merged.labels;
     S.chat = merged.chat || [];
     S.geo = merged.geo || {};
+    S.listen = merged.listen || {}; S.listenClips = merged.listenClips || {};
+    maybeServeListen();
     S.tasks = merged.tasks; S.metaUpdatedAt = merged.metaUpdatedAt;
     S.syncRev = rev;
     if(S.currentUser && !member(S.currentUser)) S.currentUser = null;
@@ -1798,12 +1953,19 @@ const SYNC = {
         S.syncRev = d.rev; this.lastSent = JSON.stringify(snap); persistLocal();
         try{ this.chan && this.chan.send({type:'broadcast', event:'sync', payload:{cid:this.cid, rev:d.rev}}); }catch(e){}
         setSyncStatus('on');
+        // сообщения чата дошли до облака
+        let marked = false;
+        (S.chat||[]).forEach(m=>{ if(m.author===S.currentUser && m.sent===false){ m.sent = true; marked = true; } });
+        if(marked){ persistLocal(); if(activeScreen==='chat') renderChat(); }
       } else if(d){                       // конфликт: сливаем и пробуем снова
         this.pushing = false;
         this.applyRemote(d.state, d.rev);
         return;
       }
-    }catch(e){ console.warn('sync push', e); setSyncStatus('err'); }
+    }catch(e){
+      console.warn('sync push', e); setSyncStatus('err');
+      if(activeScreen==='chat') renderChat();
+    }
     this.pushing = false;
   },
   async imgPut(id){
@@ -1892,7 +2054,8 @@ function show(name){
   activeScreen = name;
   $('bottom-nav').classList.toggle('hidden', name==='auth' || name==='form' || name==='geo');
   if(name==='chat') renderChat();
-  if(name==='geo'){ renderGeo(); startGeo(); } else stopGeo();
+  if(name==='geo'){ renderGeo(); startGeo(); maybeServeListen(); }
+  else { if(activeScreen==='geo') stopMyListenSessions(); stopGeo(); }
   markUiState();
   window.scrollTo(0,0);
   // history: main — база; всё остальное добавляет запись, чтобы «назад» возвращал в приложение
@@ -1926,13 +2089,15 @@ function updateNav(){
     const n = chatUnread(), bg = $('nav-badge-chat');
     if(bg){ bg.textContent = n>99?'99+':n; bg.classList.toggle('hidden', !n || activeScreen==='chat'); }
   }
-  const ha = $('hdr-ava'), me2 = member(S.currentUser);
-  if(ha && me2){
-    ha.style.setProperty('--mc', me2.color);
-    ha.innerHTML = me2.avatarId ? `<img data-img="${me2.avatarId}" alt="">` : esc(me2.name.trim()[0].toUpperCase());
-    hydrateImages(ha.parentElement);
-  }
-  if(!member(S.currentUser)){ const ha2=$('hdr-ava'); if(ha2){ ha2.style.setProperty('--mc','#9B9CA4'); ha2.textContent='•'; } }
+  const me2 = member(S.currentUser);
+  document.querySelectorAll('.hdr-ava').forEach(ha=>{
+    if(me2){
+      ha.style.setProperty('--mc', me2.color);
+      ha.innerHTML = me2.avatarId ? `<img data-img="${me2.avatarId}" alt="">` : esc(me2.name.trim()[0].toUpperCase());
+      hydrateImages(ha.parentElement);
+    } else { ha.style.setProperty('--mc','#9B9CA4'); ha.textContent='•'; }
+  });
+
   const cnt = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===S.currentUser).length;
   const badge = $('nav-badge-tasks');
   badge.classList.toggle('hidden', !cnt);
@@ -2440,6 +2605,10 @@ function renderDetail(){
       imgs.map((id,i)=>`<img data-img="${id}" data-lb="${t.id}" data-idx="${i}" alt="">`).join('') + `</div>`;
   }
 
+  const voiceHtml = t.voice
+    ? `<div class="d-sec" style="margin-top:16px"><b>Голосовая метка</b></div>
+       <div style="margin-top:8px">${voiceChipHTML(t.voice)}</div>`
+    : '';
   const tFiles = t.files || [];
   const filesHtml = tFiles.length
     ? `<div class="d-sec" style="margin-top:16px"><b>Файлы · ${tFiles.length}</b></div>
@@ -2480,7 +2649,7 @@ function renderDetail(){
     <div class="d-history">${history}</div>
     ${info}
     ${t.description?`<div class="d-desc md-render">${renderMarkdown(t.description)}</div>`:`<div class="d-desc empty-desc">Без описания</div>`}
-    ${chkHtml}${gal}${filesHtml}
+    ${chkHtml}${voiceHtml}${gal}${filesHtml}
     <div class="d-actions">${actions}</div>`;
   hydrateImages(body);
   requestAnimationFrame(()=>{ layoutDetailActions(); });
@@ -2614,7 +2783,7 @@ function newFormBuffer(){
   return { editingId:null, type:'tasks',
     label:null, labelColor:null,
     newLabelColor:'green', labelEdit:false, assignee:null, repeat:null,
-    date:'', time:'', imageIds:[], removedImageIds:[], files:[], removedFileIds:[],
+    date:'', time:'', imageIds:[], removedImageIds:[], files:[], removedFileIds:[], voice:null, removedVoiceIds:[],
     visibility:S.members.map(m=>m.id) };
 }
 function openForm(editId){
@@ -2626,6 +2795,7 @@ function openForm(editId){
     F.assignee = t.assignedTo; F.repeat = t.repeat ? {...t.repeat} : null;
     F.imageIds = [...(t.imageIds||[])];
     F.files = [...(t.files||[])];
+    F.voice = t.voice ? {...t.voice} : null;
     F.visibility = (t.visibleTo||[]).length ? [...t.visibleTo] : S.members.map(m=>m.id);
     const sp = splitLocal(t.deadline); F.date = sp.date; F.time = sp.time;
     $('f-title').value = t.title||'';
@@ -2649,7 +2819,7 @@ function openForm(editId){
     F.type = S.currentTab;
   }
   $('f-title').classList.remove('err');
-  renderFormType(); renderFormSelectors(); renderFormPhotos(); renderFormDocs(); renderPlan();
+  renderFormType(); renderFormSelectors(); renderFormPhotos(); renderFormDocs(); renderFormVoice(); renderPlan();
   $('ctx-overlay').classList.add('hidden');
   show('form');
   // высота описания считается только когда форма видима
@@ -2662,7 +2832,7 @@ function formSnapshot(){
   return JSON.stringify({
     ty:F.type, ti:$('f-title').value, de:$('f-desc').value,
     d:F.date, t:F.time, rp:F.repeat, lbl:F.label, asg:F.assignee,
-    vis:[...(F.visibility||[])].sort(), img:[...(F.imageIds||[])], fls:(F.files||[]).map(f=>f.id), chk
+    vis:[...(F.visibility||[])].sort(), img:[...(F.imageIds||[])], fls:(F.files||[]).map(f=>f.id), vc:F.voice?.id||'', chk
   });
 }
 let formBaseline = null;
@@ -2773,6 +2943,35 @@ function fileRowHTML(f, removable){
       : `<span class="fx">${ICON.send(15)}</span>`}
   </div>`;
 }
+function renderFormVoice(){
+  const box = $('f-voice-box'); if(!box) return;
+  if(F.voice){
+    box.innerHTML = voiceChipHTML(F.voice, {removable:true});
+  } else {
+    const rec = !!vr;
+    box.innerHTML = `<button type="button" class="v-rec-btn ${rec?'rec':''}" id="f-voice-btn">
+      ${rec?'<span class="rdot"></span>':ICON.mic(17)}
+      <span id="f-voice-label">${rec?'Идёт запись… нажмите, чтобы остановить':'Записать голосовую метку'}</span>
+    </button>`;
+  }
+}
+let fVoiceTimer = null;
+async function toggleFormVoice(){
+  if(vr){
+    clearInterval(fVoiceTimer); fVoiceTimer = null;
+    const v = await voiceStop();
+    if(v){ F.voice = v; haptic('ok'); toast('Голосовая метка записана','🎙️'); }
+    renderFormVoice();
+    return;
+  }
+  const ok = await voiceStart();
+  if(!ok) return;
+  renderFormVoice();
+  fVoiceTimer = setInterval(()=>{
+    const lab = $('f-voice-label');
+    if(lab && vr) lab.textContent = 'Идёт запись · ' + fmtDur((Date.now()-vr.startedAt)/1000) + ' — нажмите, чтобы остановить';
+  }, 250);
+}
 function renderFormDocs(){
   F.files = F.files || [];
   $('f-doc-cnt').textContent = `${F.files.length} / 5`;
@@ -2874,11 +3073,11 @@ async function saveForm(asDraft){
     const t = task(F.editingId); if(!t) return;
     for(const id of F.removedImageIds){ try{ await DB.del('img', id); }catch(e){} urlCache.delete(id); SYNC.imgDel(id); }
     checklist.forEach(n=>{ if(!n.done){ const m=(t.checklist||[]).find(o=>o.text===n.text); if(m) n.done=m.done; } });
-    for(const id of (F.removedFileIds||[])){ try{ await DB.del('img', id); }catch(e){} SYNC.imgDel(id); }
+    for(const id of [...(F.removedFileIds||[]), ...(F.removedVoiceIds||[])]){ try{ await DB.del('img', id); }catch(e){} SYNC.imgDel(id); }
     Object.assign(t, { title, description:desc, deadline:dl, repeat:rp,
       label:F.label, labelColor:F.labelColor, assignedTo:F.type==='tasks'?F.assignee:null,
       visibleTo:F.type==='notes'?[...F.visibility]:[], imageIds:[...F.imageIds],
-      files:[...(F.files||[])],
+      files:[...(F.files||[])], voice:F.voice||null,
       checklist, updatedBy:S.currentUser, updatedAt:Date.now() });
     persist(); toast('Сохранено','✓');
     activeTaskId = t.id; show('detail');
@@ -2897,7 +3096,7 @@ function finalizeCreate(assignee, asDraft){
     assignedTo:F.type==='tasks'?(assignee||null):null, status:'pending', completed:false,
     visibleTo:F.type==='notes'?[...F.visibility]:[],
     createdBy:S.currentUser, updatedBy:S.currentUser,
-    isDraft:!!asDraft, pinnedBy:[], imageIds:[...F.imageIds], files:[...(F.files||[])], checklist:p.checklist,
+    isDraft:!!asDraft, pinnedBy:[], imageIds:[...F.imageIds], files:[...(F.files||[])], voice:F.voice||null, checklist:p.checklist,
     updatedAt:Date.now(),
   };
   S.tasks.push(nt);
@@ -2932,12 +3131,89 @@ async function doCancelForm(){
   if(F && !F.editingId){
     for(const id of F.imageIds){ try{ await DB.del('img', id); }catch(e){} urlCache.delete(id); }
     for(const f of (F.files||[])){ try{ await DB.del('img', f.id); }catch(e){} }
+    if(F.voice?.id){ try{ await DB.del('img', F.voice.id); }catch(e){} }
   } else if(F && F.editingId){
     const t = task(F.editingId);
     const keep = new Set(t?.imageIds||[]);
     for(const id of F.imageIds){ if(!keep.has(id)){ try{ await DB.del('img', id); }catch(e){} urlCache.delete(id); } }
   }
   F.editingId ? show('detail') : show('main');
+}
+
+/* ---------- ГОЛОСОВЫЕ ---------- */
+let vr = null;   // {stream, rec, chunks, startedAt, canceled, ondone}
+async function voiceStart(onSlideCancel){
+  if(vr) return false;
+  if(!navigator.mediaDevices?.getUserMedia){ toast('Запись не поддерживается','⚠️'); return false; }
+  let stream;
+  try{ stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e){ toast('Нет доступа к микрофону','🎙️'); openPermSheet(); return false; }
+  const mime = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'].find(t=>MediaRecorder.isTypeSupported(t)) || '';
+  const rec = new MediaRecorder(stream, mime?{mimeType:mime}:undefined);
+  const chunks = [];
+  rec.ondataavailable = e=>{ if(e.data.size) chunks.push(e.data); };
+  vr = { stream, rec, chunks, startedAt:Date.now(), canceled:false, mime:mime||'audio/webm' };
+  rec.start();
+  haptic('med');
+  return true;
+}
+function voiceCancel(){
+  if(!vr) return;
+  vr.canceled = true;
+  try{ vr.rec.stop(); }catch(e){}
+  vr.stream.getTracks().forEach(t=>t.stop());
+  vr = null;
+  haptic('warn');
+}
+function voiceStop(){
+  return new Promise(resolve=>{
+    if(!vr){ resolve(null); return; }
+    const cur = vr;
+    cur.rec.onstop = async ()=>{
+      cur.stream.getTracks().forEach(t=>t.stop());
+      const dur = Math.round((Date.now()-cur.startedAt)/1000);
+      if(cur.canceled || dur < 1){ vr=null; resolve(null); return; }
+      const blob = new Blob(cur.chunks, {type:cur.mime});
+      const id = uid('aud_');
+      try{
+        await DB.set('img', id, blob);
+        queuePendingImg(id); SYNC.imgPut(id);
+        vr=null; resolve({ id, dur, type:cur.mime });
+      }catch(e){ vr=null; resolve(null); }
+    };
+    try{ cur.rec.stop(); }catch(e){ vr=null; resolve(null); }
+  });
+}
+function fmtDur(s){ s=Math.max(0,Math.round(s||0)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+
+// плеер голосовой метки (используется в делах, заметках, чате)
+let curAudio = null, curAudioBtn = null;
+async function playVoice(id, btn){
+  if(curAudio && curAudioBtn===btn){        // пауза/возобновление
+    if(curAudio.paused){ curAudio.play(); btn.innerHTML=ICON.pause(16); }
+    else { curAudio.pause(); btn.innerHTML=ICON.play(16); }
+    return;
+  }
+  if(curAudio){ curAudio.pause(); if(curAudioBtn) curAudioBtn.innerHTML=ICON.play(16); curAudio=null; }
+  try{
+    let blob = await DB.get('img', id) || await SYNC.imgGet(id);
+    if(!blob){ toast('Голосовая метка недоступна','⚠️'); return; }
+    const url = URL.createObjectURL(blob);
+    const a = new Audio(url);
+    curAudio = a; curAudioBtn = btn;
+    btn.innerHTML = ICON.pause(16);
+    a.onended = ()=>{ btn.innerHTML=ICON.play(16); URL.revokeObjectURL(url); if(curAudioBtn===btn){curAudio=null;curAudioBtn=null;} };
+    a.play();
+  }catch(e){ toast('Не удалось воспроизвести','⚠️'); }
+}
+function voiceChipHTML(v, opts={}){
+  // v = {id, dur}
+  return `<div class="voice-chip ${opts.mine?'mine':''}" data-voice="${v.id}">
+    <button type="button" class="vc-play">${ICON.play(16)}</button>
+    <span class="vc-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    <span class="vc-dur">${fmtDur(v.dur)}</span>
+    ${opts.removable?`<button type="button" class="vc-rm" data-rmvoice="${v.id}">${ICON.x(14)}</button>`:''}
+  </div>`;
 }
 
 /* ---------- РАЗРЕШЕНИЯ ---------- */
@@ -2957,6 +3233,16 @@ async function permState(name){
     }catch(e){}
     return 'prompt';
   }
+  if(name==='microphone'){
+    if(!navigator.mediaDevices?.getUserMedia) return 'unsupported';
+    try{
+      if(navigator.permissions?.query){
+        const r = await navigator.permissions.query({name:'microphone'});
+        return r.state;
+      }
+    }catch(e){}
+    return 'prompt';
+  }
   return 'unsupported';
 }
 const PERMS = [
@@ -2964,6 +3250,8 @@ const PERMS = [
     why:'Чтобы не пропустить дела, дедлайны и сообщения в чате' },
   { key:'geolocation',   icon:()=>ICON.cal(18),  title:'Геопозиция',
     why:'Нужна для правильных часовых поясов при синхронизации напоминаний' },
+  { key:'microphone',    icon:()=>ICON.mic(18),  title:'Микрофон',
+    why:'Для голосовых меток в делах, заметках и сообщений в чате' },
 ];
 async function renderPermList(){
   const box = $('perm-list'); if(!box) return;
@@ -2994,17 +3282,22 @@ async function askPerm(key){
       ()=>{ toast('Доступ к геопозиции отклонён','⚠️'); res(); },
       { timeout:12000 }));
   }
+  if(key==='microphone'){
+    try{
+      const st = await navigator.mediaDevices.getUserMedia({audio:true});
+      st.getTracks().forEach(t=>t.stop());
+      toast('Микрофон разрешён','🎙️');
+    }catch(e){ toast('Доступ к микрофону отклонён','⚠️'); }
+  }
   renderPermList();
   if(activeScreen==='geo') renderGeoPerm();
 }
 async function openPermSheet(){ await renderPermList(); $('perm-overlay').classList.remove('hidden'); }
 async function maybeAskPerms(){
-  // разово предлагаем включить, если что-то ещё не выдано
-  try{ if(localStorage.getItem('fh-perm-asked')) return; }catch(e){}
+  // показываем при каждом запуске, пока есть невыданные (кроме уже отклонённых системой)
   const states = await Promise.all(PERMS.map(p=>permState(p.key)));
-  if(states.every(s=>s==='granted'||s==='unsupported'||s==='denied')) return;
-  try{ localStorage.setItem('fh-perm-asked','1'); }catch(e){}
-  setTimeout(openPermSheet, 1200);
+  const needAsk = states.some(s=>s==='prompt');
+  if(needAsk) setTimeout(openPermSheet, 1200);
 }
 async function renderGeoPerm(){
   const box = $('geo-perm'); if(!box) return;
@@ -3019,7 +3312,8 @@ async function renderGeoPerm(){
 
 /* ---------- КАРТА СЕМЬИ (секретный экран) ---------- */
 const GEO_STALE = 3*60e3;      // больше 3 минут без обновления → офлайн
-const GEO_MIN_GAP = 60e3;      // своё положение обновляем не чаще раза в минуту
+const GEO_MIN_GAP = 60e3;      // на экране карты — не чаще раза в минуту
+const GEO_BG_GAP  = 5*60e3;    // в фоне — раз в 5 минут (бережём батарею)
 let geoMap = null, geoMarkers = {}, geoWatch = null, geoLastPush = 0;
 let geoHidden = new Set();     // кого скрыли из показа
 
@@ -3035,12 +3329,18 @@ function geoAgeText(at){
 }
 const geoIsFresh = at => at && (Date.now()-at) < GEO_STALE;
 
-async function pushMyLocation(force){
+async function pushMyLocation(force, bg){
   if(!navigator.geolocation || !S.currentUser) return;
-  if(!force && Date.now()-geoLastPush < GEO_MIN_GAP) return;
+  const gap = bg ? GEO_BG_GAP : GEO_MIN_GAP;
+  if(!force && Date.now()-geoLastPush < gap) return;
+  if(bg){
+    // в фоне не будим GPS: берём кэш и низкую точность
+    const st = await permState('geolocation');
+    if(st !== 'granted') return;
+  }
   geoLastPush = Date.now();
   navigator.geolocation.getCurrentPosition(pos=>{
-    S.geo = S.geo || {};
+    S.geo = S.geo || {}; S.listen = S.listen || {}; S.listenClips = S.listenClips || {};
     S.geo[S.currentUser] = { lat:pos.coords.latitude, lng:pos.coords.longitude,
                              acc:Math.round(pos.coords.accuracy||0), at:Date.now() };
     persist();
@@ -3050,7 +3350,16 @@ async function pushMyLocation(force){
       const msg = err.code===1 ? 'Нет разрешения на геолокацию' : 'Не удалось определить положение';
       toast(msg,'⚠️');
     }
-  }, { enableHighAccuracy:true, timeout:12000, maximumAge:30000 });
+  }, bg
+     ? { enableHighAccuracy:false, timeout:20000, maximumAge:4*60e3 }   // экономный режим
+     : { enableHighAccuracy:true,  timeout:12000, maximumAge:30000 });
+}
+// постоянная фоновая передача — работает на всех экранах, пока приложение открыто
+let geoBgTimer = null;
+function startGeoBackground(){
+  clearInterval(geoBgTimer);
+  pushMyLocation(false, true);
+  geoBgTimer = setInterval(()=>{ if(!document.hidden) pushMyLocation(false, true); }, GEO_BG_GAP);
 }
 function loadLeaflet(){
   if(window.L) return Promise.resolve(true);
@@ -3085,7 +3394,11 @@ function renderGeoList(){
     return `<div class="geo-row">
       ${avaHTML(m,'')}
       <div class="gi"><b>${esc(m.name)}</b>${status}</div>
-      ${g?`<button class="geo-go" data-geogo="${m.id}" title="Открыть в Google Maps">${ICON.send(16)}</button>`:''}
+      <div style="display:flex;gap:6px">
+        ${(S.listenClips||{})[m.id]?.audioId ? `<button class="geo-go" data-listenplay="${m.id}" title="Прослушать запись">${ICON.play(16)}</button>`:''}
+        ${m.id!==S.currentUser ? `<button class="geo-go ${listenActive(m.id)?'live':''}" data-listen="${m.id}" title="${listenActive(m.id)?'Идёт прослушивание — выключить':'Включить микрофон удалённо'}">${ICON.mic(16)}</button>`:''}
+        ${g?`<button class="geo-go" data-geogo="${m.id}" title="Открыть в Google Maps">${ICON.send(16)}</button>`:''}
+      </div>
     </div>`;
   }).join('');
   $('geo-list').innerHTML = rows || '<div class="empty" style="padding:26px"><span>Никто не выбран</span></div>';
@@ -3125,6 +3438,61 @@ async function renderGeo(){
     hydrateImages($('geo-map'));
   });
 }
+// ===== СЕССИЯ ПРОСЛУШКИ =====
+// РОДИТЕЛЬ: включает/выключает сессию у члена семьи
+const listenActive = t => { const r=(S.listen||{})[t]; return !!(r && r.active); };
+function requestListen(targetId){
+  const m = member(targetId); if(!m) return;
+  S.listen = S.listen || {};
+  if(listenActive(targetId)){                      // выключаем
+    S.listen[targetId] = { ...S.listen[targetId], active:false, at:Date.now() };
+    persist(); renderGeoList();
+    toast(`Прослушивание «${m.name}» выключено`,'🎙️');
+    return;
+  }
+  confirmDlg('Включить микрофон?',
+    `Устройство «${m.name}» будет непрерывно записывать звук отрезками и присылать сюда, пока вы не выключите. Работает, только если приложение у него запущено.`,
+    'Включить', false, ()=>{
+      S.listen[targetId] = { by:S.currentUser, at:Date.now(), active:true, nonce:uid('n_') };
+      persist(); renderGeoList();
+      pushEvent('🎙️ Запрос микрофона', 'Требуется запись окружения', 'listen-'+targetId+'-'+Date.now(), targetId);
+      toast('Сессия начата — записи будут появляться здесь','🎙️');
+    });
+}
+// выключить все сессии, которые запустил я (при выходе из секретного режима)
+function stopMyListenSessions(){
+  let changed = false;
+  Object.keys(S.listen||{}).forEach(k=>{
+    const r = S.listen[k];
+    if(r?.active && r.by === S.currentUser){ S.listen[k] = {...r, active:false, at:Date.now()}; changed = true; }
+  });
+  if(changed) persist();
+}
+// ЦЕЛЬ: пока сессия активна — пишем отрезками по 15 секунд
+let listenLoop = false;
+async function maybeServeListen(){
+  if(!S.currentUser || listenLoop) return;
+  const req = (S.listen||{})[S.currentUser];
+  if(!req || !req.active) return;
+  listenLoop = true;
+  try{
+    while(((S.listen||{})[S.currentUser]||{}).active){
+      const ok = await voiceStart();
+      if(!ok) break;
+      await new Promise(r=>setTimeout(r, 15000));
+      const v = await voiceStop();
+      if(!((S.listen||{})[S.currentUser]||{}).active) break;
+      if(v){
+        S.listenClips = S.listenClips || {};
+        S.listenClips[S.currentUser] = { audioId:v.id, dur:v.dur, at:Date.now(), by:req.by };
+        persist();
+      }
+      await new Promise(r=>setTimeout(r, 1500));
+    }
+  }catch(e){}
+  if(vr) voiceCancel();
+  listenLoop = false;
+}
 function startGeo(){
   pushMyLocation(true);
   clearInterval(geoWatch);
@@ -3148,7 +3516,15 @@ function markChatSeen(){
   S.chatSeen = S.chatSeen || {};
   const last = liveChat().slice(-1)[0];
   S.chatSeen[S.currentUser] = last ? (last.at||Date.now()) : Date.now();
-  persistLocal(); updateNav();
+  // отмечаем чужие сообщения прочитанными
+  let changed = false;
+  liveChat().forEach(m=>{
+    if(m.author === S.currentUser) return;
+    m.readBy = m.readBy || [];
+    if(!m.readBy.includes(S.currentUser)){ m.readBy.push(S.currentUser); changed = true; }
+  });
+  if(changed) persist(); else persistLocal();
+  updateNav();
 }
 // текст со ссылками (безопасно: сначала экранируем)
 function linkify(txt){
@@ -3171,7 +3547,7 @@ function chatDayLabel(ts){
 function renderChat(){
   const box = $('chat-body');
   const list = liveChat();
-  $('chat-sub').textContent = list.length ? `Сообщений: ${list.length}` : 'Быстрые заметки для всех';
+  const cs = $('chat-sub'); if(cs) cs.textContent = list.length ? `Сообщений: ${list.length}` : 'Быстрые заметки';
   if(!list.length){
     box.innerHTML = `<div class="chat-empty"><div class="e-ico">${ICON.send(26)}</div>
       <span>Пока пусто.<br>Напишите первое сообщение — увидят все.</span></div>`;
@@ -3194,25 +3570,39 @@ function renderChat(){
             <span class="fi" style="background:${FILE_COLORS[k]}">${esc(fileExt(f.name))}</span>
             <b>${esc(f.name)}</b></div>`;
         }).join('')}</div>` : '';
+    const voice = m.voice ? `<div style="margin-top:${m.text?'6px':'0'}">${voiceChipHTML(m.voice,{mine})}</div>` : '';
     const time = new Date(m.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    // кто прочитал (кроме автора)
+    const readers = (m.readBy||[]).filter(id=>id!==m.author).map(id=>member(id)).filter(Boolean).slice(0,4);
+    const readHtml = readers.length
+      ? `<span class="b-read">${readers.map(r=>`<span class="ava r-ava" style="--mc:${r.color}" title="${esc(r.name)}">${r.avatarId?`<img data-img="${r.avatarId}" alt="">`:esc(r.name.trim()[0].toUpperCase())}</span>`).join('')}</span>`
+      : '';
+    // статус доставки (только для своих)
+    const statusHtml = mine
+      ? (m.sent === false
+          ? `<button class="b-retry" data-retry="${m.id}" title="Не отправлено — повторить">${ICON.repeat(11)}</button>`
+          : m.sent === undefined ? '' : `<span class="b-ok">${ICON.check(11)}</span>`)
+      : '';
     html += `<div class="msg ${mine?'mine':''} ${stack?'stack':''}" data-msg="${m.id}">
       ${mine?'':avaHTML(au,'m-ava')}
       <div class="bubble">
         ${(!mine && !stack) ? `<div class="b-name" style="--mc:${au?.color||'var(--acc)'}">${esc(au?.name||'—')}</div>` : ''}
         ${m.text ? `<div class="b-text">${linkify(m.text)}</div>` : ''}
-        ${imgs}${files}
-        <div class="b-time">${m.editedAt?'<span class="b-edited">изм. </span>':''}${time}</div>
+        ${voice}${imgs}${files}
+        <div class="b-time">${readHtml}${m.editedAt?'<span class="b-edited">изм. </span>':''}${time}${statusHtml}</div>
       </div></div>`;
   });
   box.innerHTML = html;
   hydrateImages(box);
   requestAnimationFrame(()=>{ box.scrollTop = box.scrollHeight; });
+  chatToggleSendMic();
   markChatSeen();
 }
 function renderChatAttach(){
   const row = $('chat-attach-row');
   const items = [...chatDraft.imageIds.map(id=>({id,img:true})), ...chatDraft.files.map(f=>({...f}))];
   row.classList.toggle('hidden', !items.length);
+  chatToggleSendMic();
   row.innerHTML = items.map(it=> it.img
     ? `<span class="chat-att"><img data-img="${it.id}" alt=""><button type="button" data-rmatt="${it.id}">${ICON.x(12)}</button></span>`
     : `<span class="chat-att"><span>${esc(it.name)}</span><button type="button" data-rmatt="${it.id}">${ICON.x(12)}</button></span>`
@@ -3254,7 +3644,7 @@ function sendChat(){
     $('chat-edit-bar').classList.add('hidden');
   } else {
     const msg = { id: uid('m_'), author:S.currentUser, text,
-      imageIds:[...chatDraft.imageIds], files:[...chatDraft.files], at: Date.now() };
+      imageIds:[...chatDraft.imageIds], files:[...chatDraft.files], at: Date.now(), sent:false, readBy:[] };
     S.chat.push(msg);
     if(S.chat.length > 500) S.chat = S.chat.slice(-500);
     // уведомление всем, кроме автора
@@ -3266,7 +3656,7 @@ function sendChat(){
   }
   chatDraft = { imageIds:[], files:[] };
   ta.value = ''; ta.style.height = '';
-  renderChatAttach();
+  renderChatAttach(); chatToggleSendMic();
   persist(); haptic('ok');
   renderChat();
 }
@@ -3300,10 +3690,64 @@ function chatMsgAction(act, id){
     confirmDlg('Удалить сообщение?','Оно исчезнет у всех членов семьи.','Удалить',true, async ()=>{
       for(const iid of (m.imageIds||[])){ try{ await DB.del('img', iid); }catch(e){} urlCache.delete(iid); SYNC.imgDel(iid); }
       for(const f of (m.files||[])){ try{ await DB.del('img', f.id); }catch(e){} SYNC.imgDel(f.id); }
-      m.deleted = true; m.text = ''; m.imageIds = []; m.files = []; m.editedAt = Date.now();
+      if(m.voice?.id){ try{ await DB.del('img', m.voice.id); }catch(e){} SYNC.imgDel(m.voice.id); }
+      m.deleted = true; m.text = ''; m.imageIds = []; m.files = []; m.voice = null; m.editedAt = Date.now();
       persist(); renderChat(); toast('Удалено','🗑️');
     });
   }
+}
+let chatRec = { active:false, x0:0, cancel:false, timer:null };
+function chatToggleSendMic(){
+  const has = $('chat-input').value.trim().length || chatDraft.imageIds.length || chatDraft.files.length;
+  $('chat-send').classList.toggle('hidden', !has);
+  $('chat-mic').classList.toggle('hidden', !!has);
+}
+async function chatRecStart(clientX){
+  if(chatRec.active) return;
+  const ok = await voiceStart();
+  if(!ok) return;
+  chatRec = { active:true, x0:clientX, cancel:false, timer:null };
+  $('chat-row-normal').classList.add('hidden');
+  $('chat-row-rec').classList.remove('hidden');
+  $('chat-rec').classList.remove('will-cancel');
+  $('chat-rec-hint').textContent = '← смахните, чтобы отменить';
+  chatRec.timer = setInterval(()=>{
+    if(vr) $('chat-rec-time').textContent = fmtDur((Date.now()-vr.startedAt)/1000);
+  }, 250);
+}
+function chatRecMove(clientX){
+  if(!chatRec.active) return;
+  const dx = clientX - chatRec.x0;
+  const willCancel = dx < -70;
+  if(willCancel !== chatRec.cancel){
+    chatRec.cancel = willCancel;
+    $('chat-rec').classList.toggle('will-cancel', willCancel);
+    $('chat-rec-hint').textContent = willCancel ? 'Отпустите — запись отменится' : '← смахните, чтобы отменить';
+    haptic(willCancel?'warn':'tap');
+  }
+}
+async function chatRecEnd(){
+  if(!chatRec.active) return;
+  clearInterval(chatRec.timer);
+  const canceled = chatRec.cancel;
+  chatRec = { active:false, x0:0, cancel:false, timer:null };
+  $('chat-row-rec').classList.add('hidden');
+  $('chat-row-normal').classList.remove('hidden');
+  $('chat-rec-time').textContent = '0:00';
+  if(canceled){ voiceCancel(); toast('Запись отменена','✕'); return; }
+  const v = await voiceStop();
+  if(!v){ toast('Слишком короткая запись','⚠️'); return; }
+  sendChatVoice(v);
+}
+function sendChatVoice(v){
+  S.chat = S.chat || [];
+  const msg = { id: uid('m_'), author:S.currentUser, text:'', imageIds:[], files:[], voice:v, at: Date.now(), sent:false, readBy:[] };
+  S.chat.push(msg);
+  if(S.chat.length > 500) S.chat = S.chat.slice(-500);
+  const others = S.members.map(m=>m.id).filter(id=>id!==S.currentUser);
+  if(others.length)
+    pushEvent('💬 Семейный чат', `${member(S.currentUser)?.name||''}: голосовое сообщение`, 'chat-'+msg.id, others);
+  persist(); haptic('ok'); renderChat();
 }
 function autoGrowChat(){
   const ta = $('chat-input'); if(!ta) return;
@@ -3350,6 +3794,7 @@ function enqueueAllImages(){
   S.tasks.forEach(t=>{
     (t.imageIds||[]).forEach(queuePendingImg);
     (t.files||[]).forEach(f=>queuePendingImg(f.id));
+    if(t.voice?.id) queuePendingImg(t.voice.id);
   });
   S.members.forEach(m=>{ if(m.avatarId) queuePendingImg(m.avatarId); });
 }
@@ -3357,6 +3802,7 @@ let famNewAvatarId = null;   // фото для нового профиля
 let famAvaTarget = null;     // 'new' или id члена семьи, которому меняем фото
 const CAM_SVG = '<span class="cam-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg></span>';
 function renderFamily(){
+  const fs = $('fam-sub'); if(fs) fs.textContent = `Участников: ${S.members.length}`;
   const genOpen = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===null).length;
   const genRow = `<div class="fam-row" style="--mc:#5E7186">
       <span class="fam-ring ava-general">${ICON.users(19)}</span>
@@ -3557,11 +4003,16 @@ document.addEventListener('click', e=>{
   if(x = el('[data-nav]')){ show(x.dataset.nav); return; }
   if(x = el('[data-tab]')){ S.currentTab = x.dataset.tab; searchQ=''; $('search-input').value=''; $('search-wrap').classList.remove('has-q'); if(activeScreen!=='main') show('main'); else renderMain(); persist(); return; }
   if(el('#fab')){ openForm(); return; }
-  if(el('#hdr-profile')){ confirmDlg('Сменить профиль?','Вы вернётесь на экран выбора членов семьи.','Выйти',false,()=>{ S.currentUser=null; persist(); show('auth'); }); return; }
+  if(el('.hdr-profile')){ confirmDlg('Сменить профиль?','Вы вернётесь на экран выбора членов семьи.','Выйти',false,()=>{ S.currentUser=null; persist(); show('auth'); }); return; }
   if(x = el('[data-geotoggle]')){
     const id = x.dataset.geotoggle;
     geoHidden.has(id) ? geoHidden.delete(id) : geoHidden.add(id);
     renderGeo(); return; }
+  if(x = el('[data-listen]')){ requestListen(x.dataset.listen); return; }
+  if(x = el('[data-listenplay]')){
+    const clip = (S.listenClips||{})[x.dataset.listenplay];
+    if(clip?.audioId){ const btn = x; playVoice(clip.audioId, btn); }
+    return; }
   if(x = el('[data-geogo]')){
     const g = (S.geo||{})[x.dataset.geogo];
     if(g) window.open(`https://www.google.com/maps/search/?api=1&query=${g.lat},${g.lng}`, '_blank');
@@ -3570,6 +4021,11 @@ document.addEventListener('click', e=>{
   if(el('#open-perms')){ openPermSheet(); return; }
   if(x = el('[data-permask]')){ askPerm(x.dataset.permask); return; }
   if(el('#perm-overlay') && !el('.modal')){ $('perm-overlay').classList.add('hidden'); return; }
+  if(x = el('[data-retry]')){
+    const m = (S.chat||[]).find(z=>z.id===x.dataset.retry);
+    if(m){ m.at = m.at; persist(); SYNC.push(); toast('Отправляю…','⏳'); }
+    return; }
+  if(el('#chat-mic-stop')){ chatRecEnd(); return; }
   if(el('#chat-clip')){ $('chat-file').click(); return; }
   if(el('#chat-send')){ sendChat(); return; }
   if(el('#chat-edit-cancel')){ chatEditId=null; $('chat-input').value=''; $('chat-edit-bar').classList.add('hidden'); autoGrowChat(); return; }
@@ -3589,7 +4045,7 @@ document.addEventListener('click', e=>{
     if(m){ lbImgs = m.imageIds||[]; lbIdx = Number(x.dataset.idx)||0; $('lightbox').classList.remove('hidden'); updateLB(); }
     return; }
   if(x = el('[data-msgact]')){ chatMsgAction(x.dataset.msgact, x.dataset.id); return; }
-  if(el('#btn-theme')){
+  if(el('.btn-theme')){
     const order = ['auto','light','dark'];
     const cur = (S.currentUser ? prefs().theme : S.theme) || 'auto';
     const next = order[(order.indexOf(cur)+1)%3];
@@ -3697,6 +4153,15 @@ document.addEventListener('click', e=>{
   if(el('#f-plan-clear')){ F.date=''; F.time=''; F.repeat=null; renderPlan(); return; }
   if(el('#f-photo-btn')){ $('f-file').click(); return; }
   if(el('#f-doc-btn')){ $('f-doc-input').click(); return; }
+  if(el('#f-voice-btn')){ toggleFormVoice(); return; }
+  if(x = el('[data-rmvoice]')){
+    const id = x.dataset.rmvoice;
+    if(F){ F.removedVoiceIds = F.removedVoiceIds||[]; F.removedVoiceIds.push(id); F.voice = null; renderFormVoice(); }
+    return; }
+  if(x = el('.vc-play')){
+    const chip = x.closest('[data-voice]');
+    if(chip) playVoice(chip.dataset.voice, x);
+    return; }
   if(x = el('[data-rmfile]')){
     const id = x.dataset.rmfile;
     F.removedFileIds = F.removedFileIds || [];
@@ -3795,7 +4260,15 @@ $('f-new-label').addEventListener('keydown', e=>{
 $('f-file').addEventListener('change', e=>{ handleFiles(e.target.files); e.target.value=''; });
 $('f-doc-input').addEventListener('change', e=>{ handleDocs(e.target.files); e.target.value=''; });
 $('chat-file').addEventListener('change', e=>{ chatAttachFiles(e.target.files); e.target.value=''; });
-$('chat-input').addEventListener('input', autoGrowChat);
+$('chat-input').addEventListener('input', ()=>{ autoGrowChat(); chatToggleSendMic(); });
+(function(){
+  const mic = $('chat-mic');
+  mic.addEventListener('pointerdown', e=>{ e.preventDefault(); mic.classList.add('rec'); chatRecStart(e.clientX); });
+  document.addEventListener('pointermove', e=>{ if(chatRec.active) chatRecMove(e.clientX); }, {passive:true});
+  const stop = ()=>{ mic.classList.remove('rec'); if(chatRec.active) chatRecEnd(); };
+  document.addEventListener('pointerup', stop, {passive:true});
+  document.addEventListener('pointercancel', stop, {passive:true});
+})();
 $('chat-input').addEventListener('keydown', e=>{
   if(e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); sendChat(); }
 });
@@ -3833,7 +4306,7 @@ document.addEventListener('keydown', e=>{
       S = Object.assign(defaultState(), saved);
       S.prefs = S.prefs || {};
       S.chat = S.chat || []; S.chatSeen = S.chatSeen || {}; S.geo = S.geo || {};
-      S.tasks.forEach(t=>{ t.pinnedBy=t.pinnedBy||[]; t.imageIds=t.imageIds||[]; t.files=t.files||[]; t.checklist=t.checklist||[]; t.visibleTo=t.visibleTo||[]; delete t.status; });
+      S.tasks.forEach(t=>{ t.pinnedBy=t.pinnedBy||[]; t.imageIds=t.imageIds||[]; t.files=t.files||[]; t.voice=t.voice||null; t.checklist=t.checklist||[]; t.visibleTo=t.visibleTo||[]; delete t.status; });
       S.members.forEach((m,i)=>{ if(!MEMBER_COLORS.includes(m.color)) m.color = MEMBER_COLORS[i % MEMBER_COLORS.length]; });
     } else {
       await migrateLegacy();
@@ -3849,11 +4322,13 @@ document.addEventListener('keydown', e=>{
   const _cc = $('chat-clip'); if(_cc) _cc.innerHTML = ICON.camera(19);
   const _gr = $('geo-refresh'); if(_gr) _gr.innerHTML = ICON.repeat(17);
   const _cs = $('chat-send'); if(_cs) _cs.innerHTML = ICON.send(19);
+  const _cm = $('chat-mic'); if(_cm) _cm.innerHTML = ICON.mic(19);
+  const _cms = $('chat-mic-stop'); if(_cms) _cms.innerHTML = ICON.check(19);
   const _ls = $('lb-save'); if(_ls) _ls.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0 4-4m-4 4-4-4M5 21h14"/></svg>';
   const _lc = $('lb-close'); if(_lc) _lc.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
   applyTheme();
   try{ history.replaceState({screen:'root'}, ''); }catch(e){}
-  if(S.currentUser && member(S.currentUser)){ show('main'); maybeAskPerms(); } else show('auth');
+  if(S.currentUser && member(S.currentUser)){ show('main'); maybeAskPerms(); maybeServeListen(); startGeoBackground(); } else show('auth');
   SYNC.start();
   checkDeadlines();
   setInterval(checkDeadlines, 30000);
