@@ -143,6 +143,19 @@ body.no-anim *{animation:none!important}
 .f-item.active span{color:var(--ink)}
 .f-cnt{position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--mc,var(--mut));color:#fff!important;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--bg);z-index:1;text-shadow:0 1px 1px rgba(0,0,0,.15)}
 
+.lock-row{display:flex;align-items:center;gap:11px;margin-top:12px}
+.lock-toggle{width:44px;height:26px;border-radius:99px;background:var(--line);position:relative;flex-shrink:0;transition:background .2s}
+.lock-toggle i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:transform .22s var(--spring)}
+.lock-toggle.on{background:var(--acc)}
+.lock-toggle.on i{transform:translateX(18px)}
+.lock-info b{display:block;font-size:12.5px;font-weight:750}
+.lock-info span{font-size:11px;color:var(--faint)}
+.lock-badge{display:inline-flex;align-items:center;gap:4px;color:var(--amber-ink,var(--mut))}
+
+.drop-box{background:var(--card);border-radius:18px;padding:10px;box-shadow:var(--shadow), inset 0 0 0 1px var(--ring)}
+.drop-box .photo-drop{box-shadow:none;background:var(--soft)}
+.drop-box .pv-grid:not(:empty),.drop-box .file-list:not(:empty){margin-top:9px}
+
 /* ===== SOS ===== */
 .sos-btn{position:relative;width:95px;height:38px;border-radius:19px;background:#E5484D;color:#fff;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;
@@ -297,9 +310,8 @@ body.no-anim *{animation:none!important}
 .hdr-ava-btn{padding:0;background:none;border-radius:50%;margin-left:4px;display:flex;align-items:center}
 .hdr-ava{width:34px;height:34px;font-size:13px;box-shadow:0 0 0 2px var(--mc,var(--line))}
 #screen-chat{display:flex;flex-direction:column;height:100dvh}
-.chat-scroll{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column}
 .chat-hdr{padding-bottom:6px}
-.chat-body{flex:1 0 auto;padding:8px 14px 12px;display:flex;flex-direction:column;justify-content:flex-end;gap:3px}
+.chat-body{flex:1;min-height:0;overflow-y:auto;padding:8px 14px 12px;display:flex;flex-direction:column;gap:3px}
 .chat-day{align-self:center;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);background:var(--soft);padding:4px 12px;border-radius:99px;margin:10px 0 6px}
 .msg{display:flex;gap:8px;max-width:88%;align-items:flex-end}
 .msg.mine{align-self:flex-end;flex-direction:row-reverse}
@@ -326,8 +338,11 @@ body.no-anim *{animation:none!important}
 .msg:not(.stack){margin-top:6px}
 .msg.mine .b-time{color:rgba(255,255,255,.75)}
 .b-edited{font-style:italic;opacity:.8}
-.b-imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:5px;margin-top:6px}
-.b-imgs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:11px;background:var(--soft)}
+.b-imgs{display:grid;gap:4px;margin-top:6px;width:min(230px,68vw);grid-template-columns:1fr}
+.b-imgs.n2,.b-imgs.n4{grid-template-columns:1fr 1fr}
+.b-imgs.n3,.b-imgs.n5,.b-imgs.n6{grid-template-columns:1fr 1fr 1fr}
+.b-imgs img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:var(--soft)}
+.b-imgs.n1 img{aspect-ratio:4/3;border-radius:12px}
 .b-files{display:flex;flex-direction:column;gap:5px;margin-top:6px}
 .b-file{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:11px;background:var(--soft);font-size:11.5px;font-weight:700}
 .msg.mine .b-file{background:rgba(255,255,255,.18);color:#fff}
@@ -615,6 +630,14 @@ select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 /* separator removed — used two rows instead */
 textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;border-radius:17px;overflow-y:auto}
 .md-editor{position:relative}
+.dict-wrap{position:relative}
+.dict-wrap .field-title{padding-right:48px}
+.dict-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;
+  background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;transition:all .2s var(--spring)}
+.dict-btn:active{transform:translateY(-50%) scale(.88)}
+.dict-btn.rec,.md-btn.rec{background:var(--rose);color:#fff}
+.md-btn.rec{animation:blink 1s infinite}
+.dict-btn.rec{animation:blink 1s infinite}
 .md-toolbar{position:sticky;top:-1px;z-index:15;display:flex;align-items:center;gap:3px;background:var(--card);border:1.5px solid var(--line);border-bottom:none;border-radius:15px 15px 0 0;padding:6px 8px;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,.06)}
 .md-btn{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--mut);transition:all .18s var(--spring)}
 .md-btn:active{transform:scale(.85);background:var(--soft);color:var(--acc)}
@@ -871,7 +894,10 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         <button data-type="notes">🔒 &nbsp;Заметка</button>
       </div>
 
-      <input class="field field-title" id="f-title" placeholder="Название…" maxlength="120">
+      <div class="dict-wrap">
+        <input class="field field-title" id="f-title" placeholder="Название…" maxlength="120">
+        <button type="button" class="dict-btn" data-dict="f-title" title="Надиктовать"></button>
+      </div>
 
       <div class="fgroup">
         <span class="label-cap">Описание</span>
@@ -883,11 +909,14 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
           <button type="button" class="md-btn" data-md="h" title="Заголовок"></button>
           <button type="button" class="md-btn" data-md="list" title="Список"></button>
           <button type="button" class="md-btn" data-md="link" title="Ссылка"></button>
+          <span class="md-sep"></span>
+          <button type="button" class="md-btn dict-md" data-dict="f-desc" title="Надиктовать"></button>
         </div>
         <div class="md-editor" id="md-editor">
           <div class="md-hl" id="md-hl" aria-hidden="true"></div>
           <textarea class="md-area" id="f-desc" placeholder="Подробности, списки, счета, реквизиты…" spellcheck="false"></textarea>
         </div>
+        <div id="f-voice-box"></div>
       </div>
 
       <div id="f-task-fields">
@@ -920,6 +949,11 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         <span class="label-cap">Кто видит заметку</span>
         <div class="mem-scroll" id="f-visibility"></div>
         <div class="vis-hint" id="f-vis-hint"></div>
+        <div class="lock-row" id="f-lock-row">
+          <button type="button" class="lock-toggle" id="f-lock-btn"></button>
+          <div class="lock-info"><b>Пароль на заметку</b><span id="f-lock-sub">Открыть можно будет только по паролю</span></div>
+        </div>
+        <input class="field hidden" id="f-lock-pass" type="password" inputmode="numeric" placeholder="Придумайте пароль" maxlength="32" autocomplete="new-password" style="margin-top:9px">
       </div>
 
       <div class="fgroup">
@@ -942,28 +976,25 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       </div>
 
       <div class="fgroup">
-        <span class="label-cap">Фото <span id="f-photo-cnt" style="float:right;color:var(--faint)">0 / 5</span></span>
-        <input type="file" id="f-file" multiple accept="image/*" class="hidden">
-        <button class="photo-drop" id="f-photo-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="9" cy="10.5" r="1.6"/><path d="m21 16-4.5-4.5L7 21"/></svg>
-          Прикрепить снимки
-        </button>
-        <div class="pv-grid" id="f-photos"></div>
+        <div class="drop-box">
+          <input type="file" id="f-file" multiple accept="image/*" class="hidden">
+          <button class="photo-drop" id="f-photo-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="9" cy="10.5" r="1.6"/><path d="m21 16-4.5-4.5L7 21"/></svg>
+            Изображения <span id="f-photo-cnt">(0 из 5)</span>
+          </button>
+          <div class="pv-grid" id="f-photos"></div>
+        </div>
       </div>
 
       <div class="fgroup">
-        <span class="label-cap">Файлы <span id="f-doc-cnt" style="float:right;color:var(--faint)">0 / 5</span></span>
-        <input type="file" id="f-doc-input" multiple class="hidden">
-        <button class="photo-drop" id="f-doc-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
-          Прикрепить файл
-        </button>
-        <div class="file-list" id="f-docs"></div>
-      </div>
-
-      <div class="fgroup">
-        <span class="label-cap">Голосовая метка</span>
-        <div id="f-voice-box"></div>
+        <div class="drop-box">
+          <input type="file" id="f-doc-input" multiple class="hidden">
+          <button class="photo-drop" id="f-doc-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+            Файлы <span id="f-doc-cnt">(0 из 5)</span>
+          </button>
+          <div class="file-list" id="f-docs"></div>
+        </div>
       </div>
     </div>
     <div class="form-foot">
@@ -987,9 +1018,9 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       </div>
     </header>
     <div class="fam-body">
+      <div id="fam-list"></div>
       <div id="sync-card"></div>
       <div id="notif-card"></div>
-      <div id="fam-list"></div>
       <div class="fam-add">
         <span class="label-cap">Новый член семьи</span>
         <input type="file" id="fam-ava-input" accept="image/*" class="hidden">
@@ -1017,6 +1048,19 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <span class="call-state" id="call-state">Соединение…</span>
     </div>
     <div class="call-actions" id="call-actions"></div>
+  </div>
+
+  <!-- ПАРОЛЬ ЗАМЕТКИ -->
+  <div class="overlay top-anchor hidden" id="lock-overlay">
+    <div class="modal">
+      <h3>Заметка под паролем</h3>
+      <p id="lock-msg">Введите пароль, чтобы открыть</p>
+      <input class="field" id="lock-input" type="password" inputmode="numeric" placeholder="Пароль" maxlength="32" style="margin-bottom:9px" autocomplete="off">
+      <div class="row2">
+        <button class="btn btn-soft" data-close="lock-overlay">Отмена</button>
+        <button class="btn btn-acc" id="lock-ok">Открыть</button>
+      </div>
+    </div>
   </div>
 
   <!-- РАЗРЕШЕНИЯ -->
@@ -1049,7 +1093,6 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 
   <!-- ЭКРАН: ЧАТ -->
   <section id="screen-chat" class="screen hidden">
-    <div class="chat-scroll" id="chat-scroll">
     <header class="hdr">
       <div class="hdr-row">
         <div class="hdr-title">Чат<small id="chat-sub"></small></div>
@@ -1063,7 +1106,6 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       </div>
     </header>
     <div class="chat-body" id="chat-body"></div>
-    </div>
     <div class="chat-compose" id="chat-compose">
       <div class="chat-attach-row hidden" id="chat-attach-row"></div>
       <div class="chat-edit-bar hidden" id="chat-edit-bar">
@@ -1261,6 +1303,7 @@ const ICON = {
   mic:(s)=>_svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/>',s),
   cam:(s)=>_svg('<rect x="2" y="6" width="14" height="12" rx="3"/><path d="m16 11 6-3.5v9L16 13z"/>',s),
   clip:(s)=>_svg('<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.5 3.5 0 0 1 5 5L10.5 18a2 2 0 0 1-3-3l8-8"/>',s),
+  phone:(s)=>_svg('<path d="M6.5 3h3l1.5 4.5-2 1.5a12 12 0 0 0 6 6l1.5-2 4.5 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3z"/>',s),
   file:(s)=>_svg('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',s),
   geoPin:(s)=>_svg('<path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>',s),
   play:(s)=>_svg('<path d="M7 5l12 7-12 7z" fill="currentColor" stroke="none"/>',s),
@@ -1440,10 +1483,14 @@ async function pasteUrl(){
 }
 function autoGrowDesc(){
   const ta = $('f-desc'); if(!ta) return;
-  ta.style.height='auto';
-  const h = Math.min(800, Math.max(110, ta.scrollHeight + 2));   // +2px под нижнюю рамку
-  ta.style.height = h+'px';
+  const body = document.querySelector('#screen-form .form-body');
+  const keep = body ? body.scrollTop : 0;
+  ta.style.height = 'auto';
+  const h = Math.min(800, Math.max(110, ta.scrollHeight));
+  ta.style.height = h + 'px';
   highlightDesc();
+  // при пересчёте высоты браузер иногда уводит прокрутку — возвращаем на место
+  if(body && body.scrollTop !== keep) body.scrollTop = keep;
 }
 function highlightDesc(){
   const ta = $('f-desc'), hl = $('md-hl'); if(!ta||!hl) return;
@@ -2358,7 +2405,7 @@ function cardHTML(t){
     }
   }
   let thumbs = '';
-  const imgs = t.imageIds||[];
+  const imgs = (t.lock && !unlocked.has(t.id)) ? [] : (t.imageIds||[]);
   if(imgs.length){
     thumbs = `<div class="thumbs">` +
       imgs.slice(0,4).map((id,i)=>`<img data-img="${id}" data-lb="${t.id}" data-idx="${i}" alt="">`).join('') +
@@ -2543,7 +2590,12 @@ function openCtx(id){
     <button class="sheet-btn" data-act="pin">${ICO.pin}${pinned?'Открепить':'Закрепить наверху'}</button>`;
   if(t.type==='tasks' && !t.completed){
     html += `<button class="sheet-btn" data-act="assign">${ICO.person}Сменить исполнителя</button>`;
-    html += `<button class="sheet-btn" data-act="ping">${ICO.bell}${t.assignedTo?'Напомнить исполнителю':'Напомнить всем'}</button>`;
+    if(t.assignedTo && t.assignedTo === S.currentUser){
+      if(!t.accepted)
+        html += `<button class="sheet-btn" data-act="accept">${ICO.done}Прочитано — берусь за дело</button>`;
+    } else {
+      html += `<button class="sheet-btn" data-act="ping">${ICO.bell}${t.assignedTo?'Напомнить исполнителю':'Напомнить всем'}</button>`;
+    }
     html += `<button class="sheet-btn green" data-act="done">${ICO.done}Отметить выполненным</button>`;
   } else if(t.type==='tasks' && t.completed){
     html += `<button class="sheet-btn" data-act="done">${ICO.person}Вернуть в актуальное</button>`;
@@ -2564,6 +2616,7 @@ function ctxAction(act){
     touch(t); persist(); renderFeed();
   }
   if(act==='assign') openAssignee(t.id, true);
+  if(act==='accept') acceptTask(t);
   if(act==='ping') pingTask(t);
   if(act==='done') toggleComplete(t.id);
   if(act==='edit') openForm(t.id);
@@ -2597,7 +2650,7 @@ function chooseAssignee(mid){
   }
   const t = task(asgId); if(!t) return;   // смена у существующего
   if(t.assignedTo === mid) return;
-  t.assignedTo = mid; t.accepted = false; t.updatedBy = S.currentUser; touch(t);
+  t.assignedTo = mid; t.accepted = (mid === S.currentUser); t.updatedBy = S.currentUser; touch(t);
   persist();
   const name = mid ? member(mid)?.name : 'Общее';
   toast('Исполнитель: '+name, '👉');
@@ -2792,13 +2845,15 @@ function layoutDetailActions(){
   if(box) box.style.display = 'none';        // список кнопок всегда скрыт
   if(activeScreen !== 'detail') return;
   if(!detailActs.length) return;
-  $('d-fab').innerHTML = ICON.dots(24);      // всегда «ещё», а не иконка действия
+  wrap.dataset.single = detailActs.length === 1 ? '1' : '';
+  $('d-fab').innerHTML = detailActs.length === 1 ? detailActs[0].ic(24) : ICON.dots(24);
   $('d-fab-items').innerHTML = detailActs.map(a=>
     `<button data-d-act="${a.a}" class="${a.cls}">${a.ic(16)}${esc(a.label)}</button>`).join('');
   wrap.classList.remove('hidden');
 }
 function toggleDetailFab(){
   const wrap = $('d-fab-wrap');
+  if(wrap.dataset.single === '1' && detailActs[0]){ detailAction(detailActs[0].a); return; }
   if(wrap.classList.contains('open')){ closeDetailFab(); return; }
   wrap.classList.add('open'); haptic('tap');
   $('d-fab').innerHTML = ICON.x(24);
@@ -2811,7 +2866,8 @@ function closeDetailFab(){
   const wrap = $('d-fab-wrap');
   if(wrap && wrap.classList.contains('open')){
     wrap.classList.remove('open');
-    const f = $('d-fab'); if(f) f.innerHTML = ICON.dots(24);
+      const f = $('d-fab');
+    if(f) f.innerHTML = detailActs.length === 1 && detailActs[0] ? detailActs[0].ic(24) : ICON.dots(24);
   }
   const sc = $('d-fab-scrim'); if(sc) sc.remove();
 }
@@ -2891,7 +2947,7 @@ function newFormBuffer(){
   return { editingId:null, type:'tasks',
     label:null, labelColor:null,
     newLabelColor:'green', labelEdit:false, assignee:null, repeat:null,
-    date:'', time:'', imageIds:[], removedImageIds:[], files:[], removedFileIds:[], voice:null, removedVoiceIds:[],
+    date:'', time:'', imageIds:[], removedImageIds:[], files:[], removedFileIds:[], voice:null, removedVoiceIds:[], lockOn:false, lockKeep:false,
     visibility:S.members.map(m=>m.id) };
 }
 function openForm(editId){
@@ -2904,6 +2960,7 @@ function openForm(editId){
     F.imageIds = [...(t.imageIds||[])];
     F.files = [...(t.files||[])];
     F.voice = t.voice ? {...t.voice} : null;
+    F.lockOn = !!t.lock; F.lockKeep = !!t.lock;
     F.visibility = (t.visibleTo||[]).length ? [...t.visibleTo] : S.members.map(m=>m.id);
     const sp = splitLocal(t.deadline); F.date = sp.date; F.time = sp.time;
     $('f-title').value = t.title||'';
@@ -2927,7 +2984,7 @@ function openForm(editId){
     F.type = S.currentTab;
   }
   $('f-title').classList.remove('err');
-  renderFormType(); renderFormSelectors(); renderFormPhotos(); renderFormDocs(); renderFormVoice(); renderPlan();
+  renderFormType(); renderFormSelectors(); renderFormPhotos(); renderFormDocs(); renderFormVoice(); renderLockRow(); renderPlan();
   $('ctx-overlay').classList.add('hidden');
   show('form');
   // высота описания считается только когда форма видима
@@ -3082,7 +3139,7 @@ async function toggleFormVoice(){
 }
 function renderFormDocs(){
   F.files = F.files || [];
-  $('f-doc-cnt').textContent = `${F.files.length} / 5`;
+  $('f-doc-cnt').textContent = `(${F.files.length} из 5)`;
   $('f-docs').innerHTML = F.files.map(f=>fileRowHTML(f, true)).join('');
 }
 async function handleDocs(files){
@@ -3122,7 +3179,7 @@ async function openStoredFile(id, name, type){
   }catch(e){ toast('Не удалось открыть файл','⚠️'); }
 }
 function renderFormPhotos(){
-  $('f-photo-cnt').textContent = `${F.imageIds.length} / 5`;
+  $('f-photo-cnt').textContent = `(${F.imageIds.length} из 5)`;
   $('f-photos').innerHTML = F.imageIds.map((id,i)=>`
     <div class="pv-cell"><img data-img="${id}" alt=""><button data-rm-img="${i}">✕</button></div>`).join('');
   hydrateImages($('f-photos'));
@@ -3186,6 +3243,9 @@ async function saveForm(asDraft){
       label:F.label, labelColor:F.labelColor, assignedTo:F.type==='tasks'?F.assignee:null,
       visibleTo:F.type==='notes'?[...F.visibility]:[], imageIds:[...F.imageIds],
       files:[...(F.files||[])], voice:F.voice||null,
+      lock: F.type==='notes' && F.lockOn
+              ? (($('f-lock-pass').value.trim() ? lockHash($('f-lock-pass').value.trim()) : (F.lockKeep ? t.lock : null)))
+              : null,
       checklist, updatedBy:S.currentUser, updatedAt:Date.now() });
     persist(); toast('Сохранено','✓');
     activeTaskId = t.id; show('detail');
@@ -3204,7 +3264,9 @@ function finalizeCreate(assignee, asDraft){
     assignedTo:F.type==='tasks'?(assignee||null):null, status:'pending', completed:false,
     visibleTo:F.type==='notes'?[...F.visibility]:[],
     createdBy:S.currentUser, updatedBy:S.currentUser,
-    isDraft:!!asDraft, pinnedBy:[], imageIds:[...F.imageIds], files:[...(F.files||[])], voice:F.voice||null, checklist:p.checklist,
+    lock: F.type==='notes' && F.lockOn && $('f-lock-pass').value.trim() ? lockHash($('f-lock-pass').value.trim()) : null,
+    isDraft:!!asDraft, pinnedBy:[], accepted: F.type==='tasks' && F.assignee===S.currentUser,
+    imageIds:[...F.imageIds], files:[...(F.files||[])], voice:F.voice||null, checklist:p.checklist,
     updatedAt:Date.now(),
   };
   S.tasks.push(nt);
@@ -3234,6 +3296,7 @@ function cancelForm(){
   doCancelForm();
 }
 async function doCancelForm(){
+  dictStop();
   formBaseline = null;
   /* новые фото, добавленные в незакрытую форму — вычистить */
   if(F && !F.editingId){
@@ -3246,6 +3309,94 @@ async function doCancelForm(){
     for(const id of F.imageIds){ if(!keep.has(id)){ try{ await DB.del('img', id); }catch(e){} urlCache.delete(id); } }
   }
   F.editingId ? show('detail') : show('main');
+}
+
+/* ---------- ПАРОЛЬ НА ЗАМЕТКУ ---------- */
+// простой хеш (не криптостойкий, но защищает от случайного просмотра)
+function lockHash(pass){
+  let h = 5381;
+  const s = 'fh:' + String(pass||'');
+  for(let i=0;i<s.length;i++) h = ((h*33) ^ s.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+let unlocked = new Set();          // id заметок, открытых в этой сессии
+let lockPending = null;            // {taskId, then}
+function isLocked(t){ return !!(t && t.lock && !unlocked.has(t.id)); }
+function askUnlock(taskId, then){
+  const t = task(taskId); if(!t) return;
+  lockPending = { taskId, then };
+  $('lock-msg').textContent = 'Введите пароль, чтобы открыть «' + (t.title||'заметку') + '»';
+  $('lock-input').value = '';
+  $('lock-overlay').classList.remove('hidden');
+  setTimeout(()=>$('lock-input').focus(), 160);
+}
+function tryUnlock(){
+  const p = $('lock-input').value;
+  const t = lockPending && task(lockPending.taskId);
+  if(!t) { $('lock-overlay').classList.add('hidden'); return; }
+  if(lockHash(p) === t.lock){
+    unlocked.add(t.id);
+    $('lock-overlay').classList.add('hidden');
+    haptic('ok');
+    const fn = lockPending.then; lockPending = null;
+    if(fn) fn();
+  } else {
+    haptic('err');
+    $('lock-input').value = '';
+    toast('Неверный пароль','⚠️');
+  }
+}
+function renderLockRow(){
+  const row = $('f-lock-row'); if(!row) return;
+  const btn = $('f-lock-btn'), inp = $('f-lock-pass'), sub = $('f-lock-sub');
+  btn.innerHTML = '<i></i>';
+  btn.classList.toggle('on', !!F.lockOn);
+  inp.classList.toggle('hidden', !F.lockOn);
+  if(F.lockOn && F.lockKeep) sub.textContent = 'Пароль уже задан — оставьте поле пустым, чтобы не менять';
+  else sub.textContent = 'Открыть можно будет только по паролю';
+}
+
+/* ---------- ДИКТОВКА (речь → текст) ---------- */
+let dictRec = null, dictTarget = null, dictBtn = null, dictBase = '';
+function dictSupported(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+function dictStop(){
+  if(dictRec){ try{ dictRec.stop(); }catch(e){} }
+  if(dictBtn) dictBtn.classList.remove('rec');
+  dictRec = null; dictBtn = null; dictTarget = null;
+}
+function dictStart(fieldId, btn){
+  if(dictRec){ dictStop(); return; }
+  if(!dictSupported()){ toast('Браузер не поддерживает распознавание речи','⚠️'); return; }
+  const el = $(fieldId); if(!el) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const r = new SR();
+  r.lang = 'ru-RU';
+  r.continuous = true;
+  r.interimResults = true;
+  dictRec = r; dictBtn = btn; dictTarget = el;
+  dictBase = el.value ? el.value.replace(/\s*$/,'') + ' ' : '';
+  btn.classList.add('rec');
+  haptic('med');
+  toast('Говорите…','🎙️');
+  let finalTxt = '';
+  r.onresult = e=>{
+    let interim = '';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal) finalTxt += t;
+      else interim += t;
+    }
+    el.value = dictBase + finalTxt + interim;
+    if(fieldId === 'f-desc') autoGrowDesc();
+    el.dispatchEvent(new Event('input', {bubbles:true}));
+  };
+  r.onerror = ev=>{
+    if(ev.error === 'not-allowed'){ toast('Нет доступа к микрофону','🎙️'); openPermSheet(); }
+    else if(ev.error !== 'aborted') toast('Не удалось распознать','⚠️');
+    dictStop();
+  };
+  r.onend = ()=>{ if(dictBtn) dictBtn.classList.remove('rec'); dictRec = null; dictBtn = null; };
+  try{ r.start(); }catch(e){ dictStop(); }
 }
 
 /* ---------- SOS ---------- */
@@ -3659,7 +3810,8 @@ async function playVoice(id, btn){
     const durEl = chip?.querySelector('.vc-dur');
     const total = Number(chip?.dataset.dur) || 0;
     a.ontimeupdate = ()=>{
-      const d = isFinite(a.duration) && a.duration ? a.duration : total;
+      // у webm-записей duration часто Infinity — берём сохранённую длительность
+      const d = (total && total > 0) ? total : (isFinite(a.duration) && a.duration ? a.duration : 0);
       if(fill && d) fill.style.width = Math.min(100, (a.currentTime/d)*100) + '%';
       if(durEl) durEl.textContent = fmtDur(a.currentTime);
     };
@@ -3697,11 +3849,11 @@ async function permState(name){
     }catch(e){}
     return 'prompt';
   }
-  if(name==='microphone'){
+  if(name==='microphone' || name==='camera'){
     if(!navigator.mediaDevices?.getUserMedia) return 'unsupported';
     try{
       if(navigator.permissions?.query){
-        const r = await navigator.permissions.query({name:'microphone'});
+        const r = await navigator.permissions.query({name});
         return r.state;
       }
     }catch(e){}
@@ -3715,7 +3867,9 @@ const PERMS = [
   { key:'geolocation',   icon:()=>ICON.cal(18),  title:'Геопозиция',
     why:'Нужна для правильных часовых поясов при синхронизации напоминаний' },
   { key:'microphone',    icon:()=>ICON.mic(18),  title:'Микрофон',
-    why:'Для голосовых меток в делах, заметках и сообщений в чате' },
+    why:'Для голосовых меток, диктовки и звонков' },
+  { key:'camera',        icon:()=>ICON.cam(18),  title:'Камера',
+    why:'Нужна для видеозвонков членам семьи' },
 ];
 async function renderPermList(){
   const box = $('perm-list'); if(!box) return;
@@ -3746,12 +3900,13 @@ async function askPerm(key){
       ()=>{ toast('Доступ к геопозиции отклонён','⚠️'); res(); },
       { timeout:12000 }));
   }
-  if(key==='microphone'){
+  if(key==='microphone' || key==='camera'){
+    const isCam = key==='camera';
     try{
-      const st = await navigator.mediaDevices.getUserMedia({audio:true});
+      const st = await navigator.mediaDevices.getUserMedia(isCam?{video:true}:{audio:true});
       st.getTracks().forEach(t=>t.stop());
-      toast('Микрофон разрешён','🎙️');
-    }catch(e){ toast('Доступ к микрофону отклонён','⚠️'); }
+      toast(isCam?'Камера разрешена':'Микрофон разрешён', isCam?'📷':'🎙️');
+    }catch(e){ toast(isCam?'Доступ к камере отклонён':'Доступ к микрофону отклонён','⚠️'); }
   }
   renderPermList();
   if(activeScreen==='geo') renderGeoPerm();
@@ -3990,7 +4145,7 @@ function renderChat(){
     const stack = prevAuthor === m.author && (m.at - prevAt) < 5*60e3;
     prevAuthor = m.author; prevAt = m.at;
     const imgs = (m.imageIds||[]).length
-      ? `<div class="b-imgs">${m.imageIds.map((id,i)=>`<img data-img="${id}" data-chatlb="${m.id}" data-idx="${i}" alt="">`).join('')}</div>` : '';
+      ? `<div class="b-imgs n${Math.min(6,m.imageIds.length)}">${m.imageIds.map((id,i)=>`<img data-img="${id}" data-chatlb="${m.id}" data-idx="${i}" alt="">`).join('')}</div>` : '';
     const files = (m.files||[]).length
       ? `<div class="b-files">${m.files.map(f=>{
           const k = fileKind(f.name,f.type);
@@ -4002,7 +4157,10 @@ function renderChat(){
     const sosMap = m.geo ? miniMapHTML(m.geo) : '';
     const time = new Date(m.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
     // кто прочитал (кроме автора)
-    const readers = (m.readBy||[]).filter(id=>id!==m.author).map(id=>member(id)).filter(Boolean).slice(0,4);
+    // отметки о прочтении — только на своих сообщениях, себя не показываем
+    const readers = mine
+      ? (m.readBy||[]).filter(id=>id!==m.author && id!==S.currentUser).map(id=>member(id)).filter(Boolean).slice(0,4)
+      : [];
     const readHtml = readers.length
       ? `<span class="b-read">${readers.map(r=>`<span class="ava r-ava" style="--mc:${r.color}" title="${esc(r.name)}">${r.avatarId?`<img data-img="${r.avatarId}" alt="">`:esc(r.name.trim()[0].toUpperCase())}</span>`).join('')}</span>`
       : '';
@@ -4029,10 +4187,7 @@ function renderChat(){
   });
   box.innerHTML = html;
   hydrateImages(box);
-  requestAnimationFrame(()=>{
-    const sc = $('chat-scroll');            // прокручивается вся область вместе с шапкой
-    if(sc) sc.scrollTop = sc.scrollHeight;
-  });
+  requestAnimationFrame(()=>{ box.scrollTop = box.scrollHeight; });
   chatToggleSendMic();
   markChatSeen();
   clearTimeout(renderChat._pend);
@@ -4278,7 +4433,7 @@ function renderFamily(){
         ${avaHTML(m,'fam-ring')}${CAM_SVG}
       </button>
       <div class="fam-info"><b>${esc(m.name)}</b><span>${open ? 'Открытых дел: '+open : 'Нет открытых дел'}</span></div>
-      ${m.id!==S.currentUser?`<button class="fam-call" data-call-to="${m.id}" title="Позвонить">${ICON.mic(17)}</button>`:''}
+      ${m.id!==S.currentUser?`<button class="fam-call" data-call-to="${m.id}" title="Позвонить">${ICON.phone(17)}</button>`:''}
       ${S.members.length>1?`<button class="fam-del" data-del-mem="${m.id}">✕</button>`:''}
     </div>`;
   }).join('');
@@ -4647,6 +4802,10 @@ document.addEventListener('click', e=>{
     const f = (tk?.files||[]).find(z=>z.id===id);
     openStoredFile(id, f?.name, f?.type); return; }
   if(x = el('[data-rm-img]')){ const i=Number(x.dataset.rmImg); F.removedImageIds.push(F.imageIds[i]); F.imageIds.splice(i,1); renderFormPhotos(); return; }
+  if(el('#f-lock-btn')){ F.lockOn = !F.lockOn; renderLockRow(); haptic('tap'); return; }
+  if(el('#lock-ok')){ tryUnlock(); return; }
+  if(el('#lock-overlay') && !el('.modal')){ $('lock-overlay').classList.add('hidden'); lockPending=null; return; }
+  if(x = el('[data-dict]')){ dictStart(x.dataset.dict, x); return; }
   if(x = el('[data-md]')){ mdWrap(x.dataset.md); return; }
   if(el('#md-ok')){ mdConfirm(); return; }
   if(el('#md-paste')){ pasteUrl(); return; }
@@ -4809,7 +4968,7 @@ document.addEventListener('keydown', e=>{
       S = Object.assign(defaultState(), saved);
       S.prefs = S.prefs || {};
       S.chat = S.chat || []; S.chatSeen = S.chatSeen || {}; S.geo = S.geo || {};
-      S.tasks.forEach(t=>{ t.pinnedBy=t.pinnedBy||[]; t.imageIds=t.imageIds||[]; t.files=t.files||[]; t.voice=t.voice||null; t.checklist=t.checklist||[]; t.visibleTo=t.visibleTo||[]; delete t.status; });
+      S.tasks.forEach(t=>{ t.pinnedBy=t.pinnedBy||[]; t.imageIds=t.imageIds||[]; t.files=t.files||[]; t.voice=t.voice||null; t.lock=t.lock||null; t.checklist=t.checklist||[]; t.visibleTo=t.visibleTo||[]; delete t.status; });
       S.members.forEach((m,i)=>{ if(!MEMBER_COLORS.includes(m.color)) m.color = MEMBER_COLORS[i % MEMBER_COLORS.length]; });
     } else {
       await migrateLegacy();
@@ -4820,7 +4979,9 @@ document.addEventListener('keydown', e=>{
   }
   S.tasks = S.tasks.filter(t=>!t.deleted || (Date.now()-(t.updatedAt||0)) < 30*864e5);
   const mdIco = {bold:ICON.bold(16),italic:ICON.italic(16),strike:ICON.strike(16),h:ICON.head(16),list:ICON.list(16),link:ICON.link(16)};
-  document.querySelectorAll('#md-toolbar .md-btn').forEach(b=>b.innerHTML = mdIco[b.dataset.md]||'');
+  document.querySelectorAll('#md-toolbar .md-btn').forEach(b=>{ if(b.dataset.md) b.innerHTML = mdIco[b.dataset.md]||''; });
+  document.querySelectorAll('[data-dict]').forEach(b=>b.innerHTML = ICON.mic(b.classList.contains('md-btn')?16:17));
+  if(!dictSupported()) document.querySelectorAll('[data-dict]').forEach(b=>b.style.display='none');
   const _mp = $('md-paste'); if(_mp) _mp.innerHTML = ICON.link(16);
   const _cc = $('chat-clip'); if(_cc) _cc.innerHTML = ICON.clip(20);
   const _gr = $('geo-refresh'); if(_gr) _gr.innerHTML = ICON.repeat(17);
