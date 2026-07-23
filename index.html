@@ -148,13 +148,13 @@ body.no-anim *{animation:none!important}
 .vc-play{width:32px;height:32px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .18s var(--spring)}
 .voice-chip.mine .vc-play{background:#fff;color:var(--acc)}
 .vc-play:active{transform:scale(.88)}
-.vc-wave{display:flex;align-items:center;gap:2.5px;height:22px;flex:1;min-width:56px}
-.vc-wave i{flex:1;background:var(--line);border-radius:99px;min-width:2.5px}
-.voice-chip.mine .vc-wave i{background:rgba(255,255,255,.55)}
-.vc-wave i:nth-child(1){height:32%}.vc-wave i:nth-child(2){height:62%}.vc-wave i:nth-child(3){height:100%}
-.vc-wave i:nth-child(4){height:48%}.vc-wave i:nth-child(5){height:80%}.vc-wave i:nth-child(6){height:38%}
-.vc-wave i:nth-child(7){height:92%}.vc-wave i:nth-child(8){height:54%}.vc-wave i:nth-child(9){height:70%}
-.vc-wave i:nth-child(10){height:34%}
+.voice-chip.full{display:flex;width:100%}
+.vc-wave{position:relative;display:flex;align-items:center;gap:2.5px;height:24px;flex:1;min-width:56px;overflow:hidden}
+.vc-wave i{position:relative;z-index:2;flex:1;background:var(--line);border-radius:99px;min-width:2px}
+.voice-chip.mine .vc-wave i{background:rgba(255,255,255,.5)}
+.vc-fill{position:absolute;left:0;top:0;bottom:0;width:0;z-index:1;border-radius:4px;
+  background:color-mix(in srgb,var(--acc) 28%,transparent);transition:width .12s linear}
+.voice-chip.mine .vc-fill{background:rgba(255,255,255,.35)}
 .vc-dur{font-size:11.5px;font-weight:750;color:var(--mut);flex-shrink:0;font-variant-numeric:tabular-nums}
 .voice-chip.mine .vc-dur{color:rgba(255,255,255,.9)}
 .vc-rm{width:24px;height:24px;border-radius:50%;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -212,7 +212,6 @@ body.no-anim *{animation:none!important}
 .geo-row .gi span.off{color:var(--rose);font-weight:700}
 .geo-go{width:34px;height:34px;border-radius:11px;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .18s var(--spring)}
 .geo-go:active{transform:scale(.88)}
-.geo-go.live{background:var(--rose);color:#fff;animation:blink 1.4s infinite}
 
 /* ===== ЧАТ ===== */
 .hdr-ava-btn{padding:0;background:none;border-radius:50%}
@@ -234,12 +233,14 @@ body.no-anim *{animation:none!important}
 .msg.mine .b-text a{color:#fff;text-decoration:underline}
 .b-time{font-size:9.5px;color:var(--faint);margin-top:3px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:5px}
 .b-read{display:inline-flex;align-items:center;margin-right:1px}
-.r-ava{width:8px;height:8px;font-size:5px;border-radius:50%;box-shadow:0 0 0 1px var(--card);flex-shrink:0}
+.r-ava{width:12px;height:12px;font-size:7px;border-radius:50%;box-shadow:0 0 0 1px var(--card);flex-shrink:0}
 .msg.mine .r-ava{box-shadow:0 0 0 1px var(--acc)}
-.b-read .r-ava:not(:first-child){margin-left:-2.6px}
+.b-read .r-ava:not(:first-child){margin-left:-4px}
 .b-ok{display:inline-flex;color:var(--acc);opacity:.85}
 .msg.mine .b-ok{color:rgba(255,255,255,.9)}
 .b-retry{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--rose);color:#fff}
+.b-sending{width:9px;height:9px;border-radius:50%;border:1.5px solid currentColor;border-top-color:transparent;opacity:.65;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
 /* +6px между сообщениями разных людей */
 .msg:not(.stack){margin-top:6px}
 .msg.mine .b-time{color:rgba(255,255,255,.75)}
@@ -252,7 +253,9 @@ body.no-anim *{animation:none!important}
 .b-file .fi{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0}
 .b-file b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
 .chat-compose{background:var(--glass);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);border-top:1px solid var(--ring);padding:9px 12px calc(94px + env(safe-area-inset-bottom))}
+.chat-row-stack{position:relative}
 .chat-input-row{display:flex;align-items:flex-end;gap:8px}
+.chat-input-row.rec-overlay{position:absolute;inset:0;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:3}
 .chat-input-row textarea{flex:1;min-height:42px;max-height:130px;resize:none;border:1.5px solid var(--line);border-radius:21px;background:var(--card);padding:11px 14px;font-family:var(--font);font-size:14px;line-height:1.4;outline:none;color:var(--ink)}
 .chat-input-row textarea:focus{border-color:var(--acc)}
 .chat-clip,.chat-send{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s var(--spring)}
@@ -963,18 +966,20 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         <span>Редактирование</span>
         <button type="button" id="chat-edit-cancel">Отмена</button>
       </div>
+      <div class="chat-row-stack" id="chat-row-stack">
       <div class="chat-input-row" id="chat-row-normal">
         <button class="chat-clip" id="chat-clip" title="Прикрепить"></button>
         <textarea id="chat-input" rows="1" placeholder="Сообщение…"></textarea>
         <button class="chat-clip chat-mic" id="chat-mic" title="Удерживайте для записи"></button>
         <button class="chat-send hidden" id="chat-send" title="Отправить"></button>
       </div>
-      <div class="chat-input-row hidden" id="chat-row-rec">
+      <div class="chat-input-row rec-overlay hidden" id="chat-row-rec">
         <div class="chat-rec" id="chat-rec">
           <span class="rdot"></span><span class="rtime" id="chat-rec-time">0:00</span>
           <span class="rhint" id="chat-rec-hint">← смахните, чтобы отменить</span>
         </div>
         <button class="chat-send" id="chat-mic-stop"></button>
+      </div>
       </div>
       <input type="file" id="chat-file" multiple class="hidden">
     </div>
@@ -1406,8 +1411,6 @@ const defaultState = () => ({
   prefs:{},  // per-user: {catFilter, sort, view, calMonth}
   chat:[],   // [{id, author, text, imageIds[], files[], at, editedAt, deleted}]
   geo:{},    // { memberId: {lat, lng, acc, at} }
-  listen:{}, // { targetId: {by, at, done} } — запросы удалённой записи
-  listenClips:{}, // { targetId: {audioId, dur, at, by} }
   chatSeen:{}, // per-user: id последнего прочитанного сообщения
   familyCode:null, syncRev:0, pendingImg:[], metaUpdatedAt:0,
   members:[
@@ -1784,7 +1787,7 @@ function setSyncStatus(s){
   syncState = s;
   if(!$('screen-family').classList.contains('hidden')) renderSyncCard();
 }
-function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], chat:st.chat||[], geo:st.geo||{}, listen:st.listen||{}, listenClips:st.listenClips||{}, generalAvatarId:st.generalAvatarId||null, metaUpdatedAt:st.metaUpdatedAt||0, tz:(typeof st.tz==='number'?st.tz:new Date().getTimezoneOffset()) }; }
+function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], chat:st.chat||[], geo:st.geo||{}, generalAvatarId:st.generalAvatarId||null, metaUpdatedAt:st.metaUpdatedAt||0, tz:(typeof st.tz==='number'?st.tz:new Date().getTimezoneOffset()) }; }
 function mergeStates(local, remote){
   local = normSnap(local); remote = normSnap(remote);
   const map = new Map();
@@ -1814,8 +1817,6 @@ function mergeStates(local, remote){
       });
       return g;
     })(),
-    listen: (()=>{ const o={}; [remote.listen||{}, local.listen||{}].forEach(src=>Object.keys(src).forEach(k=>{ if(!o[k]||(src[k]?.at||0)>=(o[k]?.at||0)) o[k]=src[k]; })); return o; })(),
-    listenClips: (()=>{ const o={}; [remote.listenClips||{}, local.listenClips||{}].forEach(src=>Object.keys(src).forEach(k=>{ if(!o[k]||(src[k]?.at||0)>=(o[k]?.at||0)) o[k]=src[k]; })); return o; })(),
     tasks: [...map.values()],
     metaUpdatedAt: Math.max(local.metaUpdatedAt||0, remote.metaUpdatedAt||0),
     tz: new Date().getTimezoneOffset(),
@@ -1892,8 +1893,6 @@ const SYNC = {
     S.members = merged.members; S.labels = merged.labels;
     S.chat = merged.chat || [];
     S.geo = merged.geo || {};
-    S.listen = merged.listen || {}; S.listenClips = merged.listenClips || {};
-    maybeServeListen();
     S.tasks = merged.tasks; S.metaUpdatedAt = merged.metaUpdatedAt;
     S.syncRev = rev;
     if(S.currentUser && !member(S.currentUser)) S.currentUser = null;
@@ -2054,8 +2053,7 @@ function show(name){
   activeScreen = name;
   $('bottom-nav').classList.toggle('hidden', name==='auth' || name==='form' || name==='geo');
   if(name==='chat') renderChat();
-  if(name==='geo'){ renderGeo(); startGeo(); maybeServeListen(); }
-  else { if(activeScreen==='geo') stopMyListenSessions(); stopGeo(); }
+  if(name==='geo'){ renderGeo(); startGeo(); } else stopGeo();
   markUiState();
   window.scrollTo(0,0);
   // history: main — база; всё остальное добавляет запись, чтобы «назад» возвращал в приложение
@@ -2607,7 +2605,7 @@ function renderDetail(){
 
   const voiceHtml = t.voice
     ? `<div class="d-sec" style="margin-top:16px"><b>Голосовая метка</b></div>
-       <div style="margin-top:8px">${voiceChipHTML(t.voice)}</div>`
+       <div style="margin-top:8px">${voiceChipHTML(t.voice,{full:true})}</div>`
     : '';
   const tFiles = t.files || [];
   const filesHtml = tFiles.length
@@ -2946,7 +2944,7 @@ function fileRowHTML(f, removable){
 function renderFormVoice(){
   const box = $('f-voice-box'); if(!box) return;
   if(F.voice){
-    box.innerHTML = voiceChipHTML(F.voice, {removable:true});
+    box.innerHTML = voiceChipHTML(F.voice, {removable:true, full:true});
   } else {
     const rec = !!vr;
     box.innerHTML = `<button type="button" class="v-rec-btn ${rec?'rec':''}" id="f-voice-btn">
@@ -3188,13 +3186,20 @@ function fmtDur(s){ s=Math.max(0,Math.round(s||0)); return Math.floor(s/60)+':'+
 
 // плеер голосовой метки (используется в делах, заметках, чате)
 let curAudio = null, curAudioBtn = null;
+function vcReset(btn){
+  const chip = btn?.closest('.voice-chip'); if(!chip) return;
+  const fill = chip.querySelector('.vc-fill'); if(fill) fill.style.width = '0%';
+  const dur = chip.querySelector('.vc-dur');
+  if(dur) dur.textContent = fmtDur(Number(chip.dataset.dur)||0);
+  btn.innerHTML = ICON.play(16);
+}
 async function playVoice(id, btn){
   if(curAudio && curAudioBtn===btn){        // пауза/возобновление
     if(curAudio.paused){ curAudio.play(); btn.innerHTML=ICON.pause(16); }
     else { curAudio.pause(); btn.innerHTML=ICON.play(16); }
     return;
   }
-  if(curAudio){ curAudio.pause(); if(curAudioBtn) curAudioBtn.innerHTML=ICON.play(16); curAudio=null; }
+  if(curAudio){ curAudio.pause(); if(curAudioBtn) vcReset(curAudioBtn); curAudio=null; curAudioBtn=null; }
   try{
     let blob = await DB.get('img', id) || await SYNC.imgGet(id);
     if(!blob){ toast('Голосовая метка недоступна','⚠️'); return; }
@@ -3202,15 +3207,27 @@ async function playVoice(id, btn){
     const a = new Audio(url);
     curAudio = a; curAudioBtn = btn;
     btn.innerHTML = ICON.pause(16);
-    a.onended = ()=>{ btn.innerHTML=ICON.play(16); URL.revokeObjectURL(url); if(curAudioBtn===btn){curAudio=null;curAudioBtn=null;} };
+    const chip = btn.closest('.voice-chip');
+    const fill = chip?.querySelector('.vc-fill');
+    const durEl = chip?.querySelector('.vc-dur');
+    const total = Number(chip?.dataset.dur) || 0;
+    a.ontimeupdate = ()=>{
+      const d = isFinite(a.duration) && a.duration ? a.duration : total;
+      if(fill && d) fill.style.width = Math.min(100, (a.currentTime/d)*100) + '%';
+      if(durEl) durEl.textContent = fmtDur(a.currentTime);
+    };
+    a.onended = ()=>{ vcReset(btn); URL.revokeObjectURL(url); if(curAudioBtn===btn){curAudio=null;curAudioBtn=null;} };
     a.play();
   }catch(e){ toast('Не удалось воспроизвести','⚠️'); }
 }
 function voiceChipHTML(v, opts={}){
-  // v = {id, dur}
-  return `<div class="voice-chip ${opts.mine?'mine':''}" data-voice="${v.id}">
+  const bars = 22;
+  const h = [34,58,86,46,72,38,94,52,68,40,80,60,44,90,50,74,36,64,88,42,56,70];
+  let w = '';
+  for(let i=0;i<bars;i++) w += `<i style="height:${h[i%h.length]}%"></i>`;
+  return `<div class="voice-chip ${opts.mine?'mine':''} ${opts.full?'full':''}" data-voice="${v.id}" data-dur="${v.dur||0}">
     <button type="button" class="vc-play">${ICON.play(16)}</button>
-    <span class="vc-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    <span class="vc-wave"><span class="vc-fill"></span>${w}</span>
     <span class="vc-dur">${fmtDur(v.dur)}</span>
     ${opts.removable?`<button type="button" class="vc-rm" data-rmvoice="${v.id}">${ICON.x(14)}</button>`:''}
   </div>`;
@@ -3340,7 +3357,7 @@ async function pushMyLocation(force, bg){
   }
   geoLastPush = Date.now();
   navigator.geolocation.getCurrentPosition(pos=>{
-    S.geo = S.geo || {}; S.listen = S.listen || {}; S.listenClips = S.listenClips || {};
+    S.geo = S.geo || {};
     S.geo[S.currentUser] = { lat:pos.coords.latitude, lng:pos.coords.longitude,
                              acc:Math.round(pos.coords.accuracy||0), at:Date.now() };
     persist();
@@ -3394,11 +3411,7 @@ function renderGeoList(){
     return `<div class="geo-row">
       ${avaHTML(m,'')}
       <div class="gi"><b>${esc(m.name)}</b>${status}</div>
-      <div style="display:flex;gap:6px">
-        ${(S.listenClips||{})[m.id]?.audioId ? `<button class="geo-go" data-listenplay="${m.id}" title="Прослушать запись">${ICON.play(16)}</button>`:''}
-        ${m.id!==S.currentUser ? `<button class="geo-go ${listenActive(m.id)?'live':''}" data-listen="${m.id}" title="${listenActive(m.id)?'Идёт прослушивание — выключить':'Включить микрофон удалённо'}">${ICON.mic(16)}</button>`:''}
-        ${g?`<button class="geo-go" data-geogo="${m.id}" title="Открыть в Google Maps">${ICON.send(16)}</button>`:''}
-      </div>
+      ${g?`<button class="geo-go" data-geogo="${m.id}" title="Открыть в Google Maps">${ICON.send(16)}</button>`:''}
     </div>`;
   }).join('');
   $('geo-list').innerHTML = rows || '<div class="empty" style="padding:26px"><span>Никто не выбран</span></div>';
@@ -3437,61 +3450,6 @@ async function renderGeo(){
     else geoMap.fitBounds(bounds, { padding:[40,40], maxZoom:16 });
     hydrateImages($('geo-map'));
   });
-}
-// ===== СЕССИЯ ПРОСЛУШКИ =====
-// РОДИТЕЛЬ: включает/выключает сессию у члена семьи
-const listenActive = t => { const r=(S.listen||{})[t]; return !!(r && r.active); };
-function requestListen(targetId){
-  const m = member(targetId); if(!m) return;
-  S.listen = S.listen || {};
-  if(listenActive(targetId)){                      // выключаем
-    S.listen[targetId] = { ...S.listen[targetId], active:false, at:Date.now() };
-    persist(); renderGeoList();
-    toast(`Прослушивание «${m.name}» выключено`,'🎙️');
-    return;
-  }
-  confirmDlg('Включить микрофон?',
-    `Устройство «${m.name}» будет непрерывно записывать звук отрезками и присылать сюда, пока вы не выключите. Работает, только если приложение у него запущено.`,
-    'Включить', false, ()=>{
-      S.listen[targetId] = { by:S.currentUser, at:Date.now(), active:true, nonce:uid('n_') };
-      persist(); renderGeoList();
-      pushEvent('🎙️ Запрос микрофона', 'Требуется запись окружения', 'listen-'+targetId+'-'+Date.now(), targetId);
-      toast('Сессия начата — записи будут появляться здесь','🎙️');
-    });
-}
-// выключить все сессии, которые запустил я (при выходе из секретного режима)
-function stopMyListenSessions(){
-  let changed = false;
-  Object.keys(S.listen||{}).forEach(k=>{
-    const r = S.listen[k];
-    if(r?.active && r.by === S.currentUser){ S.listen[k] = {...r, active:false, at:Date.now()}; changed = true; }
-  });
-  if(changed) persist();
-}
-// ЦЕЛЬ: пока сессия активна — пишем отрезками по 15 секунд
-let listenLoop = false;
-async function maybeServeListen(){
-  if(!S.currentUser || listenLoop) return;
-  const req = (S.listen||{})[S.currentUser];
-  if(!req || !req.active) return;
-  listenLoop = true;
-  try{
-    while(((S.listen||{})[S.currentUser]||{}).active){
-      const ok = await voiceStart();
-      if(!ok) break;
-      await new Promise(r=>setTimeout(r, 15000));
-      const v = await voiceStop();
-      if(!((S.listen||{})[S.currentUser]||{}).active) break;
-      if(v){
-        S.listenClips = S.listenClips || {};
-        S.listenClips[S.currentUser] = { audioId:v.id, dur:v.dur, at:Date.now(), by:req.by };
-        persist();
-      }
-      await new Promise(r=>setTimeout(r, 1500));
-    }
-  }catch(e){}
-  if(vr) voiceCancel();
-  listenLoop = false;
 }
 function startGeo(){
   pushMyLocation(true);
@@ -3578,11 +3536,17 @@ function renderChat(){
       ? `<span class="b-read">${readers.map(r=>`<span class="ava r-ava" style="--mc:${r.color}" title="${esc(r.name)}">${r.avatarId?`<img data-img="${r.avatarId}" alt="">`:esc(r.name.trim()[0].toUpperCase())}</span>`).join('')}</span>`
       : '';
     // статус доставки (только для своих)
-    const statusHtml = mine
-      ? (m.sent === false
-          ? `<button class="b-retry" data-retry="${m.id}" title="Не отправлено — повторить">${ICON.repeat(11)}</button>`
-          : m.sent === undefined ? '' : `<span class="b-ok">${ICON.check(11)}</span>`)
-      : '';
+    let statusHtml = '';
+    if(mine){
+      if(m.sent === false){
+        const waiting = Date.now() - (m.at||0) < 5000;    // 5 сек на доставку
+        statusHtml = waiting
+          ? `<span class="b-sending" data-pending="${m.id}"></span>`
+          : `<button class="b-retry" data-retry="${m.id}" title="Не отправлено — повторить">${ICON.repeat(11)}</button>`;
+      } else if(m.sent !== undefined){
+        statusHtml = `<span class="b-ok">${ICON.check(11)}</span>`;
+      }
+    }
     html += `<div class="msg ${mine?'mine':''} ${stack?'stack':''}" data-msg="${m.id}">
       ${mine?'':avaHTML(au,'m-ava')}
       <div class="bubble">
@@ -3597,6 +3561,8 @@ function renderChat(){
   requestAnimationFrame(()=>{ box.scrollTop = box.scrollHeight; });
   chatToggleSendMic();
   markChatSeen();
+  clearTimeout(renderChat._pend);
+  if(box.querySelector('[data-pending]')) renderChat._pend = setTimeout(()=>{ if(activeScreen==='chat') renderChat(); }, 5200);
 }
 function renderChatAttach(){
   const row = $('chat-attach-row');
@@ -3707,7 +3673,6 @@ async function chatRecStart(clientX){
   const ok = await voiceStart();
   if(!ok) return;
   chatRec = { active:true, x0:clientX, cancel:false, timer:null };
-  $('chat-row-normal').classList.add('hidden');
   $('chat-row-rec').classList.remove('hidden');
   $('chat-rec').classList.remove('will-cancel');
   $('chat-rec-hint').textContent = '← смахните, чтобы отменить';
@@ -3732,7 +3697,6 @@ async function chatRecEnd(){
   const canceled = chatRec.cancel;
   chatRec = { active:false, x0:0, cancel:false, timer:null };
   $('chat-row-rec').classList.add('hidden');
-  $('chat-row-normal').classList.remove('hidden');
   $('chat-rec-time').textContent = '0:00';
   if(canceled){ voiceCancel(); toast('Запись отменена','✕'); return; }
   const v = await voiceStop();
@@ -4008,11 +3972,6 @@ document.addEventListener('click', e=>{
     const id = x.dataset.geotoggle;
     geoHidden.has(id) ? geoHidden.delete(id) : geoHidden.add(id);
     renderGeo(); return; }
-  if(x = el('[data-listen]')){ requestListen(x.dataset.listen); return; }
-  if(x = el('[data-listenplay]')){
-    const clip = (S.listenClips||{})[x.dataset.listenplay];
-    if(clip?.audioId){ const btn = x; playVoice(clip.audioId, btn); }
-    return; }
   if(x = el('[data-geogo]')){
     const g = (S.geo||{})[x.dataset.geogo];
     if(g) window.open(`https://www.google.com/maps/search/?api=1&query=${g.lat},${g.lng}`, '_blank');
@@ -4263,11 +4222,38 @@ $('chat-file').addEventListener('change', e=>{ chatAttachFiles(e.target.files); 
 $('chat-input').addEventListener('input', ()=>{ autoGrowChat(); chatToggleSendMic(); });
 (function(){
   const mic = $('chat-mic');
-  mic.addEventListener('pointerdown', e=>{ e.preventDefault(); mic.classList.add('rec'); chatRecStart(e.clientX); });
-  document.addEventListener('pointermove', e=>{ if(chatRec.active) chatRecMove(e.clientX); }, {passive:true});
-  const stop = ()=>{ mic.classList.remove('rec'); if(chatRec.active) chatRecEnd(); };
-  document.addEventListener('pointerup', stop, {passive:true});
-  document.addEventListener('pointercancel', stop, {passive:true});
+  let holding = false, startX = 0, lastX = 0, pid = null;
+  mic.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    holding = true; startX = lastX = e.clientX; pid = e.pointerId;
+    try{ mic.setPointerCapture(pid); }catch(_){}
+    mic.classList.add('rec');
+    chatRecStart(e.clientX).then(()=>{
+      // если палец успел уехать, пока запрашивался микрофон — учитываем это
+      if(chatRec.active) chatRecMove(lastX);
+    });
+  });
+  const onMove = e=>{
+    if(!holding) return;
+    lastX = e.clientX;
+    if(chatRec.active) chatRecMove(e.clientX);
+  };
+  mic.addEventListener('pointermove', onMove, {passive:true});
+  document.addEventListener('pointermove', onMove, {passive:true});
+  const stop = async ()=>{
+    if(!holding) return;
+    holding = false;
+    try{ if(pid!=null) mic.releasePointerCapture(pid); }catch(_){}
+    pid = null;
+    mic.classList.remove('rec');
+    // микрофон мог ещё не успеть запуститься — дождёмся
+    for(let i=0;i<20 && !chatRec.active && vr===null;i++) await new Promise(r=>setTimeout(r,50));
+    if(chatRec.active) chatRecEnd();
+  };
+  mic.addEventListener('pointerup', stop);
+  mic.addEventListener('pointercancel', stop);
+  document.addEventListener('pointerup', stop);
+  document.addEventListener('pointercancel', stop);
 })();
 $('chat-input').addEventListener('keydown', e=>{
   if(e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); sendChat(); }
@@ -4328,7 +4314,7 @@ document.addEventListener('keydown', e=>{
   const _lc = $('lb-close'); if(_lc) _lc.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
   applyTheme();
   try{ history.replaceState({screen:'root'}, ''); }catch(e){}
-  if(S.currentUser && member(S.currentUser)){ show('main'); maybeAskPerms(); maybeServeListen(); startGeoBackground(); } else show('auth');
+  if(S.currentUser && member(S.currentUser)){ show('main'); maybeAskPerms(); startGeoBackground(); } else show('auth');
   SYNC.start();
   checkDeadlines();
   setInterval(checkDeadlines, 30000);
