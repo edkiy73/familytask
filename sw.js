@@ -1,5 +1,5 @@
 /* Семейный Хаб — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v43';
+const CACHE = 'family-hub-v44';
 const SHELL = [
   './',
   './index.html',

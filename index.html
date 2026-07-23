@@ -149,7 +149,12 @@ body.no-anim *{animation:none!important}
 .lock-toggle.on{background:var(--acc)}
 .lock-toggle.on i{transform:translateX(18px)}
 .lock-info b{display:block;font-size:12.5px;font-weight:750}
-.lock-info span{font-size:11px;color:var(--faint)}
+.lock-set{display:flex;align-items:center;gap:8px;margin-top:9px;padding:10px 12px;border-radius:14px;
+  background:var(--acc-soft);color:var(--acc-ink);font-size:12.5px;font-weight:750}
+.lock-set span{flex:1}
+.lock-clear{width:30px;height:30px;border-radius:10px;background:var(--card);color:var(--rose);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lock-clear:active{transform:scale(.9)}
 .lock-badge{display:inline-flex;align-items:center;gap:4px;color:var(--amber-ink,var(--mut))}
 .d-lock{display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 13px;border-radius:14px;
   background:var(--acc-soft);color:var(--acc-ink);font-size:12px;font-weight:750}
@@ -956,9 +961,10 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         <div class="vis-hint" id="f-vis-hint"></div>
         <div class="lock-row" id="f-lock-row">
           <button type="button" class="lock-toggle" id="f-lock-btn"></button>
-          <div class="lock-info"><b>Пароль на заметку</b><span id="f-lock-sub">Открыть можно будет только по паролю</span></div>
+          <div class="lock-info"><b>Пароль на заметку</b></div>
         </div>
-        <input class="field hidden" id="f-lock-pass" type="password" inputmode="numeric" placeholder="Придумайте пароль" maxlength="32" autocomplete="new-password" style="margin-top:9px">
+        <div id="f-lock-slot"></div>
+        <input class="field hidden" id="f-lock-pass" type="password" inputmode="text" placeholder="Придумайте пароль" maxlength="32" autocomplete="new-password" style="margin-top:9px">
       </div>
 
       <div class="fgroup">
@@ -2209,6 +2215,7 @@ function startUiBeat(){
   uiBeatTimer = setInterval(markUiState, 25000);   // держим отметку свежей
 }
 function show(name){
+  if(name!=='detail' && name!=='form') relockAll();   // вышли — заметка снова под паролем
   if(name!=='detail'){ const w=$('d-fab-wrap'); if(w) w.classList.add('hidden'); closeDetailFab(); }
   ['auth','main','detail','form','family','chat','geo'].forEach(n=>$('screen-'+n).classList.add('hidden'));
   $('screen-'+name).classList.remove('hidden');
@@ -2953,7 +2960,7 @@ function newFormBuffer(){
   return { editingId:null, type:'tasks',
     label:null, labelColor:null,
     newLabelColor:'green', labelEdit:false, assignee:null, repeat:null,
-    date:'', time:'', imageIds:[], removedImageIds:[], files:[], removedFileIds:[], voice:null, removedVoiceIds:[], lockOn:false, lockKeep:false,
+    date:'', time:'', imageIds:[], removedImageIds:[], files:[], removedFileIds:[], voice:null, removedVoiceIds:[], lockOn:false, lockKeep:false, lockHash:null,
     visibility:S.members.map(m=>m.id) };
 }
 function openForm(editId){
@@ -2966,7 +2973,7 @@ function openForm(editId){
     F.imageIds = [...(t.imageIds||[])];
     F.files = [...(t.files||[])];
     F.voice = t.voice ? {...t.voice} : null;
-    F.lockOn = !!t.lock; F.lockKeep = !!t.lock;
+    F.lockOn = !!t.lock; F.lockKeep = !!t.lock; F.lockHash = null;
     F.visibility = (t.visibleTo||[]).length ? [...t.visibleTo] : S.members.map(m=>m.id);
     const sp = splitLocal(t.deadline); F.date = sp.date; F.time = sp.time;
     $('f-title').value = t.title||'';
@@ -3246,8 +3253,7 @@ async function saveForm(asDraft){
   const rp = (F.type==='tasks' && F.date) ? F.repeat : null;
 
   // общие данные формы, чтобы не собирать дважды
-  const lockPass = $('f-lock-pass').value.trim();
-  F._pending = { title, desc, dl, rp, checklist, asDraft, lockPass };
+  F._pending = { title, desc, dl, rp, checklist, asDraft };
 
   if(F.editingId){
     const t = task(F.editingId); if(!t) return;
@@ -3259,7 +3265,7 @@ async function saveForm(asDraft){
       visibleTo:F.type==='notes'?[...F.visibility]:[], imageIds:[...F.imageIds],
       files:[...(F.files||[])], voice:F.voice||null,
       lock: F.type==='notes' && F.lockOn
-              ? (lockPass ? lockHash(lockPass) : (F.lockKeep ? t.lock : null))
+              ? (F.lockHash || (F.lockKeep ? t.lock : null))
               : null,
       checklist, updatedBy:S.currentUser, updatedAt:Date.now() });
     persist(); toast('Сохранено','✓');
@@ -3279,7 +3285,7 @@ function finalizeCreate(assignee, asDraft){
     assignedTo:F.type==='tasks'?(assignee||null):null, status:'pending', completed:false,
     visibleTo:F.type==='notes'?[...F.visibility]:[],
     createdBy:S.currentUser, updatedBy:S.currentUser,
-    lock: (F.type==='notes' && F.lockOn && p.lockPass) ? lockHash(p.lockPass) : null,
+    lock: (F.type==='notes' && F.lockOn && F.lockHash) ? F.lockHash : null,
     isDraft:!!asDraft, pinnedBy:[], accepted: F.type==='tasks' && !!assignee && assignee===S.currentUser,
     imageIds:[...F.imageIds], files:[...(F.files||[])], voice:F.voice||null, checklist:p.checklist,
     updatedAt:Date.now(),
@@ -3334,9 +3340,11 @@ function lockHash(pass){
   for(let i=0;i<s.length;i++) h = ((h*33) ^ s.charCodeAt(i)) >>> 0;
   return h.toString(36);
 }
-let unlocked = new Set();          // id заметок, открытых в этой сессии
+// пароль спрашивается при каждом открытии: разблокировка живёт только на одно действие
+let unlocked = new Set();
 let lockPending = null;            // {taskId, then}
 function isLocked(t){ return !!(t && t.lock && !unlocked.has(t.id)); }
+function relockAll(){ unlocked.clear(); }
 function askUnlock(taskId, then){
   const t = task(taskId); if(!t) return;
   lockPending = { taskId, then };
@@ -3363,15 +3371,17 @@ function tryUnlock(){
 }
 function renderLockRow(){
   const row = $('f-lock-row'); if(!row) return;
-  const btn = $('f-lock-btn'), inp = $('f-lock-pass'), sub = $('f-lock-sub');
+  const btn = $('f-lock-btn'), inp = $('f-lock-pass'), slot = $('f-lock-slot');
   btn.innerHTML = '<i></i>';
   btn.classList.toggle('on', !!F.lockOn);
-  inp.classList.toggle('hidden', !F.lockOn);
   if(F.lockOn && F.lockKeep){
-    sub.innerHTML = 'Пароль установлен. Оставьте поле пустым, чтобы не менять';
-    inp.placeholder = 'Новый пароль (необязательно)';
+    // пароль уже задан — вместо поля показываем статус с кнопкой сброса
+    inp.classList.add('hidden'); inp.value = '';
+    slot.innerHTML = `<div class="lock-set">${ICON.check(15)}<span>Пароль установлен</span>
+      <button type="button" class="lock-clear" id="f-lock-clear" title="Удалить пароль">${ICON.trash(15)}</button></div>`;
   } else {
-    sub.textContent = 'Открыть можно будет только по паролю';
+    slot.innerHTML = '';
+    inp.classList.toggle('hidden', !F.lockOn);
     inp.placeholder = 'Придумайте пароль';
   }
 }
@@ -3392,21 +3402,27 @@ function dictStart(fieldId, btn){
   const r = new SR();
   r.lang = 'ru-RU';
   r.continuous = true;
-  r.interimResults = true;
+  r.interimResults = false;   // промежуточные результаты дают дубли на части браузеров
   dictRec = r; dictBtn = btn; dictTarget = el;
   dictBase = el.value ? el.value.replace(/\s*$/,'') + ' ' : '';
   btn.classList.add('rec');
   haptic('med');
   toast('Говорите…','🎙️');
+  let acc = '';
   r.onresult = e=>{
-    // пересобираем результат целиком из e.results — так не бывает дублей
-    let finals = '', interim = '';
-    for(let i=0;i<e.results.length;i++){
-      const t = e.results[i][0].transcript;
-      if(e.results[i].isFinal) finals += t; else interim += t;
-    }
-    const txt = (finals + interim).replace(/\s+/g,' ').trim();
-    el.value = (dictBase + txt).slice(0, el.maxLength > 0 ? el.maxLength : undefined);
+    // разные браузеры шлют либо новый кусок, либо всю фразу целиком —
+    // определяем это и не склеиваем одно и то же дважды
+    let chunk = '';
+    for(let i=e.resultIndex;i<e.results.length;i++) chunk += e.results[i][0].transcript;
+    chunk = chunk.replace(/\s+/g,' ').trim();
+    if(!chunk) return;
+    const norm = s => s.toLowerCase().replace(/[\s.,!?]/g,'');
+    if(acc && norm(chunk).startsWith(norm(acc))) acc = chunk;          // накопительный режим
+    else if(acc && norm(acc).endsWith(norm(chunk))) { /* повтор — пропускаем */ }
+    else acc = acc ? (acc + ' ' + chunk) : chunk;
+    let out = dictBase + acc;
+    if(el.maxLength > 0) out = out.slice(0, el.maxLength);
+    el.value = out;
     if(fieldId === 'f-desc') autoGrowDesc();
     el.dispatchEvent(new Event('input', {bubbles:true}));
   };
@@ -4823,7 +4839,11 @@ document.addEventListener('click', e=>{
     const f = (tk?.files||[]).find(z=>z.id===id);
     openStoredFile(id, f?.name, f?.type); return; }
   if(x = el('[data-rm-img]')){ const i=Number(x.dataset.rmImg); F.removedImageIds.push(F.imageIds[i]); F.imageIds.splice(i,1); renderFormPhotos(); return; }
-  if(el('#f-lock-btn')){ F.lockOn = !F.lockOn; renderLockRow(); haptic('tap'); return; }
+  if(el('#f-lock-clear')){ F.lockKeep = false; F.lockOn = false; F.lockHash = null; $('f-lock-pass').value=''; renderLockRow(); haptic('warn'); toast('Пароль будет снят после сохранения','🔓'); return; }
+  if(el('#f-lock-btn')){
+    F.lockOn = !F.lockOn;
+    if(!F.lockOn){ F.lockKeep = false; F.lockHash = null; $('f-lock-pass').value=''; }
+    renderLockRow(); haptic('tap'); return; }
   if(el('#lock-ok')){ tryUnlock(); return; }
   if(el('#lock-overlay') && !el('.modal')){ $('lock-overlay').classList.add('hidden'); lockPending=null; return; }
   if(x = el('[data-dict]')){ dictStart(x.dataset.dict, x); return; }
@@ -4960,6 +4980,10 @@ $('f-time').addEventListener('change', e=>{ F.time = e.target.value; renderPlan(
 $('fam-ava-input').addEventListener('change', e=>{ handleAvatarFile(e.target.files[0]); e.target.value=''; });
 $('f-title').addEventListener('input', e=>e.target.classList.remove('err'));
 $('f-desc').addEventListener('input', autoGrowDesc);
+$('f-lock-pass').addEventListener('input', e=>{
+  const v = e.target.value.trim();
+  if(F) F.lockHash = v ? lockHash(v) : null;    // фиксируем сразу, не полагаясь на DOM при сохранении
+});
 $('f-desc').addEventListener('scroll', ()=>{ const hl=$('md-hl'); if(hl) hl.scrollTop = $('f-desc').scrollTop; });
 $('md-input1').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); if(mdPendingKind==='link') $('md-input2').focus(); else mdConfirm(); } });
 $('md-input2').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); mdConfirm(); } });
