@@ -142,6 +142,31 @@ body.no-anim *{animation:none!important}
 .f-item.active span{color:var(--ink)}
 .f-cnt{position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--mc,var(--mut));color:#fff!important;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--bg);z-index:1;text-shadow:0 1px 1px rgba(0,0,0,.15)}
 
+/* ===== КАРТА СЕМЬИ ===== */
+#screen-geo{display:flex;flex-direction:column;height:100dvh}
+.geo-filter{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 14px 6px;flex-shrink:0}
+.geo-filter::-webkit-scrollbar{display:none}
+.geo-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 12px 5px 5px;border-radius:99px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);font-size:11.5px;font-weight:700;color:var(--mut);white-space:nowrap;flex-shrink:0;transition:all .2s var(--spring)}
+.geo-chip:active{transform:scale(.93)}
+.geo-chip.sel{color:var(--ink);box-shadow:var(--shadow), inset 0 0 0 2px var(--mc,var(--acc))}
+.geo-chip .ava{width:24px;height:24px;font-size:10px}
+.geo-map-wrap{position:relative;flex:1;min-height:220px;margin:6px 14px;border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
+#geo-map{position:absolute;inset:0;background:var(--soft)}
+.geo-map-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:12.5px;color:var(--mut);background:var(--soft);z-index:5}
+.geo-pin{display:flex;flex-direction:column;align-items:center}
+.geo-pin .ava{width:34px;height:34px;font-size:13px;box-shadow:0 0 0 3px #fff,0 3px 10px rgba(0,0,0,.3)}
+.geo-pin.stale .ava{filter:grayscale(1);opacity:.75}
+.geo-list{flex-shrink:0;max-height:38vh;overflow-y:auto;padding:4px 14px calc(96px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.geo-row{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:16px;background:var(--card);box-shadow:var(--shadow)}
+.geo-row .ava{width:38px;height:38px;font-size:14px;flex-shrink:0}
+.geo-row .gi{flex:1;min-width:0}
+.geo-row .gi b{display:block;font-size:13px;font-weight:750}
+.geo-row .gi span{font-size:11px;color:var(--faint)}
+.geo-row .gi span.on{color:var(--acc);font-weight:700}
+.geo-row .gi span.off{color:var(--rose);font-weight:700}
+.geo-go{width:34px;height:34px;border-radius:11px;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .18s var(--spring)}
+.geo-go:active{transform:scale(.88)}
+
 /* ===== ЧАТ ===== */
 .hdr-ava-btn{padding:0;background:none;border-radius:50%}
 .hdr-ava{width:36px;height:36px;font-size:13px;box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--mc,var(--line))}
@@ -810,6 +835,23 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
   </section>
 
   <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+  <!-- ЭКРАН: КАРТА СЕМЬИ (секретный, вход по @loc) -->
+  <section id="screen-geo" class="screen hidden">
+    <div class="d-hdr">
+      <button class="back-btn" data-nav="family"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Назад</button>
+      <span class="d-hdr-title">Где все</span>
+      <div style="display:flex;gap:8px">
+        <button class="icon-btn" id="geo-refresh" title="Обновить"></button>
+      </div>
+    </div>
+    <div class="geo-filter" id="geo-filter"></div>
+    <div class="geo-map-wrap">
+      <div id="geo-map"></div>
+      <div class="geo-map-msg hidden" id="geo-map-msg"></div>
+    </div>
+    <div class="geo-list" id="geo-list"></div>
+  </section>
+
   <!-- ЭКРАН: ЧАТ -->
   <section id="screen-chat" class="screen hidden">
     <header class="hdr chat-hdr">
@@ -1191,6 +1233,7 @@ const defaultState = () => ({
   currentUser:null, currentTab:'tasks', showCompleted:false, activeFilter:null, theme:'auto',
   prefs:{},  // per-user: {catFilter, sort, view, calMonth}
   chat:[],   // [{id, author, text, imageIds[], files[], at, editedAt, deleted}]
+  geo:{},    // { memberId: {lat, lng, acc, at} }
   chatSeen:{}, // per-user: id последнего прочитанного сообщения
   familyCode:null, syncRev:0, pendingImg:[], metaUpdatedAt:0,
   members:[
@@ -1564,7 +1607,7 @@ function setSyncStatus(s){
   syncState = s;
   if(!$('screen-family').classList.contains('hidden')) renderSyncCard();
 }
-function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], chat:st.chat||[], generalAvatarId:st.generalAvatarId||null, metaUpdatedAt:st.metaUpdatedAt||0, tz:(typeof st.tz==='number'?st.tz:new Date().getTimezoneOffset()) }; }
+function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], chat:st.chat||[], geo:st.geo||{}, generalAvatarId:st.generalAvatarId||null, metaUpdatedAt:st.metaUpdatedAt||0, tz:(typeof st.tz==='number'?st.tz:new Date().getTimezoneOffset()) }; }
 function mergeStates(local, remote){
   local = normSnap(local); remote = normSnap(remote);
   const map = new Map();
@@ -1585,6 +1628,15 @@ function mergeStates(local, remote){
       });
       return [...cm.values()].sort((a,b)=>(a.at||0)-(b.at||0)).slice(-500);
     })(),
+    geo: (()=>{                        // геопозиции: у каждого участника побеждает свежая
+      const g = {};
+      [remote.geo||{}, local.geo||{}].forEach(src=>{
+        Object.keys(src).forEach(k=>{
+          if(!g[k] || (src[k]?.at||0) >= (g[k]?.at||0)) g[k] = src[k];
+        });
+      });
+      return g;
+    })(),
     tasks: [...map.values()],
     metaUpdatedAt: Math.max(local.metaUpdatedAt||0, remote.metaUpdatedAt||0),
     tz: new Date().getTimezoneOffset(),
@@ -1598,6 +1650,7 @@ function rerender(){
   else if(activeScreen==='family') renderFamily();
   else if(activeScreen==='auth') renderAuth();
   else if(activeScreen==='chat') renderChat();
+  else if(activeScreen==='geo') renderGeo();
   updateNav();
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove('no-anim')));
 }
@@ -1655,19 +1708,21 @@ const SYNC = {
   applyRemote(remote, rev){
     const before = new Map(S.tasks.map(t=>[t.id, {u:t.updatedAt||0, a:t.assignedTo, c:!!t.completed, del:!!t.deleted}]));
     const prevChat = JSON.stringify(S.chat||[]);
-    const prevSig = JSON.stringify({m:S.members, l:S.labels, t:S.tasks, g:S.generalAvatarId, c:S.chat});
+    const prevSig = JSON.stringify({m:S.members, l:S.labels, t:S.tasks, g:S.generalAvatarId, c:S.chat, geo:S.geo});
     const merged = mergeStates(this.snapshot(), remote);
     S.members = merged.members; S.labels = merged.labels;
     S.chat = merged.chat || [];
+    S.geo = merged.geo || {};
     S.tasks = merged.tasks; S.metaUpdatedAt = merged.metaUpdatedAt;
     S.syncRev = rev;
     if(S.currentUser && !member(S.currentUser)) S.currentUser = null;
-    const newSig = JSON.stringify({m:S.members, l:S.labels, t:S.tasks, g:S.generalAvatarId, c:S.chat});
+    const newSig = JSON.stringify({m:S.members, l:S.labels, t:S.tasks, g:S.generalAvatarId, c:S.chat, geo:S.geo});
     // локальное уведомление о новых сообщениях чата (когда серверный push не активен)
     if(this.seeded && !pushSubActive && prevChat !== JSON.stringify(S.chat||[])){
       const fresh = (S.chat||[]).filter(m=>!m.deleted && m.author!==S.currentUser && (m.at||0) > (Date.now()-120000));
       const last = fresh[fresh.length-1];
-      if(last) notify('💬 Семейный чат', `${member(last.author)?.name||''}: ${(last.text||'вложение').slice(0,80)}`, 'chat-'+last.id);
+      const chatOpen = activeScreen==='chat' && !document.hidden;
+      if(last && !chatOpen) notify('💬 Семейный чат', `${member(last.author)?.name||''}: ${(last.text||'вложение').slice(0,80)}`, 'chat-'+last.id);
     }
     persistLocal();
     if(newSig !== prevSig) rerender();   // перерисовываем ТОЛЬКО при реальных изменениях
@@ -1794,13 +1849,25 @@ function closeTopOverlay(){
   if(ov){ ov.classList.add('hidden'); return true; }
   return false;
 }
+let uiBeatTimer = null;
+function markUiState(){
+  const visible = !document.hidden;
+  const rec = { screen: activeScreen, at: visible ? Date.now() : 0 };
+  try{ DB.set('kv','ui', rec); }catch(e){}
+}
+function startUiBeat(){
+  clearInterval(uiBeatTimer);
+  uiBeatTimer = setInterval(markUiState, 25000);   // держим отметку свежей
+}
 function show(name){
   if(name!=='detail'){ const w=$('d-fab-wrap'); if(w) w.classList.add('hidden'); closeDetailFab(); }
-  ['auth','main','detail','form','family','chat'].forEach(n=>$('screen-'+n).classList.add('hidden'));
+  ['auth','main','detail','form','family','chat','geo'].forEach(n=>$('screen-'+n).classList.add('hidden'));
   $('screen-'+name).classList.remove('hidden');
   activeScreen = name;
-  $('bottom-nav').classList.toggle('hidden', name==='auth' || name==='form');
+  $('bottom-nav').classList.toggle('hidden', name==='auth' || name==='form' || name==='geo');
   if(name==='chat') renderChat();
+  if(name==='geo'){ renderGeo(); startGeo(); } else stopGeo();
+  markUiState();
   window.scrollTo(0,0);
   // history: main — база; всё остальное добавляет запись, чтобы «назад» возвращал в приложение
   try{
@@ -1817,6 +1884,7 @@ window.addEventListener('popstate', e=>{
   // если открыт оверлей — закрываем его и гасим переход назад
   if(anyOverlayOpen()){ closeTopOverlay(); history.pushState({screen:activeScreen}, ''); return; }
   // из под-экранов возвращаемся на main вместо выхода из приложения
+  if(activeScreen==='geo'){ show('family'); return; }
   if(activeScreen==='detail' || activeScreen==='family' || activeScreen==='chat'){ show('main'); return; }
   if(activeScreen==='form'){ history.pushState({screen:'form'}, ''); cancelForm(); return; }
   // на main — оставляем запись, чтобы не свернуть приложение первым свайпом
@@ -2360,7 +2428,7 @@ function renderDetail(){
     if(!t.completed){
       const iAmAssignee = t.assignedTo && t.assignedTo === S.currentUser;
       if(iAmAssignee){
-        if(!t.accepted) acts.push({a:'accept', ic:ICON.check, label:'Прочитано — берусь за дело', cls:'btn-green'});
+        if(!t.accepted) acts.push({a:'accept', ic:ICON.check, label:'Прочитано — берусь за дело', cls:'btn-dark'});
       } else {
         const target = t.assignedTo ? (member(t.assignedTo)?.name||'исполнителю') : 'всей семье';
         acts.push({a:'ping', ic:ICON.bell, label:'Напомнить '+target, cls:'btn-dark'});
@@ -2846,6 +2914,120 @@ async function doCancelForm(){
   F.editingId ? show('detail') : show('main');
 }
 
+/* ---------- КАРТА СЕМЬИ (секретный экран) ---------- */
+const GEO_STALE = 3*60e3;      // больше 3 минут без обновления → офлайн
+const GEO_MIN_GAP = 60e3;      // своё положение обновляем не чаще раза в минуту
+let geoMap = null, geoMarkers = {}, geoWatch = null, geoLastPush = 0;
+let geoHidden = new Set();     // кого скрыли из показа
+
+function geoAgeText(at){
+  if(!at) return 'нет данных';
+  const s = Math.round((Date.now()-at)/1000);
+  if(s < 60) return 'только что';
+  const m = Math.round(s/60);
+  if(m < 60) return m+' мин назад';
+  const h = Math.round(m/60);
+  if(h < 24) return h+' ч назад';
+  return new Date(at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+}
+const geoIsFresh = at => at && (Date.now()-at) < GEO_STALE;
+
+async function pushMyLocation(force){
+  if(!navigator.geolocation || !S.currentUser) return;
+  if(!force && Date.now()-geoLastPush < GEO_MIN_GAP) return;
+  geoLastPush = Date.now();
+  navigator.geolocation.getCurrentPosition(pos=>{
+    S.geo = S.geo || {};
+    S.geo[S.currentUser] = { lat:pos.coords.latitude, lng:pos.coords.longitude,
+                             acc:Math.round(pos.coords.accuracy||0), at:Date.now() };
+    persist();
+    if(activeScreen==='geo') renderGeo();
+  }, err=>{
+    if(activeScreen==='geo'){
+      const msg = err.code===1 ? 'Нет разрешения на геолокацию' : 'Не удалось определить положение';
+      toast(msg,'⚠️');
+    }
+  }, { enableHighAccuracy:true, timeout:12000, maximumAge:30000 });
+}
+function loadLeaflet(){
+  if(window.L) return Promise.resolve(true);
+  return new Promise(resolve=>{
+    const css = document.createElement('link');
+    css.rel='stylesheet'; css.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(css);
+    const s = document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js';
+    s.onload=()=>resolve(true); s.onerror=()=>resolve(false);
+    document.head.appendChild(s);
+  });
+}
+function geoVisibleMembers(){
+  return S.members.filter(m=>!geoHidden.has(m.id));
+}
+function renderGeoFilter(){
+  $('geo-filter').innerHTML = S.members.map(m=>{
+    const on = !geoHidden.has(m.id);
+    return `<button class="geo-chip ${on?'sel':''}" data-geotoggle="${m.id}" style="--mc:${m.color}">
+      ${avaHTML(m,'')}${esc(m.name)}</button>`;
+  }).join('');
+  hydrateImages($('geo-filter'));
+}
+function renderGeoList(){
+  const rows = geoVisibleMembers().map(m=>{
+    const g = (S.geo||{})[m.id];
+    const fresh = geoIsFresh(g?.at);
+    const status = !g ? '<span>нет данных</span>'
+      : fresh ? `<span class="on">на связи · ${geoAgeText(g.at)}</span>`
+              : `<span class="off">офлайн · ${geoAgeText(g.at)}</span>`;
+    return `<div class="geo-row">
+      ${avaHTML(m,'')}
+      <div class="gi"><b>${esc(m.name)}</b>${status}</div>
+      ${g?`<button class="geo-go" data-geogo="${m.id}" title="Открыть в Google Maps">${ICON.send(16)}</button>`:''}
+    </div>`;
+  }).join('');
+  $('geo-list').innerHTML = rows || '<div class="empty" style="padding:26px"><span>Никто не выбран</span></div>';
+  hydrateImages($('geo-list'));
+}
+async function renderGeo(){
+  renderGeoFilter();
+  renderGeoList();
+  const ok = await loadLeaflet();
+  const msg = $('geo-map-msg');
+  if(!ok){ msg.textContent = 'Карта недоступна офлайн — положение показано списком ниже'; msg.classList.remove('hidden'); return; }
+  const pts = geoVisibleMembers().map(m=>({m, g:(S.geo||{})[m.id]})).filter(x=>x.g);
+  if(!pts.length){ msg.textContent = 'Пока нет данных о положении. Откройте эту страницу на других устройствах.'; msg.classList.remove('hidden'); return; }
+  msg.classList.add('hidden');
+  if(!geoMap){
+    geoMap = L.map('geo-map', { zoomControl:false, attributionControl:false });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(geoMap);
+    L.control.zoom({ position:'bottomright' }).addTo(geoMap);
+  }
+  Object.values(geoMarkers).forEach(mk=>geoMap.removeLayer(mk));
+  geoMarkers = {};
+  const bounds = [];
+  pts.forEach(({m,g})=>{
+    const stale = !geoIsFresh(g.at);
+    const html = `<div class="geo-pin ${stale?'stale':''}">${avaHTML(m,'')}</div>`;
+    const icon = L.divIcon({ html, className:'', iconSize:[34,34], iconAnchor:[17,17] });
+    const mk = L.marker([g.lat, g.lng], { icon }).addTo(geoMap);
+    mk.bindPopup(`<b>${esc(m.name)}</b><br>${geoAgeText(g.at)}${g.acc?` · ±${g.acc} м`:''}`);
+    geoMarkers[m.id] = mk;
+    bounds.push([g.lat, g.lng]);
+  });
+  requestAnimationFrame(()=>{
+    geoMap.invalidateSize();
+    if(bounds.length === 1) geoMap.setView(bounds[0], 15);
+    else geoMap.fitBounds(bounds, { padding:[40,40], maxZoom:16 });
+    hydrateImages($('geo-map'));
+  });
+}
+function startGeo(){
+  pushMyLocation(true);
+  clearInterval(geoWatch);
+  geoWatch = setInterval(()=>{ pushMyLocation(false); if(activeScreen==='geo') renderGeoList(); }, GEO_MIN_GAP);
+}
+function stopGeo(){ clearInterval(geoWatch); geoWatch = null; }
+
 /* ---------- ЧАТ ---------- */
 let chatDraft = { imageIds:[], files:[] };
 let chatEditId = null;
@@ -3136,6 +3318,11 @@ async function handleAvatarFile(file){
 }
 function addMember(){
   const name = $('fam-name').value.trim();
+  if(/^@loc$/i.test(name)){          // секретная страница: карта семьи
+    $('fam-name').value = '';
+    show('geo');
+    return;
+  }
   if(!name){ toast('Введите имя','⚠️'); $('fam-name').focus(); return; }
   S.members.push({ id:uid('m_'), name, avatarId:famNewAvatarId, color:MEMBER_COLORS[S.members.length % MEMBER_COLORS.length] });
   if(famNewAvatarId){ queuePendingImg(famNewAvatarId); SYNC.imgPut(famNewAvatarId); }
@@ -3267,6 +3454,15 @@ document.addEventListener('click', e=>{
   if(x = el('[data-tab]')){ S.currentTab = x.dataset.tab; searchQ=''; $('search-input').value=''; $('search-wrap').classList.remove('has-q'); if(activeScreen!=='main') show('main'); else renderMain(); persist(); return; }
   if(el('#fab')){ openForm(); return; }
   if(el('#hdr-profile')){ confirmDlg('Сменить профиль?','Вы вернётесь на экран выбора членов семьи.','Выйти',false,()=>{ S.currentUser=null; persist(); show('auth'); }); return; }
+  if(x = el('[data-geotoggle]')){
+    const id = x.dataset.geotoggle;
+    geoHidden.has(id) ? geoHidden.delete(id) : geoHidden.add(id);
+    renderGeo(); return; }
+  if(x = el('[data-geogo]')){
+    const g = (S.geo||{})[x.dataset.geogo];
+    if(g) window.open(`https://www.google.com/maps/search/?api=1&query=${g.lat},${g.lng}`, '_blank');
+    return; }
+  if(el('#geo-refresh')){ pushMyLocation(true); toast('Обновляю положение…','📍'); return; }
   if(el('#chat-clip')){ $('chat-file').click(); return; }
   if(el('#chat-send')){ sendChat(); return; }
   if(el('#chat-edit-cancel')){ chatEditId=null; $('chat-input').value=''; $('chat-edit-bar').classList.add('hidden'); autoGrowChat(); return; }
@@ -3529,7 +3725,7 @@ document.addEventListener('keydown', e=>{
     if(saved){
       S = Object.assign(defaultState(), saved);
       S.prefs = S.prefs || {};
-      S.chat = S.chat || []; S.chatSeen = S.chatSeen || {};
+      S.chat = S.chat || []; S.chatSeen = S.chatSeen || {}; S.geo = S.geo || {};
       S.tasks.forEach(t=>{ t.pinnedBy=t.pinnedBy||[]; t.imageIds=t.imageIds||[]; t.files=t.files||[]; t.checklist=t.checklist||[]; t.visibleTo=t.visibleTo||[]; delete t.status; });
       S.members.forEach((m,i)=>{ if(!MEMBER_COLORS.includes(m.color)) m.color = MEMBER_COLORS[i % MEMBER_COLORS.length]; });
     } else {
@@ -3544,6 +3740,7 @@ document.addEventListener('keydown', e=>{
   document.querySelectorAll('#md-toolbar .md-btn').forEach(b=>b.innerHTML = mdIco[b.dataset.md]||'');
   const _mp = $('md-paste'); if(_mp) _mp.innerHTML = ICON.link(16);
   const _cc = $('chat-clip'); if(_cc) _cc.innerHTML = ICON.camera(19);
+  const _gr = $('geo-refresh'); if(_gr) _gr.innerHTML = ICON.repeat(17);
   const _cs = $('chat-send'); if(_cs) _cs.innerHTML = ICON.send(19);
   const _ls = $('lb-save'); if(_ls) _ls.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0 4-4m-4 4-4-4M5 21h14"/></svg>';
   const _lc = $('lb-close'); if(_lc) _lc.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
@@ -3555,7 +3752,10 @@ document.addEventListener('keydown', e=>{
   setInterval(checkDeadlines, 30000);
   setTimeout(ensurePushSub, 2500);
   window.addEventListener('online', ()=>SYNC.pull());
-  document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ persistNow(); } else SYNC.pull(); });
+  document.addEventListener('visibilitychange', ()=>{ markUiState(); if(document.hidden){ persistNow(); } else SYNC.pull(); });
+  window.addEventListener('focus', markUiState);
+  window.addEventListener('blur', markUiState);
+  startUiBeat();
   window.addEventListener('pagehide', persistNow);
   window.addEventListener('beforeunload', persistNow);
   /* защищённая регистрация SW: не ломает открытие файла напрямую */

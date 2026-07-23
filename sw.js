@@ -1,5 +1,5 @@
 /* Семейный Хаб — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v26';
+const CACHE = 'family-hub-v28';
 const SHELL = [
   './',
   './index.html',
@@ -21,15 +21,51 @@ self.addEventListener('activate', e => {
   );
 });
 
+/* --- есть ли открытый и активный экран чата? --- */
+function readUiState() {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = v => { if (!done) { done = true; resolve(v); } };
+    setTimeout(() => finish(null), 400);
+    try {
+      const req = indexedDB.open('family-hub', 1);
+      req.onsuccess = () => {
+        try {
+          const db = req.result;
+          if (!db.objectStoreNames.contains('kv')) return finish(null);
+          const g = db.transaction('kv', 'readonly').objectStore('kv').get('ui');
+          g.onsuccess = () => finish(g.result || null);
+          g.onerror = () => finish(null);
+        } catch (_) { finish(null); }
+      };
+      req.onerror = () => finish(null);
+    } catch (_) { finish(null); }
+  });
+}
+
+async function chatIsVisible() {
+  const cs = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+  const focused = cs.some(c => c.visibilityState === 'visible' && c.focused);
+  if (!focused) return false;                 // приложение свёрнуто/в фоне → показываем
+  const ui = await readUiState();
+  if (!ui) return false;
+  // экран чата открыт и состояние свежее (страница жива)
+  return ui.screen === 'chat' && (Date.now() - (ui.at || 0) < 60000);
+}
+
 self.addEventListener('push', e => {
   let d = {};
   try { d = e.data.json(); } catch (_) { d = { title: 'Семейный Хаб', body: e.data && e.data.text() }; }
-  e.waitUntil(self.registration.showNotification(d.title || 'Семейный Хаб', {
-    body: d.body || '',
-    tag: d.tag || undefined,
-    icon: 'icon-192.png',
-    badge: 'icon-192.png',
-  }));
+  e.waitUntil((async () => {
+    const isChat = typeof d.tag === 'string' && d.tag.indexOf('chat-') === 0;
+    if (isChat && await chatIsVisible()) return;   // чат открыт на экране — не дублируем
+    await self.registration.showNotification(d.title || 'Семейный Хаб', {
+      body: d.body || '',
+      tag: d.tag || undefined,
+      icon: 'icon-192.png',
+      badge: 'icon-192.png',
+    });
+  })());
 });
 
 self.addEventListener('notificationclick', e => {
