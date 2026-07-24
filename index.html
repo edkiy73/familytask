@@ -92,7 +92,7 @@ body.no-anim *{animation:none!important}
 .btn-dark{background:var(--ink);color:var(--bg)}
 .btn-soft{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 .btn-rose-soft{background:var(--rose-soft);color:var(--rose)}
-.label-cap{display:block;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.label-cap{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);display:block;margin-bottom:8px}
 .field{width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;outline:none;transition:border-color .18s,box-shadow .18s}
 .field:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
 .avatar{display:flex;align-items:center;justify-content:center;border-radius:14px;background:var(--soft);flex-shrink:0}
@@ -335,7 +335,7 @@ body.no-anim *{animation:none!important}
 .fin-body{flex:1;padding:14px 16px calc(120px + env(safe-area-inset-bottom))}
 .fin-sum{background:var(--card);border-radius:var(--r-xl);padding:15px;box-shadow:var(--shadow);margin-bottom:12px}
 .fin-sum .big{font-size:var(--fs-3xl);font-weight:800;letter-spacing:-.02em;line-height:1.1}
-.fin-sum .cap{font-size:var(--fs-2xs);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+.fin-sum .cap{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);margin-bottom:5px}
 .fin-sum .sub{font-size:var(--fs-sm);color:var(--mut);margin-top:5px}
 .fin-bars{display:flex;flex-direction:column;gap:9px;margin-top:14px}
 .fin-bar-row{display:flex;align-items:center;gap:9px;font-size:var(--fs-sm)}
@@ -355,7 +355,7 @@ body.no-anim *{animation:none!important}
 .fin-c-in .card-title{font-size:var(--fs-base)}
 .fin-amt{font-size:var(--fs-lg);font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0;letter-spacing:-.01em}
 .fin-amt.plan{color:var(--mut)}
-.fin-day{margin-top:16px}
+.fin-day{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);margin-top:16px}
 .fin-day{font-size:var(--fs-xs);font-weight:700;color:var(--mut);margin:14px 0 8px}
 .fin-fab{position:fixed;right:16px;bottom:calc(92px + env(safe-area-inset-bottom));z-index:26;
   width:56px;height:56px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;
@@ -373,7 +373,7 @@ body.no-anim *{animation:none!important}
 #screen-chat{display:flex;flex-direction:column;height:100dvh}
 .chat-hdr{padding-bottom:6px}
 .chat-body{flex:1;min-height:0;overflow-y:auto;padding:8px 14px 12px;display:flex;flex-direction:column;gap:3px}
-.chat-day{align-self:center;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);background:var(--soft);padding:4px 12px;border-radius:26px;margin:10px 0 6px}
+.chat-day{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);align-self:center;background:var(--soft);padding:4px 12px;border-radius:26px;margin:10px 0 6px}
 .msg{display:flex;gap:8px;max-width:88%;align-items:flex-end}
 .msg.mine{align-self:flex-end;flex-direction:row-reverse}
 .msg .m-ava{width:28px;height:28px;font-size:11px;flex-shrink:0;margin-bottom:2px}
@@ -568,24 +568,24 @@ body.no-anim *{animation:none!important}
 .editable:active{background:var(--soft)}
 .d-title.editable{padding:2px 6px;margin-left:-6px}
 .d-desc.editable{padding:12px 14px}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
-.info-cell{background:var(--card);border-radius:18px;padding:11px 13px;box-shadow:var(--shadow)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.info-cell{background:var(--card);border-radius:var(--r-xl);padding:13px 15px;box-shadow:var(--shadow)}
 .info-cell.wide{grid-column:1/-1}
 .info-cell .k{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);margin-bottom:5px}
 .info-cell{overflow:visible}
 .info-cell .v{font-size:12px;font-weight:650;display:flex;align-items:center;gap:6px}
 .vis-cell-v{flex-wrap:wrap}
 .vis-cell-v .ava-stack{margin-right:2px}
-.edit-pencil{width:13px;height:13px;color:var(--acc);margin-left:auto;flex-shrink:0}
+.edit-pencil{display:flex;align-items:center;color:var(--mut);margin-left:auto;flex-shrink:0}
 .d-desc{background:var(--card);border-radius:var(--r);padding:14px 15px;font-size:13px;line-height:1.55;white-space:pre-wrap;color:color-mix(in srgb,var(--ink) 82%,var(--mut));box-shadow:var(--shadow);margin-bottom:14px;word-break:break-word}
 .d-desc.empty-desc{color:var(--faint);font-style:italic}
 .d-sec{display:flex;align-items:center;justify-content:space-between;margin:12px 4px 9px}
-.d-sec b{font-size:var(--fs-base);font-weight:750;letter-spacing:0;text-transform:none;color:var(--ink)}
+.d-sec b{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut)}
 .d-sec button{font-size:11px;font-weight:700;color:var(--acc);padding:4px 10px;border-radius:26px;background:var(--acc-soft)}
 .d-block{background:var(--card);border-radius:var(--r-xl);box-shadow:var(--shadow);padding:13px 15px;margin-top:12px;transition:background .18s}
 .d-block.editable:active{background:var(--soft)}
 .d-block:first-of-type{margin-top:0}
-.d-edit-hint{color:var(--faint);display:flex;align-items:center}
+.d-edit-hint{color:var(--mut);display:flex;align-items:center}
 .d-desc.in-block{background:none;box-shadow:none;padding:0;margin:0;border-radius:0}
 .d-voice.in-block{margin:0}
 .d-lock.in-block{margin:0;background:none;padding:0}
@@ -676,7 +676,7 @@ select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .form-hint{font-size:11px;color:var(--faint);margin-top:8px;line-height:1.4}
 .plan-clear{font-size:11px;font-weight:700;color:var(--rose);padding:4px 10px;border-radius:26px;background:var(--rose-soft)}
 .fgroup{background:var(--card);border-radius:var(--r-xl);box-shadow:var(--shadow);padding:13px 15px;margin-top:12px}
-.fgroup .label-cap{font-size:var(--fs-base);font-weight:750;letter-spacing:0;text-transform:none;color:var(--ink);margin-bottom:9px}
+.fgroup .label-cap{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);margin-bottom:9px}
 .fgroup .field,.fgroup .dt-input{background:var(--soft);box-shadow:none;border-color:transparent}
 .fgroup .dt-input:focus{background:var(--card);border-color:var(--acc)}
 .fgroup .field:focus{background:var(--card);box-shadow:inset 0 0 0 1.5px var(--acc)}
@@ -915,7 +915,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .tr-btn:active{transform:scale(.88)}
 .tr-btn.del{color:var(--rose)}
 .trash-empty{display:flex;flex-direction:column;align-items:center;gap:9px;padding:34px 20px 40px;color:var(--faint);font-size:var(--fs-sm)}
-.sheet-sub{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);padding:12px 20px 5px}
+.sheet-sub{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);padding:12px 20px 5px}
 .sheet-btn.green{color:var(--acc)}.sheet-btn.green svg{color:var(--acc)}
 .sheet-btn.rose{color:var(--rose)}.sheet-btn.rose svg{color:var(--rose)}
 .sheet-div{height:1px;background:var(--line);margin:6px 8px}
@@ -1972,13 +1972,13 @@ function b64toBlob(b64){ const bin=atob(b64); const a=new Uint8Array(bin.length)
 function queuePendingImg(id){ S.pendingImg = S.pendingImg||[]; if(!S.pendingImg.includes(id)) S.pendingImg.push(id); persistLocal(); }
 const REPEAT_OPTS = [
   {k:'',        label:'Без повтора'},
-  {k:'daily',   label:'Ежедневно'},
+  {k:'daily',   label:'Ежедн.'},
   {k:'weekdays',label:'Будни'},
   {k:'bydays',  label:'По дням'},
-  {k:'weekly',  label:'Еженедельно'},
-  {k:'monthly', label:'Ежемесячно'},
-  {k:'yearly',  label:'Ежегодно'},
-  {k:'custom',  label:'Каждые N дн.'},
+  {k:'weekly',  label:'Еженед.'},
+  {k:'monthly', label:'Ежемес.'},
+  {k:'yearly',  label:'Ежег.'},
+  {k:'custom',  label:'N дней'},
 ];
 function repLabel(rp){
   if(!rp) return '';
@@ -2915,7 +2915,7 @@ const ICO = {
   person:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.7-3.6 3.2-5.2 6.5-5.2s5.8 1.6 6.5 5.2"/></svg>',
   done:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
-  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
   del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg>',
 };
 function openCtx(id){
@@ -3124,9 +3124,9 @@ function renderDetail(){
     const asg = member(t.assignedTo);
     const r = t.deadline ? relDeadline(t.deadline) : null;
     info = `<div class="info-grid">
-      <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?`<span class="ava-acc-wrap">${avaHTML(asg,'ava-xs')}${t.accepted?`<i class="acc-badge">${ICON.check(9)}</i>`:''}</span>`+esc(asg.name)+(t.accepted?' <span class="acc-note">принял</span>':''):generalAvaHTML('ava-xs')+'Общее'}<svg class="edit-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg></div></div>
-      <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">Запланировано</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text) : '—'}<svg class="edit-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg></div></div>
-      ${t.deadline?`<div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${t.repeat?repLabel(t.repeat):'Без повтора'}${t.repeat&&t.deadline?` · далее: ${new Date(deadlineMs(t.deadline)).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}<svg class="edit-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg></div></div>`:''}
+      <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?`<span class="ava-acc-wrap">${avaHTML(asg,'ava-xs')}${t.accepted?`<i class="acc-badge">${ICON.check(9)}</i>`:''}</span>`+esc(asg.name)+(t.accepted?' <span class="acc-note">принял</span>':''):generalAvaHTML('ava-xs')+'Общее'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
+      <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">Запланировано</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text) : '—'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
+      ${t.deadline?`<div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${t.repeat?repLabel(t.repeat):'Без повтора'}${t.repeat&&t.deadline?` · далее: ${new Date(deadlineMs(t.deadline)).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>`:''}
     </div>`;
   } else {
     const vis = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
