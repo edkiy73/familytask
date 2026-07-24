@@ -583,20 +583,24 @@ body.no-anim *{animation:none!important}
 .d-sec{display:flex;align-items:center;justify-content:space-between;margin:18px 4px 9px}
 .d-sec b{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
 .d-sec button{font-size:11px;font-weight:700;color:var(--acc);padding:4px 10px;border-radius:26px;background:var(--acc-soft)}
-.chk-row{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:6px;box-shadow:var(--shadow);cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform .18s var(--spring)}
+.chk-block{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden;margin-top:2px}
+.chk-row{display:flex;align-items:center;gap:11px;background:none;border-radius:0;padding:9px 14px;margin:0;
+  box-shadow:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .18s}
+.chk-block .chk-row + .chk-row{border-top:1px solid var(--line)}
+.chk-row:active{background:var(--soft)}
 .chk-row:active{transform:scale(.98)}
-.chk-box{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .24s var(--spring);background:var(--card)}
+.chk-box{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .24s var(--spring);background:var(--card)}
 .chk-row.on .chk-box{background:linear-gradient(135deg,var(--acc-2),var(--acc));border-color:transparent;box-shadow:0 3px 10px color-mix(in srgb,var(--acc) 40%,transparent)}
 .chk-box svg{width:12px;height:12px;color:#fff;opacity:0;transform:scale(.4);transition:all .24s var(--spring)}
 .chk-row.on .chk-box svg{opacity:1;transform:scale(1)}
-.chk-row span{font-size:13px;transition:color .18s}
+.chk-row span{font-size:var(--fs-base);transition:color .18s}
 .chk-row.on span{text-decoration:line-through;color:var(--faint)}
 .prog-line{height:6px;border-radius:6px;background:var(--soft);overflow:hidden;margin:2px 4px 12px;box-shadow:inset 0 0 0 1px var(--ring)}
 .prog-line i{display:block;height:100%;background:linear-gradient(90deg,var(--acc-2),var(--acc));border-radius:6px;transition:width .32s var(--spring)}
+.d-voice{margin-top:10px}
 .att-feed{display:flex;flex-direction:column;gap:9px}
-.att-voice{width:100%}
-.att-imgs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.att-imgs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--r-md);box-shadow:var(--shadow);animation:pulseIn .32s var(--spring) backwards}
+.att-imgs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.att-imgs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--r-sm);box-shadow:var(--shadow);animation:pulseIn .32s var(--spring) backwards}
 .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .gal img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;box-shadow:var(--shadow)}
 .d-actions{display:flex;flex-direction:column;gap:9px;margin-top:20px;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
@@ -770,11 +774,11 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .photo-drop{width:100%;background:var(--card);border:2px dashed var(--line);border-radius:18px;padding:18px;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--mut);font-size:12px;font-weight:650;transition:all .18s}
 .photo-drop:active{border-color:var(--acc);color:var(--acc)}
 .photo-drop svg{width:19px;height:19px}
-.file-list{display:flex;flex-direction:column;gap:7px;margin-top:9px}
-.file-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring)}
-.file-row .fi{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:#fff;letter-spacing:.02em}
+.file-list{display:flex;flex-direction:column;gap:6px;margin-top:9px}
+.file-row{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:var(--r-sm);background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring)}
+.file-row .fi{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:var(--fs-2xs);font-weight:800;color:#fff;letter-spacing:.02em}
 .file-row .fn{flex:1;min-width:0}
-.file-row .fn b{display:block;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-row .fn b{display:block;font-size:var(--fs-sm);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .file-row .fn span{font-size:11px;color:var(--faint)}
 .file-row .fx{width:var(--h-xs);height:var(--h-xs);border-radius:10px;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .18s var(--spring)}
 .file-row .fx:active{transform:scale(.86)}
@@ -859,7 +863,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 @keyframes pop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
 .modal h3{font-size:16px;font-weight:800;letter-spacing:-.01em;margin-bottom:5px}
 .modal p{font-size:12px;color:var(--mut);line-height:1.5;margin-bottom:18px}
-.modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.modal .row2,.sheet .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.overlay.sheet-mode{padding-bottom:var(--kb,0px);transition:padding-bottom .18s}
 .sheet{background:var(--card);border-radius:26px 28px 0 0;padding:10px 14px calc(18px + env(safe-area-inset-bottom));width:100%;max-width:460px;box-shadow:var(--shadow-lg);animation:slideUp .32s var(--spring)}
 @keyframes slideUp{from{transform:translateY(50%)}to{transform:translateY(0)}}
 .sheet-grip{width:40px;height:4.5px;border-radius:6px;background:var(--line);margin:4px auto 14px}
@@ -1301,10 +1306,10 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         <button class="fin-tab" data-fintab="plan">Планы</button>
       </div>
       <div class="tools-row">
-        <button class="drop-btn" id="fin-btn-cat"><i class="dot" id="fin-cat-dot"></i><span id="fin-cat-lbl">Все категории</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="drop-btn" id="fin-btn-cat"><i class="dp" id="fin-cat-dot"></i><span id="fin-cat-lbl">Все категории</span>
+          <svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
         <button class="drop-btn" id="fin-btn-sort"><span id="fin-sort-lbl">Сначала новые</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+          <svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
       </div>
     </header>
     <div class="fin-body" id="fin-body"></div>
@@ -3091,23 +3096,22 @@ function renderDetail(){
   if(ch.length){
     const done = ch.filter(c=>c.done).length;
     chkHtml = `<div class="d-sec"><b>Чек-лист · ${done}/${ch.length}</b><button data-d-act="chk-all">${done===ch.length?'Снять всё':'Выбрать всё'}</button></div>
-      <div class="prog-line"><i style="width:${ch.length?Math.round(done/ch.length*100):0}%"></i></div>` +
+      <div class="prog-line"><i style="width:${ch.length?Math.round(done/ch.length*100):0}%"></i></div>
+      <div class="chk-block">` +
       ch.map(c=>`<div class="chk-row ${c.done?'on':''}" data-chk="${c.id}">
         <span class="chk-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 6.5"/></svg></span>
-        <span>${esc(c.text)}</span></div>`).join('');
+        <span>${esc(c.text)}</span></div>`).join('') + `</div>`;
   }
 
   const imgs = (t.lock && !unlocked.has(t.id)) ? [] : (t.imageIds||[]);
   const tFiles2 = (t.lock && !unlocked.has(t.id)) ? [] : (t.files||[]);
   const hasVoice = !!t.voice && !(t.lock && !unlocked.has(t.id));
   let gal = '';
-  if(hasVoice || imgs.length || tFiles2.length){
-    const total = (hasVoice?1:0) + imgs.length + tFiles2.length;
+  if(imgs.length || tFiles2.length){
+    const total = imgs.length + tFiles2.length;
     gal = `<div class="d-sec" style="margin-top:16px"><b>Вложения · ${total}</b>
              <button data-d-act="edit">Добавить</button></div>
            <div class="att-feed">`;
-    // голосовая метка всегда первой и на всю ширину — её не потерять
-    if(hasVoice) gal += `<div class="att-voice">${voiceChipHTML(t.voice,{full:true})}</div>`;
     if(imgs.length)
       gal += `<div class="att-imgs">` + imgs.map((id,i)=>`<img data-img="${id}" data-lb="${t.id}" data-idx="${i}" alt="">`).join('') + `</div>`;
     if(tFiles2.length)
@@ -3117,7 +3121,8 @@ function renderDetail(){
 
   const lockHtml = t.lock
     ? `<div class="d-lock">${ICON.eye(15)}<span>Заметка защищена паролем</span></div>` : '';
-  const voiceHtml = '', filesHtml = '';   // всё вложенное теперь в одной ленте
+  const voiceHtml = hasVoice ? `<div class="d-voice">${voiceChipHTML(t.voice,{full:true})}</div>` : '';
+  const filesHtml = '';
 
   // единый список действий — из него строится и нижний блок, и круглое меню
   const acts = [];
@@ -3155,7 +3160,7 @@ function renderDetail(){
     ${t.description
       ? `<div class="d-desc md-render editable" data-inline="desc">${renderMarkdown(t.description)}</div>`
       : `<div class="d-desc empty-desc editable" data-inline="desc">Добавить описание</div>`}
-    ${lockHtml}${voiceHtml}${chkHtml}${gal}${filesHtml}
+    ${voiceHtml}${lockHtml}${chkHtml}${gal}${filesHtml}
     <div class="d-actions">${actions}</div>`;
   hydrateImages(body);
   requestAnimationFrame(()=>{ layoutDetailActions(); });
@@ -3180,9 +3185,9 @@ function inlineEdit(kind){
   if(kind === 'date'){ openDateSheet(t); return; }
 }
 function openDateSheet(t){
-  const [d, tm] = t.deadline ? splitLocal(t.deadline) : ['',''];
-  $('q-date').value = d || '';
-  $('q-time').value = tm || '';
+  const s = t.deadline ? splitLocal(t.deadline) : { date:'', time:'' };
+  $('q-date').value = s.date || '';
+  $('q-time').value = s.time || '';
   syncQPh();
   renderQuickDates();
   $('date-overlay').classList.remove('hidden');
@@ -3518,10 +3523,8 @@ function fileRowHTML(f, removable){
   const k = fileKind(f.name, f.type);
   return `<div class="file-row ${removable?'':'tapable'}" ${removable?'':`data-openfile="${f.id}"`}>
     <span class="fi" style="background:${FILE_COLORS[k]}">${esc(fileExt(f.name))}</span>
-    <span class="fn"><b>${esc(f.name)}</b><span>${fmtSize(f.size)}</span></span>
-    ${removable
-      ? `<button type="button" class="fx" data-rmfile="${f.id}">${ICON.x(15)}</button>`
-      : `<span class="fx">${ICON.send(15)}</span>`}
+    <span class="fn"><b>${esc(f.name)}</b></span>
+    ${removable ? `<button type="button" class="fx" data-rmfile="${f.id}">${ICON.x(14)}</button>` : ''}
   </div>`;
 }
 function renderFormVoice(){
@@ -4958,6 +4961,7 @@ function renderFin(){
     }
   }
   box.innerHTML = h;
+  hydrateImages(box);
 }
 function finRowHTML(r){
   const c = finCat(r.cat);
@@ -6061,6 +6065,17 @@ document.addEventListener('keydown', e=>{
   const _cc = $('chat-clip'); if(_cc) _cc.innerHTML = ICON.clip(20);
   const _gr = $('geo-refresh'); if(_gr) _gr.innerHTML = ICON.repeat(17);
   const _fa = $('fin-add'); if(_fa) _fa.innerHTML = ICON.plus(24);
+  // поднимаем нижние шторки над экранной клавиатурой
+  if(window.visualViewport){
+    const vv = window.visualViewport;
+    const syncKb = ()=>{
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      document.documentElement.style.setProperty('--kb', kb > 90 ? kb + 'px' : '0px');
+    };
+    vv.addEventListener('resize', syncKb);
+    vv.addEventListener('scroll', syncKb);
+    syncKb();
+  }
   const _sc2 = $('search-clear'); if(_sc2) _sc2.innerHTML = ICON.x(13);
   const _s1 = $('lb-save-one'); if(_s1) _s1.innerHTML = ICON.check(18) + 'Только эту фотографию';
   const _s2 = $('lb-save-all'); if(_s2) _s2.innerHTML = ICON.camera(18) + 'Сохранить все фото';
