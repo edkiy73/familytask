@@ -345,12 +345,12 @@ body.no-anim *{animation:none!important}
 .fin-bar i{display:block;height:100%;border-radius:var(--r-full);background:var(--bc,var(--acc))}
 .fin-bar-row .vl{font-variant-numeric:tabular-nums;font-weight:750;color:var(--mut);flex-shrink:0}
 .fin-list{display:flex;flex-direction:column;gap:10px}
-.fin-card{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:var(--r-xl);
+.fin-card{display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:var(--r-xl);
   background:var(--card);box-shadow:var(--shadow);-webkit-user-select:none;user-select:none;
   -webkit-touch-callout:none;transition:transform .18s var(--spring);animation:rise .32s var(--spring) backwards}
 .fin-card:active{transform:scale(.975)}
 .fin-card.done{opacity:.55}
-.fin-ava{width:38px;height:38px;font-size:var(--fs-base);flex-shrink:0}
+.fin-ava{width:30px;height:30px;font-size:var(--fs-sm);flex-shrink:0;box-shadow:inset 0 0 0 1px var(--ring)}
 .fin-c-in{flex:1;min-width:0}
 .fin-c-in .card-chips{margin-bottom:4px}
 .fin-c-in .card-title{font-size:var(--fs-base)}
@@ -583,9 +583,13 @@ body.no-anim *{animation:none!important}
 .d-sec{display:flex;align-items:center;justify-content:space-between;margin:18px 4px 9px}
 .d-sec b{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
 .d-sec button{font-size:11px;font-weight:700;color:var(--acc);padding:4px 10px;border-radius:26px;background:var(--acc-soft)}
-.chk-block{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden;margin-top:2px}
+.d-block{background:var(--card);border-radius:var(--r-xl);box-shadow:var(--shadow);padding:12px 14px 4px;margin-top:16px}
+.d-sec.in-block{margin:0 0 8px;padding:0}
+.prog-line.in-block{margin:0 0 6px}
+.chk-block{background:none;border-radius:0;box-shadow:none;overflow:visible;margin:0 -14px}
 .chk-row{display:flex;align-items:center;gap:11px;background:none;border-radius:0;padding:9px 14px;margin:0;
   box-shadow:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .18s}
+.chk-block .chk-row:last-child{padding-bottom:12px}
 .chk-block .chk-row + .chk-row{border-top:1px solid var(--line)}
 .chk-row:active{background:var(--soft)}
 .chk-row:active{transform:scale(.98)}
@@ -598,7 +602,7 @@ body.no-anim *{animation:none!important}
 .prog-line{height:6px;border-radius:6px;background:var(--soft);overflow:hidden;margin:2px 4px 12px;box-shadow:inset 0 0 0 1px var(--ring)}
 .prog-line i{display:block;height:100%;background:linear-gradient(90deg,var(--acc-2),var(--acc));border-radius:6px;transition:width .32s var(--spring)}
 .d-voice{margin-top:10px}
-.att-feed{display:flex;flex-direction:column;gap:9px}
+.att-feed{display:flex;flex-direction:column;gap:8px;padding-bottom:10px}
 .att-imgs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .att-imgs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--r-sm);box-shadow:var(--shadow);animation:pulseIn .32s var(--spring) backwards}
 .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -775,8 +779,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .photo-drop:active{border-color:var(--acc);color:var(--acc)}
 .photo-drop svg{width:19px;height:19px}
 .file-list{display:flex;flex-direction:column;gap:6px;margin-top:9px}
-.file-row{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:var(--r-sm);background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring)}
-.file-row .fi{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:var(--fs-2xs);font-weight:800;color:#fff;letter-spacing:.02em}
+.file-row{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r-sm);background:var(--soft);box-shadow:none}
+.file-row .fi{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:800;color:#fff;letter-spacing:0}
 .file-row .fn{flex:1;min-width:0}
 .file-row .fn b{display:block;font-size:var(--fs-sm);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .file-row .fn span{font-size:11px;color:var(--faint)}
@@ -1227,6 +1231,27 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         <div class="row2" style="margin-top:10px">
           <button class="btn btn-soft" data-close="inline-overlay">Отмена</button>
           <button class="btn btn-acc" id="inline-save">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- БЫСТРАЯ ПРАВКА ПОВТОРА -->
+  <div class="overlay sheet-mode hidden" id="rep-overlay">
+    <div class="sheet">
+      <div class="sheet-grip"></div>
+      <div class="sheet-title">Повтор</div>
+      <div class="sheet-form">
+        <div class="pool" id="rep-pool"></div>
+        <div class="rep-stepper hidden" id="rep-stepper">
+          <button type="button" data-qrepstep="-1">−</button>
+          <b id="rep-n">2</b><span>дн.</span>
+          <button type="button" data-qrepstep="1">+</button>
+        </div>
+        <div class="dow-pick hidden" id="rep-dow"></div>
+        <div class="row2" style="margin-top:12px">
+          <button class="btn btn-soft" data-close="rep-overlay">Отмена</button>
+          <button class="btn btn-acc" id="rep-save">Сохранить</button>
         </div>
       </div>
     </div>
@@ -3081,7 +3106,7 @@ function renderDetail(){
     info = `<div class="info-grid">
       <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?`<span class="ava-acc-wrap">${avaHTML(asg,'ava-xs')}${t.accepted?`<i class="acc-badge">${ICON.check(9)}</i>`:''}</span>`+esc(asg.name)+(t.accepted?' <span class="acc-note">принял</span>':''):generalAvaHTML('ava-xs')+'Общее'}<svg class="edit-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg></div></div>
       <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">Запланировано</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text) : '—'}<svg class="edit-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg></div></div>
-      ${t.repeat?`<div class="info-cell wide"><div class="k">Повтор</div><div class="v">${repLabel(t.repeat)}${t.deadline?` · далее: ${new Date(deadlineMs(t.deadline)).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}</div></div>`:''}
+      ${t.deadline?`<div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${t.repeat?repLabel(t.repeat):'Без повтора'}${t.repeat&&t.deadline?` · далее: ${new Date(deadlineMs(t.deadline)).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}<svg class="edit-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14 6l3 3"/></svg></div></div>`:''}
     </div>`;
   } else {
     const vis = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
@@ -3095,12 +3120,13 @@ function renderDetail(){
   const ch = t.checklist||[];
   if(ch.length){
     const done = ch.filter(c=>c.done).length;
-    chkHtml = `<div class="d-sec"><b>Чек-лист · ${done}/${ch.length}</b><button data-d-act="chk-all">${done===ch.length?'Снять всё':'Выбрать всё'}</button></div>
-      <div class="prog-line"><i style="width:${ch.length?Math.round(done/ch.length*100):0}%"></i></div>
+    chkHtml = `<div class="d-block">
+      <div class="d-sec in-block"><b>Чек-лист · ${done}/${ch.length}</b><button data-d-act="chk-all">${done===ch.length?'Снять всё':'Выбрать всё'}</button></div>
+      <div class="prog-line in-block"><i style="width:${ch.length?Math.round(done/ch.length*100):0}%"></i></div>
       <div class="chk-block">` +
       ch.map(c=>`<div class="chk-row ${c.done?'on':''}" data-chk="${c.id}">
         <span class="chk-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 6.5"/></svg></span>
-        <span>${esc(c.text)}</span></div>`).join('') + `</div>`;
+        <span>${esc(c.text)}</span></div>`).join('') + `</div></div>`;
   }
 
   const imgs = (t.lock && !unlocked.has(t.id)) ? [] : (t.imageIds||[]);
@@ -3109,14 +3135,14 @@ function renderDetail(){
   let gal = '';
   if(imgs.length || tFiles2.length){
     const total = imgs.length + tFiles2.length;
-    gal = `<div class="d-sec" style="margin-top:16px"><b>Вложения · ${total}</b>
-             <button data-d-act="edit">Добавить</button></div>
-           <div class="att-feed">`;
+    gal = `<div class="d-block">
+             <div class="d-sec in-block"><b>Вложения · ${total}</b><button data-d-act="edit">Добавить</button></div>
+             <div class="att-feed">`;
     if(imgs.length)
       gal += `<div class="att-imgs">` + imgs.map((id,i)=>`<img data-img="${id}" data-lb="${t.id}" data-idx="${i}" alt="">`).join('') + `</div>`;
     if(tFiles2.length)
       gal += `<div class="file-list">${tFiles2.map(f=>fileRowHTML(f, false)).join('')}</div>`;
-    gal += `</div>`;
+    gal += `</div></div>`;
   }
 
   const lockHtml = t.lock
@@ -3183,6 +3209,43 @@ function inlineEdit(kind){
     return;
   }
   if(kind === 'date'){ openDateSheet(t); return; }
+  if(kind === 'repeat'){ openRepeatSheet(t); return; }
+}
+let qRepeat = null;
+function openRepeatSheet(t){
+  if(!t.deadline){ toast('Сначала задайте дату','warn'); return; }
+  qRepeat = t.repeat ? JSON.parse(JSON.stringify(t.repeat)) : null;
+  renderRepeatSheet();
+  $('rep-overlay').classList.remove('hidden');
+}
+function renderRepeatSheet(){
+  const cur = qRepeat?.freq || '';
+  let h = REPEAT_OPTS.map(o=>{
+    const sel = (o.k||'') === cur;
+    const label = o.k==='custom' && cur==='custom' ? `Каждые ${qRepeat.interval||2} дн.` : o.label;
+    return `<button type="button" class="p-chip ${sel?'sel':''}" data-qrep="${o.k}" style="--lc:var(--acc)">${o.k?ICON.repeat(13)+' ':''}${label}</button>`;
+  }).join('');
+  $('rep-pool').innerHTML = h;
+  // шаг для «каждые N дней»
+  const st = $('rep-stepper');
+  st.classList.toggle('hidden', cur !== 'custom');
+  if(cur === 'custom') $('rep-n').textContent = qRepeat.interval || 2;
+  // выбор дней недели
+  const dw = $('rep-dow');
+  dw.classList.toggle('hidden', cur !== 'bydays');
+  if(cur === 'bydays'){
+    const days = qRepeat.days || [];
+    const N = [['Пн',1],['Вт',2],['Ср',3],['Чт',4],['Пт',5],['Сб',6],['Вс',0]];
+    dw.innerHTML = N.map(([l,i])=>`<button type="button" class="${days.includes(i)?'on':''}" data-qdow="${i}">${l}</button>`).join('');
+  }
+}
+function saveRepeatSheet(){
+  const t = task(activeTaskId); if(!t) return;
+  t.repeat = qRepeat;
+  t.updatedBy = S.currentUser; touch(t); persist();
+  $('rep-overlay').classList.add('hidden');
+  renderDetail(); haptic('ok');
+  toast(qRepeat ? 'Повтор изменён' : 'Повтор убран','edit');
 }
 function openDateSheet(t){
   const s = t.deadline ? splitLocal(t.deadline) : { date:'', time:'' };
@@ -3517,12 +3580,15 @@ function fileKind(name, type){
   if(['zip','rar','7z','tar','gz'].includes(e)) return 'zip';
   return 'other';
 }
-function fileExt(name){ const e=(name.split('.').pop()||'').toUpperCase(); return e.length<=4?e:'ФАЙЛ'; }
+function fileExt(name){
+  const e = (name.split('.').pop()||'').toUpperCase();
+  return (e && e.length <= 4) ? e : '';     // длинное/пустое расширение — покажем иконку
+}
 function fmtSize(b){ if(!b) return ''; if(b<1024) return b+' Б'; if(b<1048576) return (b/1024).toFixed(0)+' КБ'; return (b/1048576).toFixed(1)+' МБ'; }
 function fileRowHTML(f, removable){
   const k = fileKind(f.name, f.type);
   return `<div class="file-row ${removable?'':'tapable'}" ${removable?'':`data-openfile="${f.id}"`}>
-    <span class="fi" style="background:${FILE_COLORS[k]}">${esc(fileExt(f.name))}</span>
+    <span class="fi" style="background:${FILE_COLORS[k]}">${fileExt(f.name) ? esc(fileExt(f.name)) : ICON.file(13)}</span>
     <span class="fn"><b>${esc(f.name)}</b></span>
     ${removable ? `<button type="button" class="fx" data-rmfile="${f.id}">${ICON.x(14)}</button>` : ''}
   </div>`;
@@ -4972,12 +5038,12 @@ function finRowHTML(r){
   const chips = `<span class="chip lbl" style="--lc:${c.c}">${esc(c.t)}</span>`
     + (r.kind==='plan' && r.done ? `<span class="chip soft-green">Куплено</span>` : '');
   return `<article class="fin-card ${r.done?'done':''}" data-finrow="${r.id}">
-    ${ava}
     <div class="fin-c-in">
       <div class="card-chips">${chips}</div>
       <div class="card-title">${esc(r.title||c.t)}</div>
     </div>
     <span class="fin-amt ${r.kind==='plan'?'plan':''}">${fmtMoney(r.amount)}</span>
+    ${ava}
   </article>`;
 }
 function openFinAdd(kind, editId){
@@ -5738,6 +5804,37 @@ document.addEventListener('click', e=>{
   if(x = el('[data-inline]')){ inlineEdit(x.dataset.inline); return; }
   if(el('#inline-save')){ inlineSave(); return; }
   if(el('#inline-overlay') && !el('.sheet')){ $('inline-overlay').classList.add('hidden'); inlineCb=null; return; }
+  if(x = el('[data-qrep]')){
+    const k = x.dataset.qrep;
+    if(!k) qRepeat = null;
+    else if(k==='custom') qRepeat = {freq:'custom', interval: qRepeat?.freq==='custom' ? qRepeat.interval : 2};
+    else if(k==='bydays'){
+      const d = $('q-date') && $('q-date').value;
+      let def = [];
+      const t0 = task(activeTaskId);
+      if(t0?.deadline) def = [new Date(splitLocal(t0.deadline).date + 'T12:00').getDay()];
+      qRepeat = {freq:'bydays', interval:1, days:(qRepeat?.freq==='bydays' && qRepeat.days?.length) ? qRepeat.days : def};
+    }
+    else qRepeat = {freq:k, interval:1};
+    renderRepeatSheet(); haptic('tap'); return; }
+  if(x = el('[data-qrepstep]')){
+    if(qRepeat?.freq==='custom'){
+      qRepeat.interval = Math.min(365, Math.max(2, (qRepeat.interval||2) + Number(x.dataset.qrepstep)));
+      renderRepeatSheet();
+    }
+    return; }
+  if(x = el('[data-qdow]')){
+    if(qRepeat?.freq==='bydays'){
+      const d = Number(x.dataset.qdow);
+      const set = new Set(qRepeat.days||[]);
+      set.has(d) ? set.delete(d) : set.add(d);
+      qRepeat.days = [...set];
+      if(!qRepeat.days.length) qRepeat.days = [d];
+      renderRepeatSheet();
+    }
+    return; }
+  if(el('#rep-save')){ saveRepeatSheet(); return; }
+  if(el('#rep-overlay') && !el('.sheet')){ $('rep-overlay').classList.add('hidden'); return; }
   if(x = el('[data-qdate]')){ $('q-date').value = x.dataset.qdate; syncQPh(); haptic('tap'); return; }
   if(x = el('[data-qtime]')){
     if(!$('q-date').value){ const n=new Date(); $('q-date').value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; }
