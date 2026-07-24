@@ -582,6 +582,8 @@ body.no-anim *{animation:none!important}
 .d-sec{display:flex;align-items:center;justify-content:space-between;margin:12px 4px 9px}
 .d-sec b{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut)}
 .d-sec button{font-size:11px;font-weight:700;color:var(--acc);padding:4px 10px;border-radius:26px;background:var(--acc-soft)}
+.d-sec button.d-edit-hint{background:none;padding:4px;color:var(--mut)}
+.d-sec button.d-edit-hint:active{transform:scale(.88)}
 .d-block{background:var(--card);border-radius:var(--r-xl);box-shadow:var(--shadow);padding:13px 15px;margin-top:12px;transition:background .18s}
 .d-block.editable:active{background:var(--soft)}
 .d-block:first-of-type{margin-top:0}
@@ -681,7 +683,7 @@ select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .fgroup .dt-input:focus{background:var(--card);border-color:var(--acc)}
 .fgroup .field:focus{background:var(--card);box-shadow:inset 0 0 0 1.5px var(--acc)}
 .fgroup .drop-box{background:none;box-shadow:none;padding:0}
-.fgroup .md-toolbar{background:none;border:none;box-shadow:none;padding:2px 0 8px;border-radius:0}
+.fgroup .md-toolbar{background:var(--card);border:none;box-shadow:0 6px 10px -6px rgba(0,0,0,.12);padding:4px 0 8px;border-radius:0}
 .fgroup .md-editor{border-top:1px solid var(--line)}
 /* один селектор на оба слоя — метрики и отступы гарантированно совпадают */
 .fgroup .md-editor .md-area,
@@ -1032,7 +1034,6 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       </div>
 
       <div class="fgroup">
-        <span class="label-cap">Описание</span>
         <div class="md-toolbar" id="md-toolbar">
           <button type="button" class="md-btn" data-md="bold" title="Жирный"></button>
           <button type="button" class="md-btn" data-md="italic" title="Курсив"></button>
@@ -1046,7 +1047,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         </div>
         <div class="md-editor" id="md-editor">
           <div class="md-hl" id="md-hl" aria-hidden="true"></div>
-          <textarea class="md-area" id="f-desc" placeholder="Подробности, списки, счета, реквизиты…" spellcheck="false"></textarea>
+          <textarea class="md-area" id="f-desc" placeholder="Описание" spellcheck="false"></textarea>
         </div>
       </div>
 
@@ -1974,10 +1975,10 @@ const REPEAT_OPTS = [
   {k:'',        label:'Без повтора'},
   {k:'daily',   label:'Ежедн.'},
   {k:'weekdays',label:'Будни'},
-  {k:'bydays',  label:'По дням'},
+  {k:'bydays',  label:'По дням нед.'},
   {k:'weekly',  label:'Еженед.'},
   {k:'monthly', label:'Ежемес.'},
-  {k:'yearly',  label:'Ежег.'},
+  {k:'yearly',  label:'Ежегодно'},
   {k:'custom',  label:'N дней'},
 ];
 function repLabel(rp){
@@ -3156,7 +3157,7 @@ function renderDetail(){
   if(imgs.length || tFiles2.length){
     const total = imgs.length + tFiles2.length;
     gal = `<div class="d-block">
-             <div class="d-sec in-block"><b>Вложения · ${total}</b><button data-d-act="edit">Добавить</button></div>
+             <div class="d-sec in-block"><b>Вложения · ${total}</b><button class="d-edit-hint" data-d-act="edit">${ICON.edit(13)}</button></div>
              <div class="att-feed">`;
     if(imgs.length)
       gal += `<div class="att-imgs">` + imgs.map((id,i)=>`<img data-img="${id}" data-lb="${t.id}" data-idx="${i}" alt="">`).join('') + `</div>`;
