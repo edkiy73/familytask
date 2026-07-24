@@ -99,7 +99,7 @@ body.no-anim *{animation:none!important}
 .ava{position:relative;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,color-mix(in srgb,var(--mc,#9B9CA4) 88%,#fff 12%),color-mix(in srgb,var(--mc,#9B9CA4) 100%,#000 8%));color:#fff!important;font-weight:800;flex-shrink:0;user-select:none;-webkit-user-select:none;text-shadow:0 1px 2px rgba(0,0,0,.18)}
 .ava img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ava-xs{width:20px;height:20px;font-size:10px}
-.em-ava{width:34px;height:34px;font-size:13px}
+.em-ava{width:44px;height:44px;font-size:var(--fs-lg)}
 .who-ava{width:46px;height:46px;font-size:16px}
 
 /* ---------- экраны ---------- */
@@ -185,7 +185,6 @@ body.no-anim *{animation:none!important}
 .sos-btn b{position:relative;z-index:2;font-size:12px;font-weight:900;letter-spacing:.08em}
 .sos-btn.holding{transform:scale(1.04);color:#fff}
 .sos-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--rose);z-index:1;transition:width .12s linear}
-  transition:width .12s linear}
 .sos-flash{position:fixed;inset:0;z-index:90;background:rgba(12,13,15,.94);color:#fff;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
   text-align:center;padding:30px;animation:fadeIn .18s;
@@ -334,7 +333,7 @@ body.no-anim *{animation:none!important}
 .fin-tab.on{background:var(--acc);color:#fff;box-shadow:0 3px 12px color-mix(in srgb,var(--acc) 32%,transparent)}
 .fin-tab:active{transform:scale(.95)}
 .fin-body{flex:1;padding:14px 16px calc(120px + env(safe-area-inset-bottom))}
-.fin-sum{background:var(--card);border-radius:var(--r-xl);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:14px}
+.fin-sum{background:var(--card);border-radius:var(--r-xl);padding:15px;box-shadow:var(--shadow);margin-bottom:12px}
 .fin-sum .big{font-size:var(--fs-3xl);font-weight:800;letter-spacing:-.02em;line-height:1.1}
 .fin-sum .cap{font-size:var(--fs-2xs);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
 .fin-sum .sub{font-size:var(--fs-sm);color:var(--mut);margin-top:5px}
@@ -344,7 +343,7 @@ body.no-anim *{animation:none!important}
 .fin-bar{flex:1;height:8px;border-radius:var(--r-full);background:var(--soft);overflow:hidden}
 .fin-bar i{display:block;height:100%;border-radius:var(--r-full);background:var(--bc,var(--acc))}
 .fin-bar-row .vl{font-variant-numeric:tabular-nums;font-weight:750;color:var(--mut);flex-shrink:0}
-.fin-list{display:flex;flex-direction:column;gap:10px}
+.fin-list{display:flex;flex-direction:column;gap:12px}
 .fin-card{display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:var(--r-xl);
   background:var(--card);box-shadow:var(--shadow);-webkit-user-select:none;user-select:none;
   -webkit-touch-callout:none;transition:transform .18s var(--spring);animation:rise .32s var(--spring) backwards}
@@ -357,7 +356,7 @@ body.no-anim *{animation:none!important}
 .fin-amt{font-size:var(--fs-lg);font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0;letter-spacing:-.01em}
 .fin-amt.plan{color:var(--mut)}
 .fin-day{margin-top:16px}
-.fin-day{font-size:var(--fs-2xs);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin:16px 0 8px}
+.fin-day{font-size:var(--fs-xs);font-weight:700;color:var(--mut);margin:14px 0 8px}
 .fin-fab{position:fixed;right:16px;bottom:calc(92px + env(safe-area-inset-bottom));z-index:26;
   width:56px;height:56px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;
   box-shadow:0 8px 24px color-mix(in srgb,var(--acc) 42%,transparent);transition:transform .24s var(--spring)}
@@ -472,14 +471,14 @@ body.no-anim *{animation:none!important}
 .feed{flex:1;padding:12px 14px calc(118px + env(safe-area-inset-bottom))}
 .feed-section{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:18px 4px 10px;display:flex;align-items:center;gap:10px}
 .feed-section::after{content:'';flex:1;height:1px;background:var(--line)}
-.card-item{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:10px;display:flex;overflow:hidden;position:relative;transition:transform .24s var(--spring);animation:rise .32s var(--spring) backwards}
+.card-item{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:12px;display:flex;overflow:hidden;position:relative;transition:transform .24s var(--spring);animation:rise .32s var(--spring) backwards}
 .sw-wrap:nth-child(1){animation-delay:.12s}.sw-wrap:nth-child(2){animation-delay:.12s}
 .sw-wrap:nth-child(3){animation-delay:.12s}.sw-wrap:nth-child(4){animation-delay:.12s}
 .sw-wrap:nth-child(5){animation-delay:.18s}.sw-wrap:nth-child(6){animation-delay:.18s}
 @keyframes rise{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 .card-item:active{transform:scale(.975)}
 /* ===== СВАЙП ПО КАРТОЧКЕ ===== */
-.sw-wrap{position:relative;border-radius:var(--r);margin-bottom:10px;overflow:hidden;touch-action:pan-y;
+.sw-wrap{position:relative;border-radius:var(--r);margin-bottom:12px;overflow:hidden;touch-action:pan-y;
   box-shadow:var(--shadow);animation:rise .32s var(--spring) backwards}
 .sw-wrap .card-item{margin-bottom:0;position:relative;z-index:2;will-change:transform;
   box-shadow:none;animation:none}
@@ -572,7 +571,7 @@ body.no-anim *{animation:none!important}
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
 .info-cell{background:var(--card);border-radius:18px;padding:11px 13px;box-shadow:var(--shadow)}
 .info-cell.wide{grid-column:1/-1}
-.info-cell .k{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.info-cell .k{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);margin-bottom:5px}
 .info-cell{overflow:visible}
 .info-cell .v{font-size:12px;font-weight:650;display:flex;align-items:center;gap:6px}
 .vis-cell-v{flex-wrap:wrap}
@@ -580,8 +579,8 @@ body.no-anim *{animation:none!important}
 .edit-pencil{width:13px;height:13px;color:var(--acc);margin-left:auto;flex-shrink:0}
 .d-desc{background:var(--card);border-radius:var(--r);padding:14px 15px;font-size:13px;line-height:1.55;white-space:pre-wrap;color:color-mix(in srgb,var(--ink) 82%,var(--mut));box-shadow:var(--shadow);margin-bottom:14px;word-break:break-word}
 .d-desc.empty-desc{color:var(--faint);font-style:italic}
-.d-sec{display:flex;align-items:center;justify-content:space-between;margin:18px 4px 9px}
-.d-sec b{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.d-sec{display:flex;align-items:center;justify-content:space-between;margin:12px 4px 9px}
+.d-sec b{font-size:var(--fs-base);font-weight:750;letter-spacing:0;text-transform:none;color:var(--ink)}
 .d-sec button{font-size:11px;font-weight:700;color:var(--acc);padding:4px 10px;border-radius:26px;background:var(--acc-soft)}
 .d-block{background:var(--card);border-radius:var(--r-xl);box-shadow:var(--shadow);padding:13px 15px;margin-top:12px;transition:background .18s}
 .d-block.editable:active{background:var(--soft)}
@@ -651,7 +650,7 @@ body.no-anim *{animation:none!important}
 /* ===== ФОРМА ===== */
 .form-body{flex:1;overflow-y:auto;padding:14px 16px calc(104px + env(safe-area-inset-bottom))}
 .seg{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--soft);border-radius:26px;padding:4px;margin-bottom:18px;box-shadow:inset 0 0 0 1px var(--ring)}
-.seg button{padding:9px;border-radius:26px;font-size:12px;font-weight:700;color:var(--mut);transition:all .24s var(--spring);position:relative;z-index:1}
+.seg button{display:flex;align-items:center;justify-content:center;gap:7px;padding:9px;border-radius:26px;font-size:12px;font-weight:700;color:var(--mut);transition:all .24s var(--spring);position:relative;z-index:1}
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
 .field-title{width:100%;font-size:16px;font-weight:700;letter-spacing:-.01em;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 15px;outline:none;transition:border-color .18s,box-shadow .18s}
 .field-title:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
@@ -682,9 +681,10 @@ select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .fgroup .dt-input:focus{background:var(--card);border-color:var(--acc)}
 .fgroup .field:focus{background:var(--card);box-shadow:inset 0 0 0 1.5px var(--acc)}
 .fgroup .drop-box{background:none;box-shadow:none;padding:0}
-.fgroup .md-toolbar{background:var(--soft);border-color:transparent}
-.fgroup .md-hl{background:var(--soft);border-color:transparent}
-.fgroup .md-area{border-color:transparent}
+.fgroup .md-toolbar{background:none;border-color:transparent;padding-left:0;padding-right:0;box-shadow:none}
+.fgroup .md-hl{background:none;border-color:transparent;padding-left:0;padding-right:0}
+.fgroup .md-area{border-color:transparent;padding-left:0;padding-right:0}
+.fgroup .md-editor{border-top:1px solid var(--line);padding-top:2px}
 .fgroup .md-editor:focus-within .md-hl{border-color:var(--acc)}
 .fgroup .mem-scroll{margin-left:-4px;margin-right:-4px}
 .fgroup .file-row{background:var(--soft)}
@@ -706,15 +706,15 @@ select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .dots{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .dot{width:24px;height:24px;border-radius:50%;transition:all .24s var(--spring);flex-shrink:0}
 .dot.sel{box-shadow:0 0 0 2.5px var(--bg), 0 0 0 5px var(--ink);transform:scale(1.1)}
-.mem-scroll{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:10px 4px;margin:-6px 0}
+.mem-scroll{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:14px 8px;margin:-10px -8px}
 .mem-scroll::-webkit-scrollbar{display:none}
-.mem-pick{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 12px;background:var(--card);border-radius:18px;flex-shrink:0;transition:all .24s var(--spring);min-width:64px;box-shadow:var(--shadow), inset 0 0 0 1.5px transparent}
+.mem-pick{position:relative;display:flex;align-items:center;justify-content:center;padding:6px;background:var(--card);border-radius:50%;flex-shrink:0;transition:all .24s var(--spring);box-shadow:var(--shadow), inset 0 0 0 1.5px transparent}
 .mem-pick:active{transform:scale(.93)}
 .mem-pick.sel{box-shadow:var(--shadow), inset 0 0 0 2px var(--mc,var(--acc)), 0 6px 16px color-mix(in srgb,var(--mc,var(--acc)) 22%,transparent)}
 
 .mem-pick span{font-size:10px;font-weight:700;color:var(--mut)}
 .mem-pick.sel span{color:var(--ink)}
-.mem-pick .tick{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--mc,var(--acc));color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--card);opacity:0;transform:scale(.4);transition:all .24s var(--spring)}
+.mem-pick .tick{position:absolute;top:0;right:0;width:20px;height:20px;border-radius:50%;background:var(--mc,var(--acc));color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--card);opacity:0;transform:scale(.4);transition:all .24s var(--spring)}
 .mem-pick.sel .tick{opacity:1;transform:scale(1)}
 .vis-hint{font-size:11px;color:var(--mut);margin-top:8px;padding-left:3px}
 .quick-dl{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;padding:2px 0}
@@ -832,7 +832,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .fam-set:active{transform:scale(.88)}
 .fam-del{width:34px;height:34px;border-radius:14px;background:var(--rose-soft);color:var(--rose);font-size:12px;font-weight:800;transition:transform .18s var(--spring)}
 .fam-del:active{transform:scale(.88)}
-.fam-add{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow);margin-top:14px}
+.fam-add{background:var(--card);border-radius:var(--r-xl);padding:15px;box-shadow:var(--shadow);margin-top:12px}
 .fam-add.compact{padding:13px 14px}
 .fam-new-row{display:flex;align-items:center;gap:9px}
 .fam-new-row .field{flex:1;min-width:0;margin:0;height:44px}
@@ -939,7 +939,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 /* ===== ТОСТ ===== */
 #toast{position:fixed;top:calc(env(safe-area-inset-top) + 14px);left:50%;transform:translate(-50%,-20px) scale(.95);background:var(--ink);color:var(--bg);padding:11px 19px;border-radius:26px;font-size:12px;font-weight:650;display:flex;align-items:center;gap:8px;z-index:70;opacity:0;pointer-events:none;transition:all .32s var(--spring);box-shadow:var(--shadow-lg);max-width:88%}
 #toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
-.tg-ic{display:inline-flex;align-items:center;margin-right:7px}
+.tg-ic{display:inline-flex;align-items:center;justify-content:center;line-height:0}
 /* плашка тоста = var(--ink), поэтому иконка красится в var(--bg): читается в обеих темах */
 .toast-ico{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;
   flex-shrink:0;background:color-mix(in srgb,var(--bg) 20%,transparent);color:var(--bg)}
@@ -1046,6 +1046,10 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
           <div class="md-hl" id="md-hl" aria-hidden="true"></div>
           <textarea class="md-area" id="f-desc" placeholder="Подробности, списки, счета, реквизиты…" spellcheck="false"></textarea>
         </div>
+      </div>
+
+      <div class="fgroup">
+        <span class="label-cap">Голосовая метка</span>
         <div id="f-voice-box"></div>
       </div>
 
@@ -1059,9 +1063,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
             <div class="dt-field"><input type="date" class="dt-input" id="f-date"><span class="dt-ph" id="f-date-ph">Дата</span></div>
             <div class="dt-field"><input type="time" class="dt-input" id="f-time"><span class="dt-ph" id="f-time-ph">Время</span></div>
           </div>
-          <div class="form-hint" id="f-plan-hint"></div>
           <div class="quick-dl" id="f-plan-dates"></div>
-          <div class="quick-dl row2" id="f-plan-times"></div>
         </div>
         <div class="fgroup hidden" id="f-repeat-group">
           <span class="label-cap">Повтор</span>
@@ -1078,7 +1080,6 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div id="f-note-fields" class="fgroup hidden">
         <span class="label-cap">Кто видит заметку</span>
         <div class="mem-scroll" id="f-visibility"></div>
-        <div class="vis-hint" id="f-vis-hint"></div>
         <div class="lock-row" id="f-lock-row">
           <button type="button" class="lock-toggle" id="f-lock-btn"></button>
           <div class="lock-info"><b>Пароль на заметку</b></div>
@@ -1969,13 +1970,13 @@ function b64toBlob(b64){ const bin=atob(b64); const a=new Uint8Array(bin.length)
 function queuePendingImg(id){ S.pendingImg = S.pendingImg||[]; if(!S.pendingImg.includes(id)) S.pendingImg.push(id); persistLocal(); }
 const REPEAT_OPTS = [
   {k:'',        label:'Без повтора'},
-  {k:'daily',   label:'Каждый день'},
-  {k:'weekdays',label:'По будням'},
-  {k:'bydays',  label:'По дням недели'},
-  {k:'weekly',  label:'Каждую неделю'},
-  {k:'monthly', label:'Каждый месяц'},
-  {k:'yearly',  label:'Каждый год'},
-  {k:'custom',  label:'Каждые N дней'},
+  {k:'daily',   label:'Ежедневно'},
+  {k:'weekdays',label:'Будни'},
+  {k:'bydays',  label:'По дням'},
+  {k:'weekly',  label:'Еженедельно'},
+  {k:'monthly', label:'Ежемесячно'},
+  {k:'yearly',  label:'Ежегодно'},
+  {k:'custom',  label:'Каждые N дн.'},
 ];
 function repLabel(rp){
   if(!rp) return '';
@@ -3520,9 +3521,9 @@ function renderFormSelectors(){
     S.labels.map(l=>`
     <button type="button" class="p-chip ${F.label===l.name?'sel':''}" data-lbl="${esc(l.name)}" style="--lc:${LABEL_DOT[l.color]||'#10B981'}">
       <i class="p-dot"></i>${esc(l.name)}${F.labelEdit?`<span class="x" data-del-lbl="${esc(l.name)}">${ICON.x(11)}</span>`:''}</button>`).join('') + `
-    <button type="button" class="p-chip p-add ${F.labelEdit?'on':''}" data-lbl-edit="1">${F.labelEdit?'Готово':''}</button>`;
+    <button type="button" class="p-chip p-add ${F.labelEdit?'on':''}" data-lbl-edit="1">${F.labelEdit?ICON.check(13)+' Готово':ICON.plus(13)+' Категория'}</button>`;
   $('f-label-creator').classList.toggle('hidden', !F.labelEdit);
-  const hint = $('f-label-hint'); if(hint) hint.textContent = F.labelEdit ? 'Нажмите крестик на категории, чтобы удалить её' : '';
+  const hint = $('f-label-hint'); if(hint) hint.textContent = '';
   $('f-dots').innerHTML = LABEL_COLORS.map(c=>`
     <button class="dot ${F.newLabelColor===c?'sel':''}" data-dot="${c}" style="background:${LABEL_DOT[c]}"></button>`).join('');
   renderRepeat();
@@ -3535,10 +3536,7 @@ function renderPlan(){
   const has = !!F.date;
   $('f-plan-clear').classList.toggle('hidden', !has && !F.time);
   $('f-repeat-group').classList.toggle('hidden', !has);
-  const hint = $('f-plan-hint');
-  if(hint) hint.textContent = !has ? 'Без даты — дело в разделе «Без даты»'
-    : (F.time ? '' : 'Весь день · напомним утром в 9:00');
-  // быстрые пресеты: даты меняют только дату, время — только время
+  // быстрые пресеты дат (время подставляется автоматически)
   const p = n=>String(n).padStart(2,'0');
   const dstr = d => `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
   const now = new Date();
@@ -3553,12 +3551,8 @@ function renderPlan(){
     ['В сб', dstr(sat)],
     ['В вс', dstr(sun)],
   ];
-  const timeChips = [ ['Утро','09:00'], ['В обед','13:00'], ['Вечер','19:00'] ];
-  const dhtml = dateChips.map(([lbl,d])=>`<button type="button" class="${F.date===d?'act':''}" data-setdate="${d}">${lbl}</button>`).join('');
-  const thtml = has ? timeChips.map(([lbl,t])=>`<button type="button" class="${F.time===t?'act':''}" data-settime="${t}">${lbl}</button>`).join('') : '';
-  $('f-plan-dates').innerHTML = dhtml;
-  $('f-plan-times').innerHTML = thtml;
-  $('f-plan-times').style.display = has ? '' : 'none';
+  $('f-plan-dates').innerHTML = dateChips.map(([lbl,d])=>
+    `<button type="button" class="${F.date===d?'act':''}" data-setdate="${d}">${lbl}</button>`).join('');
   if(F.repeat?.freq==='custom') $('f-rep-n').textContent = F.repeat.interval;
   renderRepeat();
 }
@@ -3585,12 +3579,9 @@ function renderDowPick(){
 }
 function renderVisibility(){
   $('f-visibility').innerHTML = S.members.map(m=>`
-    <button type="button" class="mem-pick ${F.visibility.includes(m.id)?'sel':''}" data-vis="${m.id}" style="--mc:${m.color}">
-      <span class="tick">${ICON.check(12)}</span>${avaHTML(m,'em-ava')}<span>${esc(m.name)}</span></button>`).join('');
+    <button type="button" class="mem-pick ${F.visibility.includes(m.id)?'sel':''}" data-vis="${m.id}" style="--mc:${m.color}" title="${esc(m.name)}">
+      <span class="tick">${ICON.check(12)}</span>${avaHTML(m,'em-ava')}</button>`).join('');
   hydrateImages($('f-visibility'));
-  const n = F.visibility.length;
-  $('f-vis-hint').textContent = n === S.members.length ? 'Заметку видит вся семья'
-    : 'Видят только: ' + F.visibility.map(id=>member(id)?.name).filter(Boolean).join(', ');
 }
 const FILE_COLORS = {pdf:'#E5484D', doc:'#3B82F6', xls:'#10B981', txt:'#8B8D98', img:'#A855F7', zip:'#F59E0B', other:'#5E7186'};
 function fileKind(name, type){
@@ -5858,7 +5849,7 @@ document.addEventListener('click', e=>{
     return; }
   if(el('#rep-save')){ saveRepeatSheet(); return; }
   if(el('#rep-overlay') && !el('.sheet')){ $('rep-overlay').classList.add('hidden'); return; }
-  if(x = el('[data-qdate]')){ $('q-date').value = x.dataset.qdate; syncQPh(); haptic('tap'); return; }
+  if(x = el('[data-qdate]')){ $('q-date').value = x.dataset.qdate; if(!$('q-time').value) $('q-time').value = '09:00'; syncQPh(); haptic('tap'); return; }
   if(x = el('[data-qtime]')){
     if(!$('q-date').value){ const n=new Date(); $('q-date').value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; }
     $('q-time').value = x.dataset.qtime; syncQPh(); haptic('tap'); return; }
@@ -5918,7 +5909,7 @@ document.addEventListener('click', e=>{
       renderRepeat();
     }
     return; }
-  if(x = el('[data-setdate]')){ F.date = x.dataset.setdate; renderPlan(); return; }
+  if(x = el('[data-setdate]')){ F.date = x.dataset.setdate; if(!F.time) F.time = '09:00'; renderPlan(); return; }
   if(x = el('[data-settime]')){ F.time = F.time===x.dataset.settime ? '' : x.dataset.settime; renderPlan(); return; }
   if(el('#f-plan-clear')){ F.date=''; F.time=''; F.repeat=null; renderPlan(); return; }
   if(el('#f-photo-btn')){ $('f-file').click(); return; }
@@ -6118,7 +6109,7 @@ $('chat-input').addEventListener('input', ()=>{ autoGrowChat(); chatToggleSendMi
 $('chat-input').addEventListener('keydown', e=>{
   if(e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); sendChat(); }
 });
-$('f-date').addEventListener('change', e=>{ F.date = e.target.value; renderPlan(); });
+$('f-date').addEventListener('change', e=>{ F.date = e.target.value; if(F.date && !F.time) F.time = '09:00'; renderPlan(); });
 $('f-time').addEventListener('change', e=>{ F.time = e.target.value; renderPlan(); });
 $('fam-ava-input').addEventListener('change', e=>{ handleAvatarFile(e.target.files[0]); e.target.value=''; });
 $('f-title').addEventListener('input', e=>e.target.classList.remove('err'));
