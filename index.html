@@ -134,9 +134,14 @@ body.no-anim *{animation:none!important}
 .hdr{position:relative;z-index:20;background:transparent;padding:calc(env(safe-area-inset-top) + 14px) 16px 10px}
 /* Шапка просто уезжает вместе со страницей, а панель фильтров липнет к верху.
    Никаких изменений высоты при прокрутке — поэтому нет дёрганья. */
-.tools-row{position:sticky;top:0;z-index:21;margin:0;padding:8px 14px 10px;
-  background:var(--glass);backdrop-filter:blur(20px) saturate(1.6);
-  -webkit-backdrop-filter:blur(20px) saturate(1.6)}
+.tools-sentinel{height:1px;margin:0}
+.tools-row{position:sticky;top:0;z-index:21;margin:0;padding:8px 14px;display:flex;gap:8px;align-items:center;
+  background:transparent;transition:background .18s,box-shadow .18s,backdrop-filter .18s}
+.tools-row.stuck{background:var(--glass);backdrop-filter:blur(22px) saturate(1.7);
+  -webkit-backdrop-filter:blur(22px) saturate(1.7);box-shadow:0 6px 18px -12px rgba(0,0,0,.35)}
+.tools-row .drop-btn{flex:1;min-width:0}
+.tool-ic{width:var(--h-sm);height:var(--h-sm);flex-shrink:0;border-radius:var(--r-md)}
+.tool-ic.on{background:var(--acc);color:#fff;box-shadow:0 3px 10px color-mix(in srgb,var(--acc) 32%,transparent)}
 .hdr-row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-bottom:12px}
 .hdr-title{font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:-.045em;line-height:1.05}
 .hdr-title small{display:block;font-family:var(--font);font-weight:600;font-size:11px;color:var(--mut);letter-spacing:.01em;margin-top:4px}
@@ -156,7 +161,7 @@ body.no-anim *{animation:none!important}
 .search-wrap.has-q .search-clear{display:block}
 
 /* фильтр по людям */
-.filter-bar{display:flex;gap:10px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;padding:10px 14px 8px}
+.filter-bar{display:flex;gap:10px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;padding:10px 14px 2px}
 .filter-bar::-webkit-scrollbar{display:none}
 .f-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;position:relative;transition:transform .24s var(--spring)}
 .f-item:active{transform:scale(.92)}
@@ -634,16 +639,15 @@ body.no-anim *{animation:none!important}
 /* компактный список: строго одна строка — метка категории, заголовок, аватар */
 .feed.compact .sw-wrap{margin-bottom:8px}
 .feed.compact .card-in{padding:11px 10px 11px 14px;display:flex;align-items:center;gap:9px;min-width:0}
-.feed.compact .card-chips{display:contents}
-.feed.compact .card-chips .chip{display:none}
-.feed.compact .card-chips .chip.lbl{display:inline-flex;flex-shrink:0;max-width:34%;
-  overflow:hidden;white-space:nowrap;order:-1}
+.feed.compact .card-chips{display:none}
 .feed.compact .card-title{margin:0;flex:1;min-width:0;font-size:var(--fs-base);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .feed.compact .card-excerpt,
 .feed.compact .card-meta,
 .feed.compact .thumbs{display:none}
-.feed.compact .card-side{padding:0 12px 0 0}
+.feed.compact .card-side{flex-direction:row;align-items:center;justify-content:center;gap:9px;padding:0 12px 0 0}
+.card-dot{display:none;width:9px;height:9px;border-radius:50%;background:var(--lc,var(--acc));flex-shrink:0}
+.feed.compact .card-dot{display:block}
 .feed.compact .card-ava,.feed.compact .ava-sm{width:26px;height:26px;font-size:var(--fs-2xs)}
 .feed.compact .ava-stack .ava-sm:not(:first-child){margin-left:-8px}
 .feed.compact .acc-badge{width:13px;height:13px}
@@ -1044,11 +1048,15 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       </div>
       <div class="filter-bar" id="filter-bar"></div>
     </header>
+      <div class="tools-sentinel" id="tools-sentinel"></div>
       <div class="tools-row" id="tools-row">
         <button class="drop-btn" id="btn-view">
-          <svg class="lead" id="view-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
           <span id="view-label">Фильтры</span><i class="dp" id="cat-dot"></i>
           <svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="icon-btn tool-ic" id="tb-mode" title="Список или календарь"></button>
+        <button class="icon-btn tool-ic" id="tb-done" title="Выполненные"></button>
+        <button class="icon-btn tool-ic" id="tb-rep" title="Повторяющиеся"></button>
+        <button class="icon-btn tool-ic" id="tb-compact" title="Компактный вид"></button>
       </div>
     <div class="feed" id="feed"></div>
   </section>
@@ -1657,6 +1665,8 @@ const ICON = {
   head:(s)=>_svg('<path d="M6 4v16M18 4v16M6 12h12"/>',s),
   dots:(s)=>_svg('<circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/>',s),
   cal:(s)=>_svg('<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/>',s),
+  rows:(s)=>_svg('<rect x="3" y="4" width="18" height="4" rx="1.5"/><rect x="3" y="10" width="18" height="4" rx="1.5"/><rect x="3" y="16" width="18" height="4" rx="1.5"/>',s),
+  rowsTight:(s)=>_svg('<rect x="3" y="4" width="18" height="2.6" rx="1.1"/><rect x="3" y="8.4" width="18" height="2.6" rx="1.1"/><rect x="3" y="12.8" width="18" height="2.6" rx="1.1"/><rect x="3" y="17.2" width="18" height="2.6" rx="1.1"/>',s),
   mic:(s)=>_svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/>',s),
   cam:(s)=>_svg('<rect x="2" y="6" width="14" height="12" rx="3"/><path d="m16 11 6-3.5v9L16 13z"/>',s),
   clip:(s)=>_svg('<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.5 3.5 0 0 1 5 5L10.5 18a2 2 0 0 1-3-3l8-8"/>',s),
@@ -2715,14 +2725,25 @@ function renderMain(){
   $('search-input').placeholder = isTasks ? 'Поиск по делам и спискам…' : 'Поиск по заметкам…';
   $('filter-bar').style.display = isTasks ? '' : 'none';
   $('tools-row').style.display = '';
-  const cal = P.view==='calendar';
-  $('view-ico').innerHTML = cal
-    ? '<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"/>'
-    : '<line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>';
   renderFilterLabel();
+  renderToolIcons();
   if(isTasks){ renderFilterBar(); }
   renderFeed();
   updateNav();
+}
+function renderToolIcons(){
+  const P = prefs(), isTasks = S.currentTab === 'tasks';
+  const cal = P.view === 'calendar';
+  const set = (id, icon, on, show=true) => {
+    const b = $(id); if(!b) return;
+    b.style.display = show ? '' : 'none';
+    b.innerHTML = icon;
+    b.classList.toggle('on', !!on);
+  };
+  set('tb-mode',    cal ? ICON.cal(18) : ICON.list(18), cal, isTasks);
+  set('tb-done',    ICON.check(18),   S.showCompleted,  isTasks);
+  set('tb-rep',     ICON.repeat(18),  showRepeats,      isTasks);
+  set('tb-compact', P.compact ? ICON.rowsTight(18) : ICON.rows(18), !!P.compact, true);
 }
 function renderFilterLabel(){
   const P = prefs(), isTasks = S.currentTab === 'tasks';
@@ -2730,10 +2751,7 @@ function renderFilterLabel(){
   // что сейчас отличается от обычного вида
   const parts = [];
   if(P.catFilter) parts.push(P.catFilter);
-  if(isTasks && P.view === 'calendar') parts.push('Календарь');
   if(isTasks && P.sort && P.sort !== 'smart') parts.push(SORTS[P.sort]);
-  if(isTasks && S.showCompleted) parts.push('с выполненными');
-  if(isTasks && !showRepeats) parts.push('без повторов');
   if(!isTasks && P.onlyMine) parts.push('только мои');
   const active = parts.length > 0;
   lbl.textContent = active ? parts.join(' · ') : 'Фильтры';
@@ -2876,7 +2894,7 @@ function cardHTML(t){
       ${meta?`<div class="card-meta">${meta}</div>`:''}
       ${thumbs}
     </div>
-    <div class="card-side">${side}</div>
+    <div class="card-side">${t.label?`<i class="card-dot" style="--lc:${LABEL_DOT[t.labelColor]||'#10B981'}"></i>`:''}${side}</div>
   </article></div>`;
 }
 
@@ -3009,17 +3027,8 @@ function openViewSheet(){
     h += `<div class="sheet-sub">Фильтр</div>`;
     h += item(`<i class="p-dot" style="--lc:${catColor}"></i>`, esc(catName), more(), 'data-opencat="1"');
     h += item(ICON.list(17), `Сортировка · ${esc(SORTS[P.sort]||'Умная')}`, more(), 'data-opensort="1"');
-    h += `<div class="sheet-sub">Отображение</div>`;
-    h += item(ICON.list(17), 'Список',     check(P.view!=='calendar'), 'data-viewmode="list"',     P.view!=='calendar');
-    h += item(ICON.cal(17),  'Календарь',  check(P.view==='calendar'), 'data-viewmode="calendar"', P.view==='calendar');
-    h += item(ICON.eye(17),  'Компактно',  toggle(!!P.compact), 'data-vtoggle="compact"');
-    h += `<div class="sheet-sub">Что показывать</div>`;
-    h += item(ICON.check(17),  'Выполненные',   toggle(S.showCompleted), 'data-vtoggle="done"');
-    h += item(ICON.repeat(17), 'Повторяющиеся', toggle(showRepeats),     'data-vtoggle="rep"');
     h += `<div class="sheet-div"></div>` + trashItem;
   } else {
-    h += `<div class="sheet-sub">Отображение</div>`;
-    h += item(ICON.eye(17), 'Компактно', toggle(!!P.compact), 'data-vtoggle="compact"');
     h += `<div class="sheet-sub">Что показывать</div>`;
     h += item(ICON.person(17), 'Только мои заметки', toggle(!!P.onlyMine), 'data-vtoggle="mine"');
     h += `<div class="sheet-div"></div>` + trashItem;
@@ -4406,6 +4415,14 @@ const SOS_HOLD = 1500;   // удержание, мс
 const SOS_REC  = 5000;   // длительность записи, мс
 let sosHold = null, sosBusy = false;
 
+function initStickyTools(){
+  const sentinel = $('tools-sentinel'), row = $('tools-row');
+  if(!sentinel || !row || !('IntersectionObserver' in window)) return;
+  new IntersectionObserver(
+    ([e])=>row.classList.toggle('stuck', !e.isIntersecting),
+    { threshold:[1] }
+  ).observe(sentinel);
+}
 function sosBind(){
   document.querySelectorAll('.sos-btn').forEach(btn=>{
     if(btn._bound) return;
@@ -5983,6 +6000,10 @@ document.addEventListener('click', e=>{
   if(x = el('[data-sort]')){ prefs().sort = x.dataset.sort; persist(); $('sort-overlay').classList.add('hidden'); renderMain(); return; }
   if(el('#sort-overlay') && !el('.sheet')){ $('sort-overlay').classList.add('hidden'); return; }
   if(el('#btn-view')){ openViewSheet(); return; }
+  if(el('#tb-mode')){ const P2=prefs(); P2.view = P2.view==='calendar' ? 'list' : 'calendar'; persist(); renderMain(); haptic('tap'); return; }
+  if(el('#tb-done')){ S.showCompleted = !S.showCompleted; persist(); renderMain(); haptic('tap'); return; }
+  if(el('#tb-rep')){ showRepeats = !showRepeats; renderMain(); haptic('tap'); return; }
+  if(el('#tb-compact')){ const P2=prefs(); P2.compact = !P2.compact; persist(); renderMain(); haptic('tap'); return; }
   if(x = el('[data-calnav]')){ calShiftMonth(Number(x.dataset.calnav)); return; }
   if(x = el('[data-calday]')){ openCalDay(x.dataset.calday); return; }
   if(el('#cal-nodate')){ openNoDate(); return; }
@@ -6423,6 +6444,7 @@ document.addEventListener('keydown', e=>{
   const _ls = $('lb-save'); if(_ls) _ls.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0 4-4m-4 4-4-4M5 21h14"/></svg>';
   const _lc = $('lb-close'); if(_lc) _lc.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
   sosBind();
+  initStickyTools();
   applyTheme();
   try{ history.replaceState({screen:'root'}, ''); }catch(e){}
   if(S.currentUser && member(S.currentUser)){
