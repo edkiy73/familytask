@@ -4430,31 +4430,25 @@ let sosHold = null, sosBusy = false;
 
 // быстрые действия с иконки и приём из меню «Поделиться»
 let pendingIntent = null;
-async function readSharedPayload(tries = 6){
+async function readSharedPayload(tries = 10){
   try{
-    if(!('caches' in window)) return null;
-    const cache = await caches.open('fh-share');
-    let metaRes = await cache.match('/shared-meta');
-    // данные пишутся служебным скриптом — при холодном старте они могут появиться чуть позже
-    while(!metaRes && tries-- > 0){
+    let meta = await DB.get('kv','shared');
+    // служебный скрипт мог не успеть записать к моменту загрузки
+    while(!meta && tries-- > 0){
       await new Promise(r=>setTimeout(r, 200));
-      metaRes = await cache.match('/shared-meta');
+      meta = await DB.get('kv','shared');
     }
-    if(!metaRes) return null;
-    const meta = await metaRes.json();
+    if(!meta) return null;
+    await DB.del('kv','shared');
+    if(meta.error) return { error: meta.error, blobs:[] };
     const blobs = [];
-    for(const key of (meta.files||[])){
-      const r = await cache.match(key);
-      if(!r) continue;
-      const name = decodeURIComponent(r.headers.get('X-Name') || 'file');
-      const blob = await r.blob();
-      blobs.push({ blob, name, type: blob.type || '' });
+    for(const f of (meta.files||[])){
+      const blob = await DB.get('img', f.id);
+      if(blob) blobs.push({ blob, name:f.name, type:f.type || blob.type || '' });
+      await DB.del('img', f.id);
     }
-    // чистим, чтобы не подставилось повторно при следующем запуске
-    await cache.delete('/shared-meta');
-    for(const key of (meta.files||[])) await cache.delete(key);
     return { ...meta, blobs };
-  }catch(e){ return null; }
+  }catch(e){ return { error:String(e && e.message || e), blobs:[] }; }
 }
 function runPendingIntent(){
   const it = pendingIntent; pendingIntent = null;
@@ -6599,10 +6593,14 @@ document.addEventListener('keydown', e=>{
     }
     // быстрые действия с иконки и приём того, чем поделились
     const go = sp.get('go');
-    if(sp.get('shared') === '1'){
+    const sh = sp.get('shared');
+    if(sh){
       history.replaceState({screen:'root'}, '', location.pathname);
       readSharedPayload().then(p=>{
-        if(!p){ toast('Не удалось получить файл','warn'); return; }
+        if(!p || p.error){
+          toast(p && p.error ? 'Ошибка передачи: '+p.error : 'Файл не передан','warn');
+          return;
+        }
         pendingIntent = { go:null, shared:{ title:p.title, text:p.text, url:p.url }, blobs:p.blobs };
         if(S.currentUser && member(S.currentUser)) runPendingIntent();
         // иначе подождёт: сработает сразу после выбора профиля

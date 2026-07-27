@@ -1,5 +1,5 @@
 /* FamilyHub — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v79';
+const CACHE = 'family-hub-v80';
 const SHARE_CACHE = 'fh-share';
 const SHELL = [
   './',
@@ -13,6 +13,29 @@ const SHELL = [
   './sc-note.png',
   './sc-chat.png',
 ];
+
+
+// пишем в то же хранилище, которым пользуется приложение — так данные точно доедут
+function idbPut(store, key, value) {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('family-hub', 1);
+    req.onupgradeneeded = () => {
+      const d = req.result;
+      if (!d.objectStoreNames.contains('kv'))  d.createObjectStore('kv');
+      if (!d.objectStoreNames.contains('img')) d.createObjectStore('img');
+    };
+    req.onsuccess = () => {
+      try {
+        const db = req.result;
+        const tx = db.transaction(store, 'readwrite');
+        tx.objectStore(store).put(value, key);
+        tx.oncomplete = () => { db.close(); resolve(true); };
+        tx.onerror = () => { db.close(); reject(tx.error); };
+      } catch (e) { reject(e); }
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
 
 self.addEventListener('install', e => {
   // складываем файлы по одному: если какой-то не залит на хостинг,
@@ -106,33 +129,30 @@ self.addEventListener('fetch', e => {
 
   if (e.request.method === 'POST' && url.pathname.endsWith('/share-target')) {
     e.respondWith((async () => {
+      let status = 'empty';
       try {
         const form = await e.request.formData();
         const files = [...form.getAll('sfiles'), ...form.getAll('sdocs')]
           .filter(f => f && typeof f === 'object' && f.size);
-        const cache = await caches.open(SHARE_CACHE);
-        const keys = [];
+        const ids = [];
         for (let i = 0; i < files.length; i++) {
-          const key = '/shared/' + i;
-          await cache.put(key, new Response(files[i], {
-            headers: {
-              'Content-Type': files[i].type || 'application/octet-stream',
-              'X-Name': encodeURIComponent(files[i].name || ('file-' + i)),
-            },
-          }));
-          keys.push(key);
+          const id = 'shr_' + Date.now() + '_' + i;
+          await idbPut('img', id, files[i]);
+          ids.push({ id, name: files[i].name || ('file-' + i), type: files[i].type || '' });
         }
-        const meta = {
+        await idbPut('kv', 'shared', {
           title: form.get('stitle') || '',
           text:  form.get('stext')  || '',
           url:   form.get('surl')   || '',
-          files: keys, at: Date.now(),
-        };
-        await cache.put('/shared-meta', new Response(JSON.stringify(meta), {
-          headers: { 'Content-Type': 'application/json' },
-        }));
-      } catch (_) {}
-      return Response.redirect(new URL('./index.html?shared=1', self.registration.scope).href, 303);
+          files: ids, at: Date.now(),
+        });
+        status = 'ok';
+      } catch (err) {
+        status = 'error';
+        try { await idbPut('kv', 'shared', { error: String(err && err.message || err), at: Date.now(), files: [] }); } catch (_) {}
+      }
+      return Response.redirect(
+        new URL('./index.html?shared=' + status, self.registration.scope).href, 303);
     })());
     return;
   }
