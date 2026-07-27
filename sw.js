@@ -1,5 +1,5 @@
-/* Семейный Хаб — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v74';
+/* FamilyHub — service worker: оффлайн-оболочка */
+const CACHE = 'family-hub-v76';
 const SHELL = [
   './',
   './index.html',
@@ -7,6 +7,10 @@ const SHELL = [
   './icon-192.png',
   './icon-512.png',
   './maskable-512.png',
+  './badge-96.png',
+  './sc-task.png',
+  './sc-note.png',
+  './sc-chat.png',
 ];
 
 self.addEventListener('install', e => {
@@ -55,15 +59,15 @@ async function chatIsVisible() {
 
 self.addEventListener('push', e => {
   let d = {};
-  try { d = e.data.json(); } catch (_) { d = { title: 'Семейный Хаб', body: e.data && e.data.text() }; }
+  try { d = e.data.json(); } catch (_) { d = { title: 'FamilyHub', body: e.data && e.data.text() }; }
   e.waitUntil((async () => {
     const isChat = typeof d.tag === 'string' && d.tag.indexOf('chat-') === 0;
     if (isChat && await chatIsVisible()) return;   // чат открыт на экране — не дублируем
-    await self.registration.showNotification(d.title || 'Семейный Хаб', {
+    await self.registration.showNotification(d.title || 'FamilyHub', {
       body: d.body || '',
       tag: d.tag || undefined,
-      icon: 'icon-192.png',
-      badge: 'icon-192.png',
+      icon: new URL('icon-192.png', self.registration.scope).href,
+      badge: new URL('badge-96.png', self.registration.scope).href,
     });
   })());
 });

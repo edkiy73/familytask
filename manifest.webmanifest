@@ -1,6 +1,6 @@
 {
-  "name": "Семейный Хаб",
-  "short_name": "Хаб",
+  "name": "FamilyHub",
+  "short_name": "FamilyHub",
   "description": "Совместные дела и важные заметки всей семьи. Работает без интернета.",
   "lang": "ru",
   "start_url": "./index.html",
@@ -13,12 +13,14 @@
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "maskable-512.png",
@@ -29,41 +31,44 @@
   ],
   "shortcuts": [
     {
-      "name": "Новое дело",
+      "name": "Добавить дело",
       "short_name": "Дело",
       "description": "Быстро добавить дело для семьи",
       "url": "./index.html?go=new-task",
       "icons": [
         {
-          "src": "icon-192.png",
+          "src": "sc-task.png",
           "sizes": "192x192",
-          "type": "image/png"
+          "type": "image/png",
+          "purpose": "any"
         }
       ]
     },
     {
-      "name": "Новая заметка",
+      "name": "Добавить заметку",
       "short_name": "Заметка",
       "description": "Быстро добавить заметку",
       "url": "./index.html?go=new-note",
       "icons": [
         {
-          "src": "icon-192.png",
+          "src": "sc-note.png",
           "sizes": "192x192",
-          "type": "image/png"
+          "type": "image/png",
+          "purpose": "any"
         }
       ]
     },
     {
-      "name": "Семейный чат",
+      "name": "Перейти в чат",
       "short_name": "Чат",
-      "description": "Открыть чат семьи",
+      "description": "Открыть семейный чат",
       "url": "./index.html?go=chat",
       "icons": [
         {
-          "src": "icon-192.png",
+          "src": "sc-chat.png",
           "sizes": "192x192",
-          "type": "image/png"
+          "type": "image/png",
+          "purpose": "any"
         }
       ]
     }

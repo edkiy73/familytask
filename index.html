@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Семейный Хаб</title>
+<title>FamilyHub</title>
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4F4F2">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0C0D0F">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -690,7 +690,7 @@ body.no-anim *{animation:none!important}
   box-shadow:var(--shadow-lg);opacity:0;transform:translateY(14px) scale(.9);
   transition:opacity .24s var(--spring),transform .24s var(--spring)}
 .d-fab-items button.btn-acc{background:var(--acc);color:#fff}
-.d-fab-items button.btn-green{background:var(--acc-soft);color:var(--acc-ink)}
+.d-fab-items button.btn-green{background:linear-gradient(135deg,var(--acc-2),var(--acc));color:#fff}
 .d-fab-items button.btn-dark{background:#16181D;color:#fff}
 [data-theme="dark"] .d-fab-items button.btn-dark{background:#2A2D35}
 .d-fab-items{pointer-events:none}
@@ -1024,7 +1024,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div class="auth-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
       </div>
-      <h1 class="auth-title">Семейный Хаб</h1>
+      <h1 class="auth-title">FamilyHub</h1>
       <p class="auth-sub">Кто зашёл? Выберите свой профиль</p>
       <div class="auth-grid" id="auth-grid"></div>
     </div>
@@ -1631,7 +1631,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 <script>
 'use strict';
 /* ============================================================
-   Семейный Хаб · local-first PWA
+   FamilyHub · local-first PWA
    Данные и фото — в IndexedDB (без лимитов localStorage)
 ============================================================ */
 
@@ -2144,8 +2144,8 @@ async function notify(title, body, tag){
   if(!('Notification' in window) || Notification.permission !== 'granted') return;
   try{
     const reg = await navigator.serviceWorker?.getRegistration?.();
-    if(reg && reg.showNotification) reg.showNotification(title, {body, tag, icon:'icon-192.png', badge:'icon-192.png'});
-    else new Notification(title, {body, tag, icon:'icon-192.png'});
+    if(reg && reg.showNotification) reg.showNotification(title, {body, tag, icon:'icon-192.png', badge:'badge-96.png', badge:'icon-192.png'});
+    else new Notification(title, {body, tag, icon:'icon-192.png', badge:'badge-96.png'});
   }catch(e){ try{ new Notification(title, {body}); }catch(_){} }
 }
 function checkDeadlines(){
@@ -2494,7 +2494,7 @@ const SYNC = {
             news.push(['Выполнено', t.title + (who?` — ${who}`:''), 'evt-done-'+t.id+'-'+(t.updatedAt||0)]);
         }
       });
-      if(news.length > 3) notify('Семейный Хаб', 'Обновлений от семьи: '+news.length, 'batch');
+      if(news.length > 3) notify('FamilyHub', 'Обновлений от семьи: '+news.length, 'batch');
       else news.forEach(([a,b,tg])=>notify(a, b, tg));
       if(news.length) checkDeadlines();
     }
@@ -4071,7 +4071,7 @@ async function bioRegister(mid){
     const m = member(mid);
     const cred = await navigator.credentials.create({ publicKey: {
       challenge: crypto.getRandomValues(new Uint8Array(32)),
-      rp: { name: 'Семейный Хаб' },
+      rp: { name: 'FamilyHub' },
       user: { id: new TextEncoder().encode(mid), name: m?.name || 'user', displayName: m?.name || 'user' },
       pubKeyCredParams: [{type:'public-key', alg:-7}, {type:'public-key', alg:-257}],
       authenticatorSelection: { authenticatorAttachment:'platform', userVerification:'required', residentKey:'preferred' },
@@ -6293,7 +6293,7 @@ document.addEventListener('click', e=>{
     if(x.dataset.notif === 'on'){
       Notification.requestPermission().then(p=>{
         renderNotifCard();
-        if(p === 'granted'){ notify('Семейный Хаб','Уведомления включены на этом устройстве'); checkDeadlines(); ensurePushSub(); }
+        if(p === 'granted'){ notify('FamilyHub','Уведомления включены на этом устройстве'); checkDeadlines(); ensurePushSub(); }
       });
     } else if(x.dataset.notif === 'test') runNotifSelfTest();
     return; }
