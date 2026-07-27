@@ -1,5 +1,5 @@
 /* FamilyHub — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v77';
+const CACHE = 'family-hub-v78';
 const SHARE_CACHE = 'fh-share';
 const SHELL = [
   './',
@@ -15,7 +15,13 @@ const SHELL = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // складываем файлы по одному: если какой-то не залит на хостинг,
+  // установка всё равно проходит — иначе приложение вообще не поставится
+  e.waitUntil((async () => {
+    const c = await caches.open(CACHE);
+    await Promise.allSettled(SHELL.map(u => c.add(u)));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', e => {

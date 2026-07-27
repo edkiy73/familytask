@@ -92,14 +92,7 @@
           "name": "sdocs",
           "accept": [
             "application/pdf",
-            "text/*",
-            ".pdf",
-            ".txt",
-            ".csv",
-            ".doc",
-            ".docx",
-            ".xls",
-            ".xlsx"
+            "text/plain"
           ]
         }
       ]
