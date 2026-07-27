@@ -1,5 +1,6 @@
 /* FamilyHub — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v76';
+const CACHE = 'family-hub-v77';
+const SHARE_CACHE = 'fh-share';
 const SHELL = [
   './',
   './index.html',
@@ -90,8 +91,44 @@ self.addEventListener('notificationclick', e => {
   );
 });
 
+// приём того, чем поделились: файлы кладём во временное хранилище,
+// затем открываем приложение — оно их заберёт
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
+
+  if (e.request.method === 'POST' && url.pathname.endsWith('/share-target')) {
+    e.respondWith((async () => {
+      try {
+        const form = await e.request.formData();
+        const files = [...form.getAll('sfiles'), ...form.getAll('sdocs')]
+          .filter(f => f && typeof f === 'object' && f.size);
+        const cache = await caches.open(SHARE_CACHE);
+        const keys = [];
+        for (let i = 0; i < files.length; i++) {
+          const key = '/shared/' + i;
+          await cache.put(key, new Response(files[i], {
+            headers: {
+              'Content-Type': files[i].type || 'application/octet-stream',
+              'X-Name': encodeURIComponent(files[i].name || ('file-' + i)),
+            },
+          }));
+          keys.push(key);
+        }
+        const meta = {
+          title: form.get('stitle') || '',
+          text:  form.get('stext')  || '',
+          url:   form.get('surl')   || '',
+          files: keys, at: Date.now(),
+        };
+        await cache.put('/shared-meta', new Response(JSON.stringify(meta), {
+          headers: { 'Content-Type': 'application/json' },
+        }));
+      } catch (_) {}
+      return Response.redirect(new URL('./index.html?shared=1', self.registration.scope).href, 303);
+    })());
+    return;
+  }
+
   if (e.request.method !== 'GET') return;
 
   // Google Fonts: cache-first с докачкой в кэш

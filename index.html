@@ -4428,6 +4428,27 @@ let sosHold = null, sosBusy = false;
 
 // быстрые действия с иконки и приём из меню «Поделиться»
 let pendingIntent = null;
+async function readSharedPayload(){
+  try{
+    if(!('caches' in window)) return null;
+    const cache = await caches.open('fh-share');
+    const metaRes = await cache.match('/shared-meta');
+    if(!metaRes) return null;
+    const meta = await metaRes.json();
+    const blobs = [];
+    for(const key of (meta.files||[])){
+      const r = await cache.match(key);
+      if(!r) continue;
+      const name = decodeURIComponent(r.headers.get('X-Name') || 'file');
+      const blob = await r.blob();
+      blobs.push({ blob, name, type: blob.type || '' });
+    }
+    // чистим, чтобы не подставилось повторно при следующем запуске
+    await cache.delete('/shared-meta');
+    for(const key of (meta.files||[])) await cache.delete(key);
+    return { ...meta, blobs };
+  }catch(e){ return null; }
+}
 function runPendingIntent(){
   const it = pendingIntent; pendingIntent = null;
   if(!it) return;
@@ -4435,7 +4456,8 @@ function runPendingIntent(){
   if(go === 'chat'){ show('chat'); return; }
 
   const hasShared = shared.title || shared.text || shared.url;
-  if(!go && !hasShared) return;
+  const hasFiles  = !!(it.blobs && it.blobs.length);
+  if(!go && !hasShared && !hasFiles) return;
 
   // тип записи: явный из ярлыка, иначе заметка для присланного
   const wantType = (go === 'new-task') ? 'tasks' : 'notes';
@@ -4445,6 +4467,33 @@ function runPendingIntent(){
   F.type = wantType;
   renderFormType(); renderFormSelectors();
 
+  if(it.blobs && it.blobs.length){
+    (async ()=>{
+      let imgs = 0, docs = 0;
+      for(const f of it.blobs){
+        try{
+          if((f.type||'').startsWith('image/')){
+            if(F.imageIds.length >= 5) continue;
+            const blob = await compressImage(f.blob);
+            const id = uid('img_');
+            await DB.set('img', id, blob);
+            F.imageIds.push(id); queuePendingImg(id); SYNC.imgPut(id); imgs++;
+          } else {
+            if((F.files||[]).length >= 5) continue;
+            const id = uid('doc_');
+            await DB.set('img', id, f.blob);
+            F.files.push({ id, name:f.name, type:f.type, size:f.blob.size });
+            queuePendingImg(id); SYNC.imgPut(id); docs++;
+          }
+        }catch(e){}
+      }
+      renderFormPhotos(); renderFormDocs();
+      if(imgs || docs) toast(`Добавлено: ${imgs?imgs+' фото':''}${imgs&&docs?', ':''}${docs?docs+' файл.':''}`, 'clip');
+    })();
+  }
+  if(!hasShared && hasFiles){
+    $('f-title').value = it.blobs.some(b=>(b.type||'').startsWith('image/')) ? 'Фото' : 'Файлы';
+  }
   if(hasShared){
     // заголовок и текст могут прийти по-разному — собираем аккуратно
     const parts = [shared.text, shared.url].filter(Boolean);
@@ -6543,13 +6592,15 @@ document.addEventListener('keydown', e=>{
     }
     // быстрые действия с иконки и приём того, чем поделились
     const go = sp.get('go');
-    const shared = {
-      title: sp.get('stitle') || '',
-      text:  sp.get('stext')  || '',
-      url:   sp.get('surl')   || '',
-    };
-    if((go || shared.title || shared.text || shared.url) && logged){
-      pendingIntent = { go, shared };
+    if(sp.get('shared') === '1' && logged){
+      history.replaceState({screen:'root'}, '', location.pathname);
+      readSharedPayload().then(p=>{
+        if(!p) return;
+        pendingIntent = { go:null, shared:{ title:p.title, text:p.text, url:p.url }, blobs:p.blobs };
+        runPendingIntent();
+      });
+    } else if(go && logged){
+      pendingIntent = { go, shared:{ title:'', text:'', url:'' } };
       setTimeout(runPendingIntent, 350);
       history.replaceState({screen:'root'}, '', location.pathname);
     }
