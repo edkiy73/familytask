@@ -495,10 +495,10 @@ body.no-anim *{animation:none!important}
 /* ===== СВАЙП ПО КАРТОЧКЕ ===== */
 .sw-wrap{position:relative;border-radius:var(--r);margin-bottom:10px;overflow:hidden;touch-action:pan-y;
   box-shadow:var(--shadow), var(--hair);animation:rise .32s var(--spring) backwards}
-/* корешок: чей это объект — видно до чтения текста */
-.sw-wrap .card-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:var(--own,var(--line));border-radius:0 3px 3px 0;z-index:3}
-.sw-wrap .card-item .card-in{padding-left:17px}
+/* акцентная полоса — только у закреплённых, скруглена по краю карточки */
+.sw-wrap .card-item.pinned::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:var(--acc);border-radius:var(--r) 0 0 var(--r);z-index:3}
+.sw-wrap .card-item.pinned .card-in{padding-left:17px}
 .sw-wrap .card-item{margin-bottom:0;position:relative;z-index:2;will-change:transform;
   box-shadow:none;animation:none}
 .sw-wrap.animing .card-item{transition:transform .32s var(--spring)}
@@ -512,14 +512,13 @@ body.no-anim *{animation:none!important}
 .sw-act.sw-r.off{background:linear-gradient(270deg,#94A3B8,color-mix(in srgb,#94A3B8 62%,transparent))}
 .sw-wrap.sw-show-l .sw-l{opacity:1}
 .sw-wrap.sw-show-r .sw-r{opacity:1}
-.sw-act.armed{filter:brightness(1.08)}
 .sw-act.armed{filter:brightness(1.12)}
 .card-item{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .card-item.lp{transform:scale(.94);box-shadow:var(--shadow-lg)}
 .overlay,.sheet,.modal{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .sheet-title,.modal p,.modal h3{-webkit-user-select:none;user-select:none}
 .card-item.done{opacity:.55}
-.sw-wrap .card-item.pinned{background:color-mix(in srgb,var(--own) 6%,var(--card))}
+.sw-wrap .card-item.pinned{background:color-mix(in srgb,var(--acc) 5%,var(--card))}
 .card-item.pinned .card-in{padding-left:16px}
 .card-in{flex:1;min-width:0;padding:13px 10px 13px 15px}
 .card-chips{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:6px}
@@ -2188,14 +2187,20 @@ async function runNotifSelfTest(){
   const me = member(S.currentUser)?.name || 'вы';
   // 1) локальный показ всех типов
   const samples = [
-    ['Скоро дедлайн', 'Пример: дело через 30 минут'],
-    ['Дедлайн наступил', 'Пример: срок дела настал'],
-    ['Новое дело', 'Кто-то из семьи добавил дело'],
-    ['Вам назначено дело', 'Вам поручили задачу'],
-    ['Выполнено', 'Дело отметили выполненным'],
-    ['Напоминание', 'Вам напомнили о деле'],
+    ['Скоро дедлайн',      'За 30 минут до срока'],
+    ['Дедлайн наступил',   'Когда срок настал'],
+    ['3 просроченных дела','Ежедневная сводка в 12:00'],
+    ['Новое дело',         'Кто-то из семьи добавил дело'],
+    ['Новая заметка',      'Только тем, кому она видна'],
+    ['Вам назначено дело', 'Когда дело поручили вам'],
+    ['Взяли в работу',     'Автору — исполнитель принял дело'],
+    ['Выполнено',          'Дело отметили выполненным'],
+    ['Напоминание',        'Кнопка «Напомнить» в деле'],
+    ['Семейный чат',       'Новое сообщение, фото или голосовое'],
+    ['Входящий звонок',    'Когда вам звонят из семьи'],
+    ['SOS SOS SOS',        'Сигнал тревоги от члена семьи'],
   ];
-  samples.forEach((s,i)=> setTimeout(()=>notify(s[0], s[1], 'selftest-'+i), i*700));
+  samples.forEach((s,i)=> setTimeout(()=>notify(s[0], s[1], 'selftest-'+i), i*600));
   toast('Показываю все виды локально…','bell');
   // 2) серверная адресная доставка — проверяем, что push идёт именно этому профилю
   if(VAPID_PUBLIC && S.familyCode && pushSubActive){
@@ -2831,8 +2836,7 @@ function cardHTML(t){
   const pinAct = pinned
     ? `<span class="sw-act sw-r off">${ICON.pin(17)}<b>Открепить</b></span>`
     : `<span class="sw-act sw-r">${ICON.pin(17)}<b>Закрепить</b></span>`;
-  const ownColor = t.type==='tasks' ? (asg?.color || '#8FA3B8') : (member(t.createdBy)?.color || '#8FA3B8');
-  return `<div class="sw-wrap" data-sw="${t.id}" data-sw-done="${canDone?1:''}" style="--own:${ownColor}">
+  return `<div class="sw-wrap" data-sw="${t.id}" data-sw-done="${canDone?1:''}">
     ${canDone?doneAct:''}${pinAct}
     <article class="card-item ${t.completed?'done':''} ${pinned?'pinned':''}" data-open="${t.id}">
     <div class="card-in">
@@ -3476,8 +3480,18 @@ function detailAction(act){
   if(act==='del') confirmDelete(t.id);
   if(act==='assign') openAssignee(t.id, true);
   if(act==='done') toggleComplete(t.id);
-  if(act==='publish'){ t.isDraft=false; touch(t); persist(); toast('Опубликовано','rocket');
-    pushEvent(t.type==='tasks'?'Новое дело':'🆕 Новая заметка', t.title + ' — ' + (member(S.currentUser)?.name||''), 'evt-new-'+t.id);
+  if(act==='publish'){
+    t.isDraft=false; touch(t); persist(); toast('Опубликовано','rocket');
+    const me = member(S.currentUser)?.name || '';
+    if(t.type==='notes'){
+      // приватная заметка — только тем, кому она видна
+      const aud = ((t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id)).filter(id=>id!==S.currentUser);
+      if(aud.length) pushEvent('Новая заметка', t.title + (me?' — '+me:''), 'evt-new-'+t.id, aud);
+    } else {
+      pushEvent('Новое дело', t.title + (me?' — '+me:''), 'evt-new-'+t.id);
+      if(t.assignedTo && t.assignedTo!==S.currentUser)
+        pushEvent('Вам назначено дело', t.title, 'evt-asg-'+t.id+'-'+(t.updatedAt||0), t.assignedTo);
+    }
     renderDetail(); }
   if(act==='chk-all'){
     const all = (t.checklist||[]).every(c=>c.done);
