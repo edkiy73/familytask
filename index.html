@@ -4132,6 +4132,8 @@ function doLogin(mid){
   persist(); applyTheme(); resubscribePush();
   if(!wasLocked) show('main'); else rerender();
   haptic('ok');
+  // если приложение открыли через «Поделиться» до выбора профиля — доводим до конца
+  if(pendingIntent) setTimeout(runPendingIntent, 400);
   // предложим включить биометрию, если доступна и ещё не включена
   if(bioAvailable() && !bioEnabled(mid)){
     setTimeout(()=>{
@@ -4428,11 +4430,16 @@ let sosHold = null, sosBusy = false;
 
 // быстрые действия с иконки и приём из меню «Поделиться»
 let pendingIntent = null;
-async function readSharedPayload(){
+async function readSharedPayload(tries = 6){
   try{
     if(!('caches' in window)) return null;
     const cache = await caches.open('fh-share');
-    const metaRes = await cache.match('/shared-meta');
+    let metaRes = await cache.match('/shared-meta');
+    // данные пишутся служебным скриптом — при холодном старте они могут появиться чуть позже
+    while(!metaRes && tries-- > 0){
+      await new Promise(r=>setTimeout(r, 200));
+      metaRes = await cache.match('/shared-meta');
+    }
     if(!metaRes) return null;
     const meta = await metaRes.json();
     const blobs = [];
@@ -6592,12 +6599,13 @@ document.addEventListener('keydown', e=>{
     }
     // быстрые действия с иконки и приём того, чем поделились
     const go = sp.get('go');
-    if(sp.get('shared') === '1' && logged){
+    if(sp.get('shared') === '1'){
       history.replaceState({screen:'root'}, '', location.pathname);
       readSharedPayload().then(p=>{
-        if(!p) return;
+        if(!p){ toast('Не удалось получить файл','warn'); return; }
         pendingIntent = { go:null, shared:{ title:p.title, text:p.text, url:p.url }, blobs:p.blobs };
-        runPendingIntent();
+        if(S.currentUser && member(S.currentUser)) runPendingIntent();
+        // иначе подождёт: сработает сразу после выбора профиля
       });
     } else if(go && logged){
       pendingIntent = { go, shared:{ title:'', text:'', url:'' } };

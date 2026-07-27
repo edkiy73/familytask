@@ -1,5 +1,5 @@
 /* FamilyHub — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v78';
+const CACHE = 'family-hub-v79';
 const SHARE_CACHE = 'fh-share';
 const SHELL = [
   './',
@@ -27,7 +27,9 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      // SHARE_CACHE не трогаем: в нём лежит только что переданное из другого приложения
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE && k !== SHARE_CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
