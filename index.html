@@ -133,6 +133,8 @@ body.no-anim *{animation:none!important}
 /* ===== ШАПКА ===== */
 .hdr{position:relative;z-index:20;background:transparent;padding:calc(env(safe-area-inset-top) + 14px) 16px 10px}
 #screen-main .hdr{padding-bottom:0}
+/* на заметках ленты участников нет — возвращаем зазор от поиска */
+#screen-main.no-filterbar .tools-row{padding-top:16px}
 /* Шапка просто уезжает вместе со страницей, а панель фильтров липнет к верху.
    Никаких изменений высоты при прокрутке — поэтому нет дёрганья. */
 .tools-sentinel{height:0;margin:0}
@@ -2726,6 +2728,7 @@ function renderMain(){
   $('hdr-sub').textContent = me ? `Привет, ${me.name}` : '';
   $('search-input').placeholder = isTasks ? 'Поиск по делам и спискам…' : 'Поиск по заметкам…';
   $('filter-bar').style.display = isTasks ? '' : 'none';
+  $('screen-main').classList.toggle('no-filterbar', !isTasks);
   $('tools-row').style.display = '';
   renderFilterLabel();
   renderToolIcons();
@@ -3086,7 +3089,7 @@ function openCtx(id){
   }
   html += `<button class="sheet-btn" data-act="edit">${ICO.edit}Редактировать</button>`;
   if(t.createdBy===S.currentUser)
-    html += `<div class="sheet-div"></div><button class="sheet-btn rose" data-act="del">${ICO.del}Удалить навсегда</button>`;
+    html += `<div class="sheet-div"></div><button class="sheet-btn rose" data-act="del">${ICO.del}В корзину</button>`;
   $('ctx-sheet').innerHTML = html;
   $('ctx-overlay').classList.remove('hidden');
 }
@@ -3263,7 +3266,7 @@ function renderDetail(){
   markSeen(t);
   $('detail-hdr').textContent = t.type==='tasks' ? 'Дело' : 'Заметка';
   $('detail-actions').innerHTML = t.createdBy===S.currentUser
-    ? `<button class="icon-btn" data-d-act="del" style="color:var(--rose);border-color:var(--rose-soft);background:var(--rose-soft)" title="Удалить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg></button>`
+    ? `<button class="icon-btn" data-d-act="del" style="color:var(--rose);border-color:var(--rose-soft);background:var(--rose-soft)" title="В корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg></button>`
     : '';
 
   const author = member(t.createdBy), editor = member(t.updatedBy);
@@ -4423,6 +4426,41 @@ const SOS_HOLD = 1500;   // удержание, мс
 const SOS_REC  = 5000;   // длительность записи, мс
 let sosHold = null, sosBusy = false;
 
+// быстрые действия с иконки и приём из меню «Поделиться»
+let pendingIntent = null;
+function runPendingIntent(){
+  const it = pendingIntent; pendingIntent = null;
+  if(!it) return;
+  const { go, shared } = it;
+  if(go === 'chat'){ show('chat'); return; }
+
+  const hasShared = shared.title || shared.text || shared.url;
+  if(!go && !hasShared) return;
+
+  // тип записи: явный из ярлыка, иначе заметка для присланного
+  const wantType = (go === 'new-task') ? 'tasks' : 'notes';
+  S.currentTab = wantType;
+  persistLocal();
+  openForm();
+  F.type = wantType;
+  renderFormType(); renderFormSelectors();
+
+  if(hasShared){
+    // заголовок и текст могут прийти по-разному — собираем аккуратно
+    const parts = [shared.text, shared.url].filter(Boolean);
+    let title = shared.title || '';
+    let body  = parts.join('\n');
+    if(!title && body){
+      const nl = body.indexOf('\n');
+      if(nl > 0 && nl <= 80){ title = body.slice(0, nl); body = body.slice(nl + 1); }
+      else if(body.length <= 80){ title = body; body = ''; }
+    }
+    $('f-title').value = (title || 'Из другого приложения').slice(0, 120);
+    $('f-desc').value = body;
+    autoGrowDesc();
+    toast('Добавлено из другого приложения', 'clip');
+  }
+}
 function initStickyTools(){
   const sentinel = $('tools-sentinel'), row = $('tools-row');
   if(!sentinel || !row || !('IntersectionObserver' in window)) return;
@@ -6498,8 +6536,21 @@ document.addEventListener('keydown', e=>{
   // открытие по ссылке из уведомления (когда приложение было закрыто)
   try{
     const sp = new URLSearchParams(location.search);
-    if(sp.get('screen') === 'chat' && S.currentUser && member(S.currentUser)){
+    const logged = S.currentUser && member(S.currentUser);
+    if(sp.get('screen') === 'chat' && logged){
       setTimeout(()=>show('chat'), 300);
+      history.replaceState({screen:'root'}, '', location.pathname);
+    }
+    // быстрые действия с иконки и приём того, чем поделились
+    const go = sp.get('go');
+    const shared = {
+      title: sp.get('stitle') || '',
+      text:  sp.get('stext')  || '',
+      url:   sp.get('surl')   || '',
+    };
+    if((go || shared.title || shared.text || shared.url) && logged){
+      pendingIntent = { go, shared };
+      setTimeout(runPendingIntent, 350);
       history.replaceState({screen:'root'}, '', location.pathname);
     }
   }catch(e){}

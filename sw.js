@@ -1,5 +1,5 @@
 /* Семейный Хаб — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v72';
+const CACHE = 'family-hub-v74';
 const SHELL = [
   './',
   './index.html',
@@ -106,12 +106,14 @@ self.addEventListener('fetch', e => {
   if (e.request.mode === 'navigate' || url.pathname.endsWith('index.html')) {
     e.respondWith(
       fetch(e.request).then(res => {
-        if (res && res.ok) {
+        // адреса с параметрами (ярлыки, «поделиться») в кэш не кладём —
+        // иначе он засоряется, а отдавать всё равно нужно базовую страницу
+        if (res && res.ok && !url.search) {
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, copy));
         }
         return res;
-      }).catch(() => caches.match(e.request).then(h => h || caches.match('./index.html')))
+      }).catch(() => caches.match('./index.html').then(h => h || caches.match(e.request)))
     );
     return;
   }
