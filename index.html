@@ -135,7 +135,7 @@ body.no-anim *{animation:none!important}
 /* Шапка просто уезжает вместе со страницей, а панель фильтров липнет к верху.
    Никаких изменений высоты при прокрутке — поэтому нет дёрганья. */
 .tools-sentinel{height:1px;margin:0}
-.tools-row{position:sticky;top:0;z-index:21;margin:0;padding:8px 14px;display:flex;gap:8px;align-items:center;
+.tools-row{position:sticky;top:0;z-index:21;margin:0;padding:6px 14px 8px;display:flex;gap:8px;align-items:center;
   background:transparent;transition:background .18s,box-shadow .18s,backdrop-filter .18s}
 .tools-row.stuck{background:var(--glass);backdrop-filter:blur(22px) saturate(1.7);
   -webkit-backdrop-filter:blur(22px) saturate(1.7);box-shadow:0 6px 18px -12px rgba(0,0,0,.35)}
@@ -161,7 +161,7 @@ body.no-anim *{animation:none!important}
 .search-wrap.has-q .search-clear{display:block}
 
 /* фильтр по людям */
-.filter-bar{display:flex;gap:10px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;padding:10px 14px 2px}
+.filter-bar{display:flex;gap:10px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;padding:12px 14px 6px}
 .filter-bar::-webkit-scrollbar{display:none}
 .f-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;position:relative;transition:transform .24s var(--spring)}
 .f-item:active{transform:scale(.92)}
@@ -1056,7 +1056,9 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         <button class="icon-btn tool-ic" id="tb-mode" title="Список или календарь"></button>
         <button class="icon-btn tool-ic" id="tb-done" title="Выполненные"></button>
         <button class="icon-btn tool-ic" id="tb-rep" title="Повторяющиеся"></button>
+        <button class="icon-btn tool-ic" id="tb-mine" title="Только мои заметки"></button>
         <button class="icon-btn tool-ic" id="tb-compact" title="Компактный вид"></button>
+        <button class="icon-btn tool-ic" id="tb-trash" title="Корзина"></button>
       </div>
     <div class="feed" id="feed"></div>
   </section>
@@ -1665,8 +1667,8 @@ const ICON = {
   head:(s)=>_svg('<path d="M6 4v16M18 4v16M6 12h12"/>',s),
   dots:(s)=>_svg('<circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/>',s),
   cal:(s)=>_svg('<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/>',s),
-  rows:(s)=>_svg('<rect x="3" y="4" width="18" height="4" rx="1.5"/><rect x="3" y="10" width="18" height="4" rx="1.5"/><rect x="3" y="16" width="18" height="4" rx="1.5"/>',s),
-  rowsTight:(s)=>_svg('<rect x="3" y="4" width="18" height="2.6" rx="1.1"/><rect x="3" y="8.4" width="18" height="2.6" rx="1.1"/><rect x="3" y="12.8" width="18" height="2.6" rx="1.1"/><rect x="3" y="17.2" width="18" height="2.6" rx="1.1"/>',s),
+  rows:(s)=>_svg('<rect x="3" y="4" width="18" height="7" rx="2.2"/><rect x="3" y="13" width="18" height="7" rx="2.2"/>',s),
+  rowsTight:(s)=>_svg('<rect x="3" y="4.5" width="18" height="3" rx="1.5"/><rect x="3" y="10.5" width="18" height="3" rx="1.5"/><rect x="3" y="16.5" width="18" height="3" rx="1.5"/>',s),
   mic:(s)=>_svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/>',s),
   cam:(s)=>_svg('<rect x="2" y="6" width="14" height="12" rx="3"/><path d="m16 11 6-3.5v9L16 13z"/>',s),
   clip:(s)=>_svg('<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.5 3.5 0 0 1 5 5L10.5 18a2 2 0 0 1-3-3l8-8"/>',s),
@@ -2743,28 +2745,38 @@ function renderToolIcons(){
   set('tb-mode',    cal ? ICON.cal(18) : ICON.list(18), cal, isTasks);
   set('tb-done',    ICON.check(18),   S.showCompleted,  isTasks);
   set('tb-rep',     ICON.repeat(18),  showRepeats,      isTasks);
+  set('tb-mine',    ICON.person(18),  !!P.onlyMine,     !isTasks);
   set('tb-compact', P.compact ? ICON.rowsTight(18) : ICON.rows(18), !!P.compact, true);
+  set('tb-trash',   ICON.trash(18),   false,            !isTasks);
 }
 function renderFilterLabel(){
   const P = prefs(), isTasks = S.currentTab === 'tasks';
   const btn = $('btn-view'), dot = $('cat-dot'), lbl = $('view-label');
-  // что сейчас отличается от обычного вида
-  const parts = [];
-  if(P.catFilter) parts.push(P.catFilter);
-  if(isTasks && P.sort && P.sort !== 'smart') parts.push(SORTS[P.sort]);
-  if(!isTasks && P.onlyMine) parts.push('только мои');
-  const active = parts.length > 0;
-  lbl.textContent = active ? parts.join(' · ') : 'Фильтры';
-  btn.classList.toggle('on', active);
+  if(isTasks){
+    // на делах — сводная кнопка фильтров
+    const parts = [];
+    if(P.catFilter) parts.push(P.catFilter);
+    if(P.sort && P.sort !== 'smart') parts.push(SORTS[P.sort]);
+    const active = parts.length > 0;
+    lbl.textContent = active ? parts.join(' · ') : 'Фильтры';
+    btn.classList.toggle('on', active);
+  } else {
+    // на заметках — прямой выбор категории
+    lbl.textContent = P.catFilter || 'Все категории';
+    btn.classList.toggle('on', !!P.catFilter);
+  }
   if(P.catFilter){
     const l = S.labels.find(x=>x.name===P.catFilter);
     dot.style.setProperty('--dpc', l ? (LABEL_DOT[l.color]||'#10B981') : '#9B9CA4');
     dot.style.display = '';
-  } else dot.style.display = 'none';
+  } else {
+    dot.style.setProperty('--dpc', '#9B9CA4');
+    dot.style.display = isTasks ? 'none' : '';
+  }
 }
 function openCatSheet(){
   const P = prefs();
-  const used = new Set(liveTasks().filter(t=>t.type==='tasks' && !t.isDraft).map(t=>t.label));
+  const used = new Set(liveTasks().filter(t=>t.type===S.currentTab && !t.isDraft).map(t=>t.label));
   const cats = S.labels.filter(l=>used.has(l.name));
   let html = `<div class="sheet-grip"></div><div class="sheet-title">Категория</div>`;
   html += `<button class="sheet-btn ${!P.catFilter?'green':''}" data-catpick="">${!P.catFilter?ICO.done:'<span style="width:18px"></span>'}Все категории</button>`;
@@ -2798,9 +2810,9 @@ function matchesFilters(t, {ignoreDone}={}){
     if(!ignoreDone && !S.showCompleted && t.completed) return false;
     if(S.activeFilter==='un' && t.assignedTo!==null) return false;
     if(S.activeFilter && S.activeFilter!=='un' && t.assignedTo!==S.activeFilter) return false;
-    if(P.catFilter && t.label !== P.catFilter) return false;
     if(!showRepeats && t.repeat) return false;
   }
+  if(P.catFilter && t.label !== P.catFilter) return false;
   // заметки: показывать только свои (настройка профиля)
   if(t.type==='notes' && P.onlyMine && t.createdBy !== S.currentUser) return false;
   const q = searchQ.toLowerCase().trim();
@@ -3027,10 +3039,6 @@ function openViewSheet(){
     h += `<div class="sheet-sub">Фильтр</div>`;
     h += item(`<i class="p-dot" style="--lc:${catColor}"></i>`, esc(catName), more(), 'data-opencat="1"');
     h += item(ICON.list(17), `Сортировка · ${esc(SORTS[P.sort]||'Умная')}`, more(), 'data-opensort="1"');
-    h += `<div class="sheet-div"></div>` + trashItem;
-  } else {
-    h += `<div class="sheet-sub">Что показывать</div>`;
-    h += item(ICON.person(17), 'Только мои заметки', toggle(!!P.onlyMine), 'data-vtoggle="mine"');
     h += `<div class="sheet-div"></div>` + trashItem;
   }
   $('view-sheet').innerHTML = h;
@@ -5999,11 +6007,23 @@ document.addEventListener('click', e=>{
 
   if(x = el('[data-sort]')){ prefs().sort = x.dataset.sort; persist(); $('sort-overlay').classList.add('hidden'); renderMain(); return; }
   if(el('#sort-overlay') && !el('.sheet')){ $('sort-overlay').classList.add('hidden'); return; }
-  if(el('#btn-view')){ openViewSheet(); return; }
-  if(el('#tb-mode')){ const P2=prefs(); P2.view = P2.view==='calendar' ? 'list' : 'calendar'; persist(); renderMain(); haptic('tap'); return; }
-  if(el('#tb-done')){ S.showCompleted = !S.showCompleted; persist(); renderMain(); haptic('tap'); return; }
-  if(el('#tb-rep')){ showRepeats = !showRepeats; renderMain(); haptic('tap'); return; }
-  if(el('#tb-compact')){ const P2=prefs(); P2.compact = !P2.compact; persist(); renderMain(); haptic('tap'); return; }
+  if(el('#btn-view')){ S.currentTab==='tasks' ? openViewSheet() : openCatSheet(); return; }
+  if(el('#tb-mode')){
+    const P2=prefs(); P2.view = P2.view==='calendar' ? 'list' : 'calendar'; persist(); renderMain();
+    toast(P2.view==='calendar' ? 'Календарь' : 'Список', 'info'); return; }
+  if(el('#tb-done')){
+    S.showCompleted = !S.showCompleted; persist(); renderMain();
+    toast(S.showCompleted ? 'Выполненные показаны' : 'Выполненные скрыты', 'info'); return; }
+  if(el('#tb-rep')){
+    showRepeats = !showRepeats; renderMain();
+    toast(showRepeats ? 'Повторяющиеся показаны' : 'Повторяющиеся скрыты', 'info'); return; }
+  if(el('#tb-mine')){
+    const P2=prefs(); P2.onlyMine = !P2.onlyMine; persist(); renderMain();
+    toast(P2.onlyMine ? 'Только мои заметки' : 'Заметки всей семьи', 'info'); return; }
+  if(el('#tb-compact')){
+    const P2=prefs(); P2.compact = !P2.compact; persist(); renderMain();
+    toast(P2.compact ? 'Компактный вид' : 'Обычный вид', 'info'); return; }
+  if(el('#tb-trash')){ openTrashSheet(); return; }
   if(x = el('[data-calnav]')){ calShiftMonth(Number(x.dataset.calnav)); return; }
   if(x = el('[data-calday]')){ openCalDay(x.dataset.calday); return; }
   if(el('#cal-nodate')){ openNoDate(); return; }
