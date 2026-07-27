@@ -132,6 +132,11 @@ body.no-anim *{animation:none!important}
 
 /* ===== ШАПКА ===== */
 .hdr{position:relative;z-index:20;background:transparent;padding:calc(env(safe-area-inset-top) + 14px) 16px 10px}
+/* Шапка просто уезжает вместе со страницей, а панель фильтров липнет к верху.
+   Никаких изменений высоты при прокрутке — поэтому нет дёрганья. */
+.tools-row{position:sticky;top:0;z-index:21;margin:0;padding:8px 14px 10px;
+  background:var(--glass);backdrop-filter:blur(20px) saturate(1.6);
+  -webkit-backdrop-filter:blur(20px) saturate(1.6)}
 .hdr-row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-bottom:12px}
 .hdr-title{font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:-.045em;line-height:1.05}
 .hdr-title small{display:block;font-family:var(--font);font-weight:600;font-size:11px;color:var(--mut);letter-spacing:.01em;margin-top:4px}
@@ -151,13 +156,13 @@ body.no-anim *{animation:none!important}
 .search-wrap.has-q .search-clear{display:block}
 
 /* фильтр по людям */
-.filter-bar{display:flex;gap:17px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;padding:12px 14px 10px}
+.filter-bar{display:flex;gap:10px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;padding:10px 14px 8px}
 .filter-bar::-webkit-scrollbar{display:none}
 .f-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;position:relative;transition:transform .24s var(--spring)}
 .f-item:active{transform:scale(.92)}
-.f-item .ring{width:46px;height:46px;font-size:16px;box-shadow:var(--shadow), 0 0 0 1px var(--ring);transition:all .24s var(--spring)}
+.f-item .ring{width:42px;height:42px;font-size:15px;box-shadow:var(--shadow), 0 0 0 1px var(--ring);transition:all .24s var(--spring)}
 .f-item.active .ring{box-shadow:0 0 0 2.5px var(--bg), 0 0 0 4px var(--mc,var(--ink))}
-.f-item span{font-size:10px;font-weight:700;color:var(--mut);margin-top:2px}
+.f-item span.f-name{display:none}
 .f-item.active span{color:var(--ink)}
 .f-cnt{position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:10px;background:var(--mc,var(--mut));color:#fff!important;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px var(--bg);z-index:1;text-shadow:0 1px 1px rgba(0,0,0,.15)}
 
@@ -495,10 +500,6 @@ body.no-anim *{animation:none!important}
 /* ===== СВАЙП ПО КАРТОЧКЕ ===== */
 .sw-wrap{position:relative;border-radius:var(--r);margin-bottom:10px;overflow:hidden;touch-action:pan-y;
   box-shadow:var(--shadow), var(--hair);animation:rise .32s var(--spring) backwards}
-/* акцентная полоса — только у закреплённых, скруглена по краю карточки */
-.sw-wrap .card-item.pinned::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
-  background:var(--acc);border-radius:var(--r) 0 0 var(--r);z-index:3}
-.sw-wrap .card-item.pinned .card-in{padding-left:17px}
 .sw-wrap .card-item{margin-bottom:0;position:relative;z-index:2;will-change:transform;
   box-shadow:none;animation:none}
 .sw-wrap.animing .card-item{transition:transform .32s var(--spring)}
@@ -518,8 +519,8 @@ body.no-anim *{animation:none!important}
 .overlay,.sheet,.modal{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .sheet-title,.modal p,.modal h3{-webkit-user-select:none;user-select:none}
 .card-item.done{opacity:.55}
-.sw-wrap .card-item.pinned{background:color-mix(in srgb,var(--acc) 5%,var(--card))}
-.card-item.pinned .card-in{padding-left:16px}
+/* закреплённые: акцентная полоса внутренней тенью — идёт по скруглению карточки */
+.sw-wrap .card-item.pinned{background:color-mix(in srgb,var(--acc) 5%,var(--card));box-shadow:inset 2px 0 0 var(--acc)}
 .card-in{flex:1;min-width:0;padding:13px 10px 13px 15px}
 .card-chips{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:6px}
 .card-title{font-weight:700;font-size:14px;line-height:1.3;letter-spacing:-.01em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -630,6 +631,31 @@ body.no-anim *{animation:none!important}
 .prog-line{height:6px;border-radius:6px;background:var(--soft);overflow:hidden;margin:2px 4px 12px;box-shadow:inset 0 0 0 1px var(--ring)}
 .prog-line i{display:block;height:100%;background:linear-gradient(90deg,var(--acc-2),var(--acc));border-radius:6px;transition:width .32s var(--spring)}
 .d-voice{margin-top:10px}
+/* компактный список: строго одна строка — метка категории, заголовок, аватар */
+.feed.compact .sw-wrap{margin-bottom:8px}
+.feed.compact .card-in{padding:11px 10px 11px 14px;display:flex;align-items:center;gap:9px;min-width:0}
+.feed.compact .card-chips{display:contents}
+.feed.compact .card-chips .chip{display:none}
+.feed.compact .card-chips .chip.lbl{display:inline-flex;flex-shrink:0;max-width:34%;
+  overflow:hidden;white-space:nowrap;order:-1}
+.feed.compact .card-title{margin:0;flex:1;min-width:0;font-size:var(--fs-base);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.feed.compact .card-excerpt,
+.feed.compact .card-meta,
+.feed.compact .thumbs{display:none}
+.feed.compact .card-side{padding:0 12px 0 0}
+.feed.compact .card-ava,.feed.compact .ava-sm{width:26px;height:26px;font-size:var(--fs-2xs)}
+.feed.compact .ava-stack .ava-sm:not(:first-child){margin-left:-8px}
+.feed.compact .acc-badge{width:13px;height:13px}
+/* одна кнопка фильтров */
+.tools-row .drop-btn{flex:1}
+.tools-row .drop-btn .dp{margin-left:2px}
+.sheet-btn .sb-ic{width:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--mut)}
+.sheet-btn.green .sb-ic{color:var(--acc)}
+.sheet-btn .sb-lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sheet-btn .sb-right{display:flex;align-items:center;justify-content:flex-end;flex-shrink:0;color:var(--faint);min-width:20px}
+.sheet-btn.green .sb-right{color:var(--acc)}
+.sheet-btn .sb-ic .p-dot{width:10px;height:10px}
 .att-feed{display:flex;flex-direction:column;gap:8px}
 .att-imgs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .att-imgs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--r-sm);box-shadow:var(--shadow);animation:pulseIn .32s var(--spring) backwards}
@@ -1017,12 +1043,13 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         <button class="search-clear" id="search-clear"></button>
       </div>
       <div class="filter-bar" id="filter-bar"></div>
-      <div class="tools-row" id="tools-row">
-        <button class="drop-btn" id="btn-cat"><i class="dp" id="cat-dot"></i><span id="cat-label">Все</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
-        <button class="drop-btn" id="btn-sort"><svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 20l-3-3M7 4l3 3M14 7h7M14 12h5M14 17h3"/></svg><span id="sort-label">Умная</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
-        <button class="drop-btn icon-only" id="btn-view" title="Список / Календарь"><svg class="lead" id="view-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></button>
-      </div>
     </header>
+      <div class="tools-row" id="tools-row">
+        <button class="drop-btn" id="btn-view">
+          <svg class="lead" id="view-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+          <span id="view-label">Фильтры</span><i class="dp" id="cat-dot"></i>
+          <svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+      </div>
     <div class="feed" id="feed"></div>
   </section>
 
@@ -1912,7 +1939,7 @@ const defaultState = () => ({
   tasks:[],
 });
 let S = defaultState();
-const DEFAULT_PREFS = { catFilter:null, sort:'smart', view:'list', theme:'auto' };
+const DEFAULT_PREFS = { catFilter:null, sort:'smart', view:'list', theme:'auto', onlyMine:false, compact:false };
 function prefs(){
   if(!S.currentUser) return {...DEFAULT_PREFS};
   S.prefs = S.prefs || {};
@@ -2686,35 +2713,36 @@ function renderMain(){
   $('hdr-title').childNodes[0].textContent = isTasks ? 'Дела' : 'Заметки';
   $('hdr-sub').textContent = me ? `Привет, ${me.name}` : '';
   $('search-input').placeholder = isTasks ? 'Поиск по делам и спискам…' : 'Поиск по заметкам…';
-  $('btn-view').style.display = '';
   $('filter-bar').style.display = isTasks ? '' : 'none';
   $('tools-row').style.display = '';
-  $('btn-view').classList.toggle('on', P.view==='calendar');
   const cal = P.view==='calendar';
-  $('btn-sort').style.display = cal ? 'none' : '';
-  $('btn-view').classList.remove('on');   // иконка вида нейтральна всегда
   $('view-ico').innerHTML = cal
     ? '<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"/>'
     : '<line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>';
-  $('sort-label').textContent = SORTS[P.sort] || 'Умная';
-  if(isTasks){ renderFilterBar(); renderCatBar(); }
+  renderFilterLabel();
+  if(isTasks){ renderFilterBar(); }
   renderFeed();
   updateNav();
 }
-function renderCatBar(){
-  const P = prefs();
-  const btn = $('btn-cat');
-  const dot = $('cat-dot');
-  btn.classList.toggle('on', !!P.catFilter);
+function renderFilterLabel(){
+  const P = prefs(), isTasks = S.currentTab === 'tasks';
+  const btn = $('btn-view'), dot = $('cat-dot'), lbl = $('view-label');
+  // что сейчас отличается от обычного вида
+  const parts = [];
+  if(P.catFilter) parts.push(P.catFilter);
+  if(isTasks && P.view === 'calendar') parts.push('Календарь');
+  if(isTasks && P.sort && P.sort !== 'smart') parts.push(SORTS[P.sort]);
+  if(isTasks && S.showCompleted) parts.push('с выполненными');
+  if(isTasks && !showRepeats) parts.push('без повторов');
+  if(!isTasks && P.onlyMine) parts.push('только мои');
+  const active = parts.length > 0;
+  lbl.textContent = active ? parts.join(' · ') : 'Фильтры';
+  btn.classList.toggle('on', active);
   if(P.catFilter){
     const l = S.labels.find(x=>x.name===P.catFilter);
     dot.style.setProperty('--dpc', l ? (LABEL_DOT[l.color]||'#10B981') : '#9B9CA4');
     dot.style.display = '';
-    $('cat-label').textContent = P.catFilter;
-  } else {
-    dot.style.display = 'none';
-    $('cat-label').textContent = 'Все категории';
-  }
+  } else dot.style.display = 'none';
 }
 function openCatSheet(){
   const P = prefs();
@@ -2732,14 +2760,14 @@ function renderFilterBar(){
   const openBy = id => liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===id).length;
   let html = S.members.map(m=>{
     const c = openBy(m.id);
-    return `<button class="f-item ${S.activeFilter===m.id?'active':''}" data-filter="${m.id}" style="--mc:${m.color}">
+    return `<button class="f-item ${S.activeFilter===m.id?'active':''}" data-filter="${m.id}" style="--mc:${m.color}" title="${esc(m.name)}">
       ${c?`<span class="f-cnt">${c}</span>`:''}
-      ${avaHTML(m,'ring')}<span>${esc(m.name)}</span></button>`;
+      ${avaHTML(m,'ring')}<span class="f-name">${esc(m.name)}</span></button>`;
   }).join('');
   const un = openBy(null);
-  html += `<button class="f-item ${S.activeFilter==='un'?'active':''}" data-filter="un" style="--mc:#5E7186">
+  html += `<button class="f-item ${S.activeFilter==='un'?'active':''}" data-filter="un" style="--mc:#5E7186" title="Общие">
     ${un?`<span class="f-cnt">${un}</span>`:''}
-    <span class="ava ring ava-general">${ICON.users(16)}</span><span>Общие</span></button>`;
+    <span class="ava ring ava-general">${ICON.users(16)}</span><span class="f-name">Общие</span></button>`;
   $('filter-bar').innerHTML = html;
   hydrateImages($('filter-bar'));
 }
@@ -2755,6 +2783,8 @@ function matchesFilters(t, {ignoreDone}={}){
     if(P.catFilter && t.label !== P.catFilter) return false;
     if(!showRepeats && t.repeat) return false;
   }
+  // заметки: показывать только свои (настройка профиля)
+  if(t.type==='notes' && P.onlyMine && t.createdBy !== S.currentUser) return false;
   const q = searchQ.toLowerCase().trim();
   if(q){
     const hit = (t.title||'').toLowerCase().includes(q)
@@ -2854,6 +2884,7 @@ function renderFeed(){
   if(S.currentTab==='tasks' && prefs().view==='calendar'){ renderCalendar(); return; }
   const list = visibleList();
   const feed = $('feed');
+  feed.classList.toggle('compact', !!prefs().compact);
   if(!list.length){
     const isTasks = S.currentTab==='tasks';
     feed.innerHTML = `<div class="empty">
@@ -2953,19 +2984,46 @@ function openNoDate(){
 }
 function openViewSheet(){
   const P = prefs();
-  const row = (icon,label,active,attr) =>
-    `<button class="sheet-btn ${active?'green':''}" ${attr}>${active?ICO.done:'<span style="width:18px"></span>'}${icon}${label}</button>`;
-  const toggle = (icon,label,on,attr) =>
-    `<button class="sheet-btn" ${attr}>${icon}${label}<span class="sw-toggle ${on?'on':''}"><i></i></span></button>`;
-  let h = `<div class="sheet-grip"></div><div class="sheet-title">Вид и фильтры</div>`;
-  h += `<div class="sheet-sub">Отображение</div>`;
-  h += row(ICON.list(17)+' ', 'Список',    P.view!=='calendar', 'data-viewmode="list"');
-  h += row(ICON.cal(17)+' ',  'Календарь', P.view==='calendar', 'data-viewmode="calendar"');
+  const isTasks = S.currentTab === 'tasks';
+  // единая строка: [иконка][подпись][правый элемент] — одинаковая сетка у всех пунктов
+  const item = (icon, label, right, attr, on) =>
+    `<button class="sheet-btn ${on?'green':''}" ${attr||''}>
+       <span class="sb-ic">${icon||''}</span>
+       <span class="sb-lbl">${label}</span>
+       <span class="sb-right">${right||''}</span>
+     </button>`;
+  const check  = on => on ? ICON.check(16) : '';
+  const toggle = on => `<span class="sw-toggle ${on?'on':''}"><i></i></span>`;
+  const more   = () => ICON.dots(15);
+
   const tn = trashItems().length;
-  h += `<button class="sheet-btn" data-opentrash="1"><span style="width:18px"></span>${ICON.trash(17)} Корзина${tn?` <span class="sheet-cnt">${tn}</span>`:''}</button>`;
-  h += `<div class="sheet-sub">Что показывать</div>`;
-  h += toggle(ICON.check(17)+' ',  'Выполненные',    S.showCompleted, 'data-vtoggle="done"');
-  h += toggle(ICON.repeat(17)+' ', 'Повторяющиеся',  showRepeats,     'data-vtoggle="rep"');
+  const trashItem = item(ICON.trash(17), 'Корзина',
+    tn ? `<span class="sheet-cnt">${tn}</span>` : '', 'data-opentrash="1"');
+
+  let h = `<div class="sheet-grip"></div><div class="sheet-title">${isTasks?'Вид и фильтры':'Заметки'}</div>`;
+
+  if(isTasks){
+    const catName = P.catFilter || 'Все категории';
+    const catL = P.catFilter ? S.labels.find(x=>x.name===P.catFilter) : null;
+    const catColor = catL ? (LABEL_DOT[catL.color]||'#10B981') : '#9B9CA4';
+    h += `<div class="sheet-sub">Фильтр</div>`;
+    h += item(`<i class="p-dot" style="--lc:${catColor}"></i>`, esc(catName), more(), 'data-opencat="1"');
+    h += item(ICON.list(17), `Сортировка · ${esc(SORTS[P.sort]||'Умная')}`, more(), 'data-opensort="1"');
+    h += `<div class="sheet-sub">Отображение</div>`;
+    h += item(ICON.list(17), 'Список',     check(P.view!=='calendar'), 'data-viewmode="list"',     P.view!=='calendar');
+    h += item(ICON.cal(17),  'Календарь',  check(P.view==='calendar'), 'data-viewmode="calendar"', P.view==='calendar');
+    h += item(ICON.eye(17),  'Компактно',  toggle(!!P.compact), 'data-vtoggle="compact"');
+    h += `<div class="sheet-sub">Что показывать</div>`;
+    h += item(ICON.check(17),  'Выполненные',   toggle(S.showCompleted), 'data-vtoggle="done"');
+    h += item(ICON.repeat(17), 'Повторяющиеся', toggle(showRepeats),     'data-vtoggle="rep"');
+    h += `<div class="sheet-div"></div>` + trashItem;
+  } else {
+    h += `<div class="sheet-sub">Отображение</div>`;
+    h += item(ICON.eye(17), 'Компактно', toggle(!!P.compact), 'data-vtoggle="compact"');
+    h += `<div class="sheet-sub">Что показывать</div>`;
+    h += item(ICON.person(17), 'Только мои заметки', toggle(!!P.onlyMine), 'data-vtoggle="mine"');
+    h += `<div class="sheet-div"></div>` + trashItem;
+  }
   $('view-sheet').innerHTML = h;
   $('view-overlay').classList.remove('hidden');
 }
@@ -5909,15 +5967,19 @@ document.addEventListener('click', e=>{
   if(x = el('[data-purge]')){ deleteForever(Number(x.dataset.purge)); return; }
   if(x = el('[data-viewmode]')){ prefs().view = x.dataset.viewmode; persist(); openViewSheet(); renderMain(); return; }
   if(x = el('[data-vtoggle]')){
-    if(x.dataset.vtoggle==='done'){ S.showCompleted=!S.showCompleted; persist(); }
+    const v = x.dataset.vtoggle;
+    if(v==='done'){ S.showCompleted=!S.showCompleted; persist(); }
+    else if(v==='mine'){ const P2=prefs(); P2.onlyMine = !P2.onlyMine; persist(); }
+    else if(v==='compact'){ const P2=prefs(); P2.compact = !P2.compact; persist(); }
     else showRepeats = !showRepeats;
     openViewSheet(); renderMain(); return; }
   if(el('#view-overlay') && !el('.sheet')){ $('view-overlay').classList.add('hidden'); return; }
   if(x = el('[data-filter]')){ const f = x.dataset.filter; S.activeFilter = S.activeFilter===f?null:f; persist(); renderMain(); return; }
-  if(el('#btn-cat')){ openCatSheet(); return; }
+  if(el('[data-opencat]')){ $('view-overlay').classList.add('hidden'); openCatSheet(); return; }
+  if(el('[data-opensort]')){ $('view-overlay').classList.add('hidden'); openSortSheet(); return; }
   if(x = el('[data-catpick]')){ prefs().catFilter = x.dataset.catpick || null; persist(); $('cat-overlay').classList.add('hidden'); renderMain(); return; }
   if(el('#cat-overlay') && !el('.sheet')){ $('cat-overlay').classList.add('hidden'); return; }
-  if(el('#btn-sort')){ openSortSheet(); return; }
+
   if(x = el('[data-sort]')){ prefs().sort = x.dataset.sort; persist(); $('sort-overlay').classList.add('hidden'); renderMain(); return; }
   if(el('#sort-overlay') && !el('.sheet')){ $('sort-overlay').classList.add('hidden'); return; }
   if(el('#btn-view')){ openViewSheet(); return; }
