@@ -4430,23 +4430,28 @@ let sosHold = null, sosBusy = false;
 
 // быстрые действия с иконки и приём из меню «Поделиться»
 let pendingIntent = null;
-async function readSharedPayload(tries = 10){
+async function readSharedPayload(tries = 12){
   try{
-    let meta = await DB.get('kv','shared');
+    if(!('caches' in window)) return { error:'нет доступа к хранилищу', blobs:[] };
+    const cache = await caches.open('fh-share');
+    let metaRes = await cache.match('/shared-meta');
     // служебный скрипт мог не успеть записать к моменту загрузки
-    while(!meta && tries-- > 0){
+    while(!metaRes && tries-- > 0){
       await new Promise(r=>setTimeout(r, 200));
-      meta = await DB.get('kv','shared');
+      metaRes = await cache.match('/shared-meta');
     }
-    if(!meta) return null;
-    await DB.del('kv','shared');
-    if(meta.error) return { error: meta.error, blobs:[] };
+    if(!metaRes) return null;
+    const meta = await metaRes.json();
     const blobs = [];
     for(const f of (meta.files||[])){
-      const blob = await DB.get('img', f.id);
-      if(blob) blobs.push({ blob, name:f.name, type:f.type || blob.type || '' });
-      await DB.del('img', f.id);
+      const r = await cache.match(f.key);
+      if(!r) continue;
+      const blob = await r.blob();
+      blobs.push({ blob, name:f.name, type:f.type || blob.type || '' });
     }
+    // подчищаем, чтобы не подставилось повторно
+    await cache.delete('/shared-meta');
+    for(const f of (meta.files||[])) await cache.delete(f.key);
     return { ...meta, blobs };
   }catch(e){ return { error:String(e && e.message || e), blobs:[] }; }
 }
@@ -6598,7 +6603,10 @@ document.addEventListener('keydown', e=>{
       history.replaceState({screen:'root'}, '', location.pathname);
       readSharedPayload().then(p=>{
         if(!p || p.error){
-          toast(p && p.error ? 'Ошибка передачи: '+p.error : 'Файл не передан','warn');
+          const why = sh === 'timeout' ? 'Файл слишком большой или передача зависла'
+                    : sh === 'error'   ? 'Не удалось прочитать файл'
+                    : (p && p.error) ? p.error : 'Файл не передан';
+          toast(why, 'warn');
           return;
         }
         pendingIntent = { go:null, shared:{ title:p.title, text:p.text, url:p.url }, blobs:p.blobs };

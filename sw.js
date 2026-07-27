@@ -1,5 +1,5 @@
 /* FamilyHub — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v80';
+const CACHE = 'family-hub-v81';
 const SHARE_CACHE = 'fh-share';
 const SHELL = [
   './',
@@ -14,28 +14,6 @@ const SHELL = [
   './sc-chat.png',
 ];
 
-
-// пишем в то же хранилище, которым пользуется приложение — так данные точно доедут
-function idbPut(store, key, value) {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('family-hub', 1);
-    req.onupgradeneeded = () => {
-      const d = req.result;
-      if (!d.objectStoreNames.contains('kv'))  d.createObjectStore('kv');
-      if (!d.objectStoreNames.contains('img')) d.createObjectStore('img');
-    };
-    req.onsuccess = () => {
-      try {
-        const db = req.result;
-        const tx = db.transaction(store, 'readwrite');
-        tx.objectStore(store).put(value, key);
-        tx.oncomplete = () => { db.close(); resolve(true); };
-        tx.onerror = () => { db.close(); reject(tx.error); };
-      } catch (e) { reject(e); }
-    };
-    req.onerror = () => reject(req.error);
-  });
-}
 
 self.addEventListener('install', e => {
   // складываем файлы по одному: если какой-то не залит на хостинг,
@@ -56,6 +34,33 @@ self.addEventListener('activate', e => {
       .then(() => self.clients.claim())
   );
 });
+
+// раскладываем переданное по своему хранилищу и сообщаем результат
+async function storeShared(request) {
+  const form = await request.formData();
+  const files = [...form.getAll('sfiles'), ...form.getAll('sdocs')]
+    .filter(f => f && typeof f === 'object' && f.size);
+  const cache = await caches.open(SHARE_CACHE);
+  const list = [];
+  for (let i = 0; i < files.length; i++) {
+    const key = '/shared/' + Date.now() + '-' + i;
+    await cache.put(key, new Response(files[i], {
+      headers: { 'Content-Type': files[i].type || 'application/octet-stream' },
+    }));
+    list.push({ key, name: files[i].name || ('file-' + i), type: files[i].type || '' });
+  }
+  await cache.put('/shared-meta', new Response(JSON.stringify({
+    title: form.get('stitle') || '',
+    text:  form.get('stext')  || '',
+    url:   form.get('surl')   || '',
+    files: list, at: Date.now(),
+  }), { headers: { 'Content-Type': 'application/json' } }));
+  try {
+    const cs = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    cs.forEach(c => c.postMessage({ type: 'shared-ready' }));
+  } catch (_) {}
+  return 'ok';
+}
 
 /* --- есть ли открытый и активный экран чата? --- */
 function readUiState() {
@@ -128,31 +133,20 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
   if (e.request.method === 'POST' && url.pathname.endsWith('/share-target')) {
+    // ответ обязан вернуться в любом случае: если обработчик зависнет,
+    // браузер покажет «Failed to fetch» вместо приложения
+    const done = (st) => Response.redirect(
+      new URL('./index.html?shared=' + st, self.registration.scope).href, 303);
     e.respondWith((async () => {
-      let status = 'empty';
       try {
-        const form = await e.request.formData();
-        const files = [...form.getAll('sfiles'), ...form.getAll('sdocs')]
-          .filter(f => f && typeof f === 'object' && f.size);
-        const ids = [];
-        for (let i = 0; i < files.length; i++) {
-          const id = 'shr_' + Date.now() + '_' + i;
-          await idbPut('img', id, files[i]);
-          ids.push({ id, name: files[i].name || ('file-' + i), type: files[i].type || '' });
-        }
-        await idbPut('kv', 'shared', {
-          title: form.get('stitle') || '',
-          text:  form.get('stext')  || '',
-          url:   form.get('surl')   || '',
-          files: ids, at: Date.now(),
-        });
-        status = 'ok';
-      } catch (err) {
-        status = 'error';
-        try { await idbPut('kv', 'shared', { error: String(err && err.message || err), at: Date.now(), files: [] }); } catch (_) {}
+        const st = await Promise.race([
+          storeShared(e.request),
+          new Promise(r => setTimeout(() => r('timeout'), 5000)),
+        ]);
+        return done(st);
+      } catch (_) {
+        return done('error');
       }
-      return Response.redirect(
-        new URL('./index.html?shared=' + status, self.registration.scope).href, 303);
     })());
     return;
   }
