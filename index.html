@@ -18,16 +18,21 @@
 <style>
 :root{
   color-scheme:light dark;
-  --bg:#F4F4F2; --card:#FFFFFF; --ink:#101114; --mut:#73747B; --faint:#A8A9B0; --line:#E9E9EB; --soft:#F2F2F4;
-  --acc:#0DA271; --acc-2:#34D399; --acc-ink:#04704D;
-  --acc-soft:color-mix(in srgb, var(--acc) 12%, transparent);
+  --bg:#ECEEF2; --card:#FFFFFF; --ink:#0D1017; --mut:#6B7484; --faint:#9AA3B2; --line:#E3E7ED; --soft:#F1F3F7;
+  /* акцент = цвет активного профиля, подставляется из JS */
+  --mine:#0DA271;
+  --acc:color-mix(in srgb, var(--mine) 92%, #000 8%);
+  --acc-2:color-mix(in srgb, var(--mine) 76%, #fff 24%);
+  --acc-ink:color-mix(in srgb, var(--mine) 74%, #000 26%);
+  --acc-soft:color-mix(in srgb, var(--mine) 13%, transparent);
   --amber:#D97706; --amber-soft:color-mix(in srgb,#F59E0B 15%, transparent);
   --rose:#E5484D; --rose-soft:color-mix(in srgb,#E5484D 12%, transparent);
   --glass:color-mix(in srgb, var(--card) 76%, transparent);
   --ring:color-mix(in srgb, var(--ink) 7%, transparent);
-  --r:20px;
-  --shadow:0 1px 2px rgba(16,17,20,.04), 0 8px 24px rgba(16,17,20,.06);
-  --shadow-lg:0 12px 40px rgba(16,17,20,.14);
+  --r:18px;
+  --shadow:0 1px 1px rgba(13,16,23,.03);
+  --shadow-lg:0 18px 50px rgba(13,16,23,.18), 0 2px 8px rgba(13,16,23,.06);
+  --hair:inset 0 0 0 1px var(--line);
   --spring:cubic-bezier(.34,1.4,.44,1);
   /* ---- шкала дизайн-системы ---- */
   --r-xs:6px; --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:22px; --r-2xl:26px; --r-full:99px;
@@ -40,20 +45,26 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
-    --bg:#0C0D0F; --card:#17181C; --ink:#F3F3F5; --mut:#9B9CA4; --faint:#5C5D66; --line:#26272D; --soft:#212227;
-    --acc:#2DD4A0; --acc-2:#34D399; --acc-ink:#7CF0C8;
-    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
-    --shadow-lg:0 12px 44px rgba(0,0,0,.55);
+    --bg:#0B0D11; --card:#151920; --ink:#EDEFF3; --mut:#8B94A5; --faint:#596272; --line:#242A34; --soft:#1D222A;
+    --acc:color-mix(in srgb, var(--mine) 88%, #fff 12%);
+    --acc-2:color-mix(in srgb, var(--mine) 70%, #fff 30%);
+    --acc-ink:color-mix(in srgb, var(--mine) 55%, #fff 45%);
+    --acc-soft:color-mix(in srgb, var(--mine) 20%, transparent);
+    --shadow:0 1px 1px rgba(0,0,0,.35);
+    --shadow-lg:0 20px 56px rgba(0,0,0,.6), 0 2px 10px rgba(0,0,0,.4);
     --glass:color-mix(in srgb, var(--card) 78%, transparent);
     --ring:color-mix(in srgb, #ffffff 9%, transparent);
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#0C0D0F; --card:#17181C; --ink:#F3F3F5; --mut:#9B9CA4; --faint:#5C5D66; --line:#26272D; --soft:#212227;
-    --acc:#2DD4A0; --acc-2:#34D399; --acc-ink:#7CF0C8;
-    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
-    --shadow-lg:0 12px 44px rgba(0,0,0,.55);
+    --bg:#0B0D11; --card:#151920; --ink:#EDEFF3; --mut:#8B94A5; --faint:#596272; --line:#242A34; --soft:#1D222A;
+    --acc:color-mix(in srgb, var(--mine) 88%, #fff 12%);
+    --acc-2:color-mix(in srgb, var(--mine) 70%, #fff 30%);
+    --acc-ink:color-mix(in srgb, var(--mine) 55%, #fff 45%);
+    --acc-soft:color-mix(in srgb, var(--mine) 20%, transparent);
+    --shadow:0 1px 1px rgba(0,0,0,.35);
+    --shadow-lg:0 20px 56px rgba(0,0,0,.6), 0 2px 10px rgba(0,0,0,.4);
     --glass:color-mix(in srgb, var(--card) 78%, transparent);
     --ring:color-mix(in srgb, #ffffff 9%, transparent);
 }
@@ -122,7 +133,7 @@ body.no-anim *{animation:none!important}
 /* ===== ШАПКА ===== */
 .hdr{position:relative;z-index:20;background:transparent;padding:calc(env(safe-area-inset-top) + 14px) 16px 10px}
 .hdr-row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-bottom:12px}
-.hdr-title{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.02em;line-height:1.1}
+.hdr-title{font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:-.045em;line-height:1.05}
 .hdr-title small{display:block;font-family:var(--font);font-weight:600;font-size:11px;color:var(--mut);letter-spacing:.01em;margin-top:4px}
 .hdr-actions{display:flex;align-items:center;gap:6px}
 .hdr-actions .icon-btn{border-radius:50%}
@@ -333,8 +344,8 @@ body.no-anim *{animation:none!important}
 .fin-tab.on{background:var(--acc);color:#fff;box-shadow:0 3px 12px color-mix(in srgb,var(--acc) 32%,transparent)}
 .fin-tab:active{transform:scale(.95)}
 .fin-body{flex:1;padding:14px 16px calc(120px + env(safe-area-inset-bottom))}
-.fin-sum{background:var(--card);border-radius:var(--r-xl);padding:15px;box-shadow:var(--shadow);margin-bottom:12px}
-.fin-sum .big{font-size:var(--fs-3xl);font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.fin-sum{background:var(--card);border-radius:var(--r-xl);padding:15px;box-shadow:var(--shadow), var(--hair);margin-bottom:12px}
+.fin-sum .big{font-family:var(--disp);font-size:var(--fs-3xl);font-weight:700;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
 .fin-sum .cap{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);margin-bottom:5px}
 .fin-sum .sub{font-size:var(--fs-sm);color:var(--mut);margin-top:5px}
 .fin-bars{display:flex;flex-direction:column;gap:9px;margin-top:14px}
@@ -345,7 +356,7 @@ body.no-anim *{animation:none!important}
 .fin-bar-row .vl{font-variant-numeric:tabular-nums;font-weight:750;color:var(--mut);flex-shrink:0}
 .fin-list{display:flex;flex-direction:column;gap:12px}
 .fin-card{display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:var(--r-xl);
-  background:var(--card);box-shadow:var(--shadow);-webkit-user-select:none;user-select:none;
+  background:var(--card);box-shadow:var(--shadow), var(--hair);-webkit-user-select:none;user-select:none;
   -webkit-touch-callout:none;transition:transform .18s var(--spring);animation:rise .32s var(--spring) backwards}
 .fin-card:active{transform:scale(.975)}
 .fin-card.done{opacity:.55}
@@ -353,6 +364,9 @@ body.no-anim *{animation:none!important}
 .fin-c-in{flex:1;min-width:0}
 .fin-c-in .card-chips{margin-bottom:4px}
 .fin-c-in .card-title{font-size:var(--fs-base)}
+.fin-date{font-size:var(--fs-2xs);font-weight:700;color:var(--mut);padding:5px 9px;border-radius:var(--r-full);background:var(--soft);white-space:nowrap}
+.fin-note{font-size:var(--fs-xs);color:var(--mut);line-height:1.4;margin-top:4px;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .fin-amt{font-size:var(--fs-lg);font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0;letter-spacing:-.01em}
 .fin-amt.plan{color:var(--mut)}
 .fin-day{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);margin-top:16px}
@@ -432,6 +446,7 @@ body.no-anim *{animation:none!important}
 
 /* ===== ПАНЕЛЬ ФИЛЬТРОВ ===== */
 .tools-row{display:flex;gap:8px;align-items:center;margin-top:10px;padding-bottom:2px}
+.tools-row .drop-btn.on{color:var(--acc);box-shadow:var(--shadow), inset 0 0 0 1.5px var(--acc)}
 .drop-btn{flex:1;min-width:0;height:38px;padding:0 11px;border-radius:14px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);display:flex;align-items:center;gap:7px;color:var(--ink);font-size:12px;font-weight:700;transition:all .18s var(--spring)}
 .drop-btn:active{transform:scale(.96)}
 .drop-btn.on{box-shadow:var(--shadow), inset 0 0 0 2px var(--acc);color:var(--acc-ink)}
@@ -478,8 +493,12 @@ body.no-anim *{animation:none!important}
 @keyframes rise{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 .card-item:active{transform:scale(.975)}
 /* ===== СВАЙП ПО КАРТОЧКЕ ===== */
-.sw-wrap{position:relative;border-radius:var(--r);margin-bottom:12px;overflow:hidden;touch-action:pan-y;
-  box-shadow:var(--shadow);animation:rise .32s var(--spring) backwards}
+.sw-wrap{position:relative;border-radius:var(--r);margin-bottom:10px;overflow:hidden;touch-action:pan-y;
+  box-shadow:var(--shadow), var(--hair);animation:rise .32s var(--spring) backwards}
+/* корешок: чей это объект — видно до чтения текста */
+.sw-wrap .card-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--own,var(--line));border-radius:0 3px 3px 0;z-index:3}
+.sw-wrap .card-item .card-in{padding-left:17px}
 .sw-wrap .card-item{margin-bottom:0;position:relative;z-index:2;will-change:transform;
   box-shadow:none;animation:none}
 .sw-wrap.animing .card-item{transition:transform .32s var(--spring)}
@@ -500,7 +519,7 @@ body.no-anim *{animation:none!important}
 .overlay,.sheet,.modal{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .sheet-title,.modal p,.modal h3{-webkit-user-select:none;user-select:none}
 .card-item.done{opacity:.55}
-.sw-wrap .card-item.pinned, .card-item.pinned{box-shadow:inset 4px 0 0 var(--acc)}
+.sw-wrap .card-item.pinned{background:color-mix(in srgb,var(--own) 6%,var(--card))}
 .card-item.pinned .card-in{padding-left:16px}
 .card-in{flex:1;min-width:0;padding:13px 10px 13px 15px}
 .card-chips{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:6px}
@@ -539,7 +558,7 @@ body.no-anim *{animation:none!important}
 .empty span{font-size:12px}
 
 /* ===== ПЛАВАЮЩАЯ НАВИГАЦИЯ ===== */
-.bottom-nav{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(432px, calc(100% - 24px));background:var(--glass);backdrop-filter:blur(26px) saturate(1.7);-webkit-backdrop-filter:blur(26px) saturate(1.7);border-radius:26px;box-shadow:var(--shadow-lg), inset 0 0 0 1px var(--ring);display:grid;grid-template-columns:1fr 1fr 72px 1fr 1fr;align-items:center;padding:7px 10px;z-index:25}
+.bottom-nav{box-shadow:var(--shadow-lg);position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(432px, calc(100% - 24px));background:var(--glass);backdrop-filter:blur(26px) saturate(1.7);-webkit-backdrop-filter:blur(26px) saturate(1.7);border-radius:26px;box-shadow:var(--shadow-lg), inset 0 0 0 1px var(--ring);display:grid;grid-template-columns:1fr 1fr 72px 1fr 1fr;align-items:center;padding:7px 10px;z-index:25}
 .nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px;border-radius:18px;color:var(--faint);font-size:10px;font-weight:700;transition:color .18s,transform .24s var(--spring)}
 .nav-btn:active{transform:scale(.9)}
 .nav-btn svg{width:21px;height:21px}
@@ -562,14 +581,17 @@ body.no-anim *{animation:none!important}
 /* ===== ДЕТАЛИ ===== */
 .detail-body{flex:1;overflow-y:auto;overflow-x:visible;padding:16px 16px calc(150px + env(safe-area-inset-bottom))}
 .d-title{font-size:24px;font-weight:800;line-height:1.22;margin:10px 0 5px;letter-spacing:-.025em}
-.d-history{font-size:11px;color:var(--faint);margin-bottom:14px}
+    .d-history{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--faint);margin-bottom:12px}
+.dh-line{min-width:0}
+.dh-seen{display:inline-flex;align-items:center;gap:5px;padding:3px 8px 3px 9px;border-radius:var(--r-full);background:var(--soft)}
+.dh-seen-cap{font-size:var(--fs-2xs);font-weight:700;color:var(--mut)}
 .d-history b{color:var(--mut);font-weight:600}
 .editable{position:relative;cursor:pointer;border-radius:var(--r-md);transition:background .18s}
 .editable:active{background:var(--soft)}
 .d-title.editable{padding:2px 6px;margin-left:-6px}
 .d-desc.editable{padding:12px 14px}
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.info-cell{background:var(--card);border-radius:var(--r-xl);padding:13px 15px;box-shadow:var(--shadow)}
+.info-cell{background:var(--card);border-radius:var(--r-xl);padding:13px 15px;box-shadow:var(--shadow), var(--hair)}
 .info-cell.wide{grid-column:1/-1}
 .info-cell .k{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);margin-bottom:5px}
 .info-cell{overflow:visible}
@@ -584,7 +606,7 @@ body.no-anim *{animation:none!important}
 .d-sec button{font-size:11px;font-weight:700;color:var(--acc);padding:4px 10px;border-radius:26px;background:var(--acc-soft)}
 .d-sec button.d-edit-hint{background:none;padding:4px;color:var(--mut)}
 .d-sec button.d-edit-hint:active{transform:scale(.88)}
-.d-block{background:var(--card);border-radius:var(--r-xl);box-shadow:var(--shadow);padding:13px 15px;margin-top:12px;transition:background .18s}
+.d-block{background:var(--card);border-radius:var(--r-xl);box-shadow:var(--shadow), var(--hair);padding:13px 15px;margin-top:12px;transition:background .18s}
 .d-block.editable:active{background:var(--soft)}
 .d-block:first-of-type{margin-top:0}
 .d-edit-hint{color:var(--mut);display:flex;align-items:center}
@@ -677,7 +699,7 @@ select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .chk-add-btn:active{border-color:var(--acc);color:var(--acc)}
 .form-hint{font-size:11px;color:var(--faint);margin-top:8px;line-height:1.4}
 .plan-clear{font-size:11px;font-weight:700;color:var(--rose);padding:4px 10px;border-radius:26px;background:var(--rose-soft)}
-.fgroup{background:var(--card);border-radius:var(--r-xl);box-shadow:var(--shadow);padding:13px 15px;margin-top:12px}
+.fgroup{background:var(--card);border-radius:var(--r-xl);box-shadow:var(--shadow), var(--hair);padding:13px 15px;margin-top:12px}
 .fgroup .label-cap{font-size:var(--fs-xs);font-weight:700;letter-spacing:0;text-transform:none;color:var(--mut);margin-bottom:9px}
 .fgroup .field,.fgroup .dt-input{background:var(--soft);box-shadow:none;border-color:transparent}
 .fgroup .dt-input:focus{background:var(--card);border-color:var(--acc)}
@@ -822,7 +844,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 
 /* ===== СЕМЬЯ ===== */
 .fam-body{flex:1;padding:14px 16px calc(118px + env(safe-area-inset-bottom))}
-.fam-row{display:flex;align-items:center;gap:13px;background:var(--card);border-radius:var(--r);padding:12px 14px;margin-bottom:9px;box-shadow:var(--shadow);animation:rise .32s var(--spring) backwards}
+.fam-row{display:flex;align-items:center;gap:13px;background:var(--card);border-radius:var(--r);padding:12px 14px;margin-bottom:9px;box-shadow:var(--shadow), var(--hair);animation:rise .32s var(--spring) backwards}
 .fam-row:nth-child(2){animation-delay:.12s}.fam-row:nth-child(3){animation-delay:.12s}.fam-row:nth-child(4){animation-delay:.12s}
 .fam-ring{width:46px;height:46px;border-radius:50%;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 0 2.5px var(--card), 0 0 0 5px var(--mc,var(--line))}
 .fam-row .fam-ring.ava-general{box-shadow:0 0 0 2.5px var(--card),0 0 0 5px #5E7186}
@@ -836,7 +858,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .fam-set:active{transform:scale(.88)}
 .fam-del{width:34px;height:34px;border-radius:14px;background:var(--rose-soft);color:var(--rose);font-size:12px;font-weight:800;transition:transform .18s var(--spring)}
 .fam-del:active{transform:scale(.88)}
-.fam-add{background:var(--card);border-radius:var(--r-xl);padding:15px;box-shadow:var(--shadow);margin-top:12px}
+.fam-add{background:var(--card);border-radius:var(--r-xl);padding:15px;box-shadow:var(--shadow), var(--hair);margin-top:12px}
 .fam-add.compact{padding:13px 14px}
 .fam-new-row{display:flex;align-items:center;gap:9px}
 .fam-new-row .field{flex:1;min-width:0;margin:0;height:44px}
@@ -1356,11 +1378,32 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
           <svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
         <button class="drop-btn" id="fin-btn-sort"><span id="fin-sort-lbl">Сначала новые</span>
           <svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="drop-btn" id="fin-btn-range"><span id="fin-range-lbl">Период</span>
+          <svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
       </div>
     </header>
     <div class="fin-body" id="fin-body"></div>
     <button class="fin-fab" id="fin-add"></button>
   </section>
+
+  <!-- ПЕРИОД -->
+  <div class="overlay sheet-mode hidden" id="range-overlay">
+    <div class="sheet">
+      <div class="sheet-grip"></div>
+      <div class="sheet-title">Период</div>
+      <div class="sheet-form">
+        <div class="pool" id="range-quick" style="margin-bottom:11px"></div>
+        <div class="dt-grid">
+          <div class="dt-field"><input type="date" class="dt-input" id="range-from"><span class="dt-ph">С даты</span></div>
+          <div class="dt-field"><input type="date" class="dt-input" id="range-to"><span class="dt-ph">По дату</span></div>
+        </div>
+        <div class="row2" style="margin-top:12px">
+          <button class="btn btn-soft" id="range-clear">Сбросить</button>
+          <button class="btn btn-acc" id="range-save">Применить</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ДОБАВИТЬ ТРАТУ / ПЛАН -->
   <div class="overlay sheet-mode hidden" id="fin-overlay">
@@ -1369,7 +1412,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div class="sheet-title" id="fin-mtitle">Новая трата</div>
       <div class="sheet-form">
         <input class="field" id="fin-title" placeholder="На что…" maxlength="60" style="margin-bottom:9px" autocomplete="off">
-        <input class="field" id="fin-amount" placeholder="Сумма" inputmode="decimal" maxlength="12" style="margin-bottom:11px" autocomplete="off">
+        <input class="field" id="fin-amount" placeholder="Сумма" inputmode="decimal" maxlength="12" style="margin-bottom:9px" autocomplete="off">
+        <textarea class="field" id="fin-note" placeholder="Комментарий (необязательно)" rows="2" maxlength="200" style="margin-bottom:11px;min-height:0;resize:none"></textarea>
         <div class="fin-cats" id="fin-cats"></div>
         <div class="row2" style="margin-top:4px">
           <button class="btn btn-soft" data-close="fin-overlay">Отмена</button>
@@ -1881,7 +1925,13 @@ const THEME_ICONS = {
   light:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M4.8 4.8l1.8 1.8M17.4 17.4l1.8 1.8M19.2 4.8l-1.8 1.8M6.6 17.4l-1.8 1.8"/></svg>',
   dark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13.5A8.5 8.5 0 1 1 10.5 4a7 7 0 0 0 9.5 9.5z"/></svg>'
 };
+function applyPersonalAccent(){
+  // весь интерфейс окрашивается в цвет активного профиля
+  const m = member(S.currentUser);
+  document.documentElement.style.setProperty('--mine', m?.color || '#0DA271');
+}
 function applyTheme(){
+  applyPersonalAccent();
   const t = (S.currentUser ? (prefs().theme || S.theme) : S.theme) || 'auto';
   if(t === 'auto') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = t;
@@ -2233,11 +2283,16 @@ function setSyncStatus(s){
 function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], chat:st.chat||[], geo:st.geo||{}, fin:st.fin||[], generalAvatarId:st.generalAvatarId||null, metaUpdatedAt:st.metaUpdatedAt||0, tz:(typeof st.tz==='number'?st.tz:new Date().getTimezoneOffset()) }; }
 function mergeStates(local, remote){
   local = normSnap(local); remote = normSnap(remote);
-  const map = new Map();
+  const map = new Map(), seen = new Map();
   [...remote.tasks, ...local.tasks].forEach(t=>{
+    // отметки просмотра объединяем: их ставят разные устройства без правки записи
+    const s = seen.get(t.id) || new Set();
+    (t.seenBy||[]).forEach(id=>s.add(id));
+    seen.set(t.id, s);
     const ex = map.get(t.id);
     if(!ex || (t.updatedAt||0) > (ex.updatedAt||0)) map.set(t.id, t);
   });
+  map.forEach((t,id)=>{ const s = seen.get(id); if(s && s.size) t.seenBy = [...s]; });
   const takeLocal = (local.metaUpdatedAt||0) >= (remote.metaUpdatedAt||0);
   return {
     members: takeLocal ? local.members : remote.members,
@@ -2492,6 +2547,17 @@ function toast(txt, kind='ok'){
   $('toast').classList.add('show');
   clearTimeout(toast._t); toast._t = setTimeout(()=>$('toast').classList.remove('show'), 2200);
   if(kind==='warn'||kind==='err') haptic('warn'); else haptic('med');
+}
+function createdText(ts){
+  const d = new Date(ts), now = new Date();
+  const a = new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const b = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const diff = Math.round((b-a)/864e5);
+  const time = d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  if(diff===0) return 'сегодня в '+time;
+  if(diff===1) return 'вчера в '+time;
+  if(diff < 7) return diff+' дн. назад';
+  return d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'}) + (d.getFullYear()!==now.getFullYear() ? ' '+d.getFullYear() : '');
 }
 function relDeadline(ds){
   if(!ds) return null;
@@ -2765,7 +2831,8 @@ function cardHTML(t){
   const pinAct = pinned
     ? `<span class="sw-act sw-r off">${ICON.pin(17)}<b>Открепить</b></span>`
     : `<span class="sw-act sw-r">${ICON.pin(17)}<b>Закрепить</b></span>`;
-  return `<div class="sw-wrap" data-sw="${t.id}" data-sw-done="${canDone?1:''}">
+  const ownColor = t.type==='tasks' ? (asg?.color || '#8FA3B8') : (member(t.createdBy)?.color || '#8FA3B8');
+  return `<div class="sw-wrap" data-sw="${t.id}" data-sw-done="${canDone?1:''}" style="--own:${ownColor}">
     ${canDone?doneAct:''}${pinAct}
     <article class="card-item ${t.completed?'done':''} ${pinned?'pinned':''}" data-open="${t.id}">
     <div class="card-in">
@@ -3104,17 +3171,35 @@ function toggleComplete(id){
 }
 
 /* ---------- ДЕТАЛИ ---------- */
+function markSeen(t){
+  if(!t || !S.currentUser || t.createdBy === S.currentUser) return;
+  t.seenBy = t.seenBy || [];
+  if(t.seenBy.includes(S.currentUser)) return;
+  t.seenBy.push(S.currentUser);
+  persist();
+}
 function renderDetail(){
   const t = task(activeTaskId);
   if(!t || t.deleted || !canSee(t)){ show('main'); return; }
+  markSeen(t);
   $('detail-hdr').textContent = t.type==='tasks' ? 'Дело' : 'Заметка';
   $('detail-actions').innerHTML = t.createdBy===S.currentUser
     ? `<button class="icon-btn" data-d-act="del" style="color:var(--rose);border-color:var(--rose-soft);background:var(--rose-soft)" title="Удалить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg></button>`
     : '';
 
   const author = member(t.createdBy), editor = member(t.updatedBy);
-  let history = `Автор: <b>${esc(author?.name||'—')}</b>`;
+  let history = `<span class="dh-line">Автор: <b>${esc(author?.name||'—')}</b>`;
+  if(t.createdAt) history += ` · <b>${createdText(t.createdAt)}</b>`;
   if(t.updatedBy && t.updatedBy!==t.createdBy) history += ` · правил: <b>${esc(editor?.name||'—')}</b>`;
+  history += `</span>`;
+  // кто открывал запись
+  const seenBy = (t.seenBy||[]).filter(id=>id!==t.createdBy).map(id=>member(id)).filter(Boolean);
+  if(seenBy.length){
+    history += `<span class="dh-seen" title="Просмотрели: ${esc(seenBy.map(m=>m.name).join(', '))}">
+      <span class="dh-seen-cap">Просмотрели</span>
+      <span class="ava-stack">${seenBy.slice(0,5).map(m=>
+        `<span class="ava r-ava" style="--mc:${m.color}">${m.avatarId?`<img data-img="${m.avatarId}" alt="">`:esc(m.name.trim()[0].toUpperCase())}</span>`).join('')}</span></span>`;
+  }
 
   let chips = t.label ? `<span class="chip lbl lbl-${t.labelColor||'green'}">${esc(t.label)}</span>` : '';
   if(t.isDraft) chips += `<span class="chip soft-gray">Черновик</span>`;
@@ -3775,6 +3860,7 @@ function finalizeCreate(assignee, asDraft){
     visibleTo:F.type==='notes'?[...F.visibility]:[],
     createdBy:S.currentUser, updatedBy:S.currentUser,
     lock: (F.type==='notes' && F.lockOn && F.lockHash) ? F.lockHash : null,
+    createdAt: Date.now(), seenBy: [],
     isDraft:!!asDraft, pinnedBy:[], accepted: F.type==='tasks' && !!assignee && assignee===S.currentUser,
     imageIds:[...F.imageIds], files:[...(F.files||[])], voice:F.voice||null, checklist:p.checklist,
     updatedAt:Date.now(),
@@ -4944,11 +5030,53 @@ function finPrefs(){
   const p = prefs();
   if(!p.finSort) p.finSort = 'new';
   if(p.finCat === undefined) p.finCat = null;
+  if(p.finFrom === undefined) p.finFrom = '';
+  if(p.finTo === undefined) p.finTo = '';
   return p;
 }
+function fmtRangeLabel(p){
+  const f = d => d ? new Date(d+'T12:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'}) : '';
+  if(p.finFrom && p.finTo) return f(p.finFrom)+' — '+f(p.finTo);
+  if(p.finFrom) return 'с '+f(p.finFrom);
+  if(p.finTo) return 'по '+f(p.finTo);
+  return 'Период';
+}
+function openRangeSheet(){
+  const p = finPrefs();
+  $('range-from').value = p.finFrom || '';
+  $('range-to').value = p.finTo || '';
+  ['range-from','range-to'].forEach(id=>{ const el=$(id); el.classList.toggle('empty', !el.value); });
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const now = new Date();
+  const mk = (label, from, to) => `<button type="button" class="p-chip" data-rangeq="${from}|${to}">${label}</button>`;
+  const d0 = new Date(now); d0.setDate(1);
+  const prevM = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const prevMEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+  const w = new Date(now); w.setDate(w.getDate()-6);
+  const m3 = new Date(now); m3.setMonth(m3.getMonth()-3);
+  $('range-quick').innerHTML =
+    mk('7 дней', iso(w), iso(now)) +
+    mk('Этот месяц', iso(d0), iso(now)) +
+    mk('Прошлый месяц', iso(prevM), iso(prevMEnd)) +
+    mk('3 месяца', iso(m3), iso(now)) +
+    mk('Год', iso(new Date(now.getFullYear(),0,1)), iso(now));
+  $('range-overlay').classList.remove('hidden');
+}
+function saveRange(){
+  const p = finPrefs();
+  p.finFrom = $('range-from').value || '';
+  p.finTo   = $('range-to').value || '';
+  persist(); $('range-overlay').classList.add('hidden'); renderFin(); haptic('ok');
+}
+const dayStart = s => { const d=new Date(s+'T00:00'); return isNaN(d)?null:d.getTime(); };
+const dayEnd   = s => { const d=new Date(s+'T23:59:59'); return isNaN(d)?null:d.getTime(); };
 function finApply(list){
   const p = finPrefs();
   let out = p.finCat ? list.filter(r=>(r.cat||'other') === p.finCat) : list.slice();
+  const a = p.finFrom ? dayStart(p.finFrom) : null;
+  const b = p.finTo   ? dayEnd(p.finTo)     : null;
+  if(a) out = out.filter(r=>(r.at||0) >= a);
+  if(b) out = out.filter(r=>(r.at||0) <= b);
   const s = p.finSort;
   out.sort((a,b)=>
     s==='old'   ? (a.at||0)-(b.at||0) :
@@ -4963,6 +5091,8 @@ function renderFinTools(){
   const lbl = $('fin-cat-lbl'); if(lbl) lbl.textContent = c ? c.t : 'Все категории';
   const dot = $('fin-cat-dot'); if(dot) dot.style.setProperty('--dpc', c ? c.c : '#9B9CA4');
   const sl = $('fin-sort-lbl'); if(sl) sl.textContent = FIN_SORTS[p.finSort] || FIN_SORTS.new;
+  const rl = $('fin-range-lbl'); if(rl) rl.textContent = fmtRangeLabel(p);
+  const rb = $('fin-btn-range'); if(rb) rb.classList.toggle('on', !!(p.finFrom || p.finTo));
 }
 function openFinCatSheet(){
   const p = finPrefs();
@@ -5004,16 +5134,16 @@ function renderFin(){
       : `<div class="empty" style="padding:34px 20px"><span>Планов пока нет.<br>Добавьте будущую покупку кнопкой ниже.</span></div>`;
   } else {
     const items = finTab === 'month' ? monthItems : finAll().filter(r=>r.kind==='spend');
-    const total = items.reduce((s,r)=>s+(Number(r.amount)||0), 0);
-    // сводка + разбивка по категориям
+    const shown = finApply(items);                 // сводка считается по показанным записям
+    const total = shown.reduce((s,r)=>s+(Number(r.amount)||0), 0);
     const byCat = {};
-    items.forEach(r=>{ byCat[r.cat||'other'] = (byCat[r.cat||'other']||0) + (Number(r.amount)||0); });
+    shown.forEach(r=>{ byCat[r.cat||'other'] = (byCat[r.cat||'other']||0) + (Number(r.amount)||0); });
     const cats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
     const max = cats.length ? cats[0][1] : 1;
     h += `<div class="fin-sum">
-            <div class="cap">${finTab==='month' ? 'Потрачено за месяц' : 'Потрачено всего'}</div>
+            <div class="cap">${(finPrefs().finFrom||finPrefs().finTo) ? 'Потрачено за период' : (finTab==='month' ? 'Потрачено за месяц' : 'Потрачено всего')}</div>
             <div class="big">${fmtMoney(total)}</div>
-            <div class="sub">${items.length} записей${finTab==='month' && items.length ? ' · в среднем ' + fmtMoney(total/Math.max(1,new Date().getDate())) + ' в день' : ''}</div>
+            <div class="sub">${shown.length} записей${finTab==='month' && shown.length ? ' · в среднем ' + fmtMoney(total/Math.max(1,new Date().getDate())) + ' в день' : ''}</div>
             ${cats.length ? `<div class="fin-bars">` + cats.map(([k,v])=>{
               const c = finCat(k);
               return `<div class="fin-bar-row"><span class="nm">${esc(c.t)}</span>
@@ -5021,7 +5151,6 @@ function renderFin(){
                 <span class="vl">${fmtMoney(v)}</span></div>`;
             }).join('') + `</div>` : ''}
           </div>`;
-    const shown = finApply(items);
     if(!shown.length){
       h += `<div class="empty" style="padding:34px 20px"><span>${items.length ? 'В этой категории пусто' : 'Трат пока нет.<br>Добавьте первую кнопкой ниже.'}</span></div>`;
     } else {
@@ -5054,10 +5183,12 @@ function finRowHTML(r){
     : `<span class="ava fin-ava ava-general">${ICON.users(13)}</span>`;
   const chips = `<span class="chip lbl" style="--lc:${c.c}">${esc(c.t)}</span>`
     + (r.kind==='plan' && r.done ? `<span class="chip soft-green">Куплено</span>` : '');
+  const dateStr = new Date(r.at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
   return `<article class="fin-card ${r.done?'done':''}" data-finrow="${r.id}">
     <div class="fin-c-in">
-      <div class="card-chips">${chips}</div>
+      <div class="card-chips">${chips}<span class="fin-date">${dateStr}</span></div>
       <div class="card-title">${esc(r.title||c.t)}</div>
+      ${r.note?`<div class="fin-note">${esc(r.note)}</div>`:''}
     </div>
     <span class="fin-amt ${r.kind==='plan'?'plan':''}">${fmtMoney(r.amount)}</span>
     ${ava}
@@ -5070,6 +5201,7 @@ function openFinAdd(kind, editId){
   $('fin-mtitle').textContent = r ? 'Изменить запись' : (finDraft.kind==='plan' ? 'Планируемая покупка' : 'Новая трата');
   $('fin-title').value = r ? (r.title||'') : '';
   $('fin-amount').value = r ? (r.amount||'') : '';
+  $('fin-note').value = r ? (r.note||'') : '';
   renderFinCats();
   $('fin-overlay').classList.remove('hidden');
   setTimeout(()=>$('fin-title').focus(), 160);
@@ -5080,14 +5212,15 @@ function renderFinCats(){
 }
 function finSave(){
   const title = $('fin-title').value.trim();
+  const note = $('fin-note').value.trim();
   const amount = Number(String($('fin-amount').value).replace(',','.').replace(/[^\d.]/g,'')) || 0;
   if(!amount){ toast('Введите сумму','warn'); $('fin-amount').focus(); return; }
   S.fin = S.fin || [];
   if(finDraft.editId){
     const r = S.fin.find(x=>x.id===finDraft.editId);
-    if(r){ r.title = title; r.amount = amount; r.cat = finDraft.cat; r.updatedAt = Date.now(); }
+    if(r){ r.title = title; r.note = note; r.amount = amount; r.cat = finDraft.cat; r.updatedAt = Date.now(); }
   } else {
-    S.fin.unshift({ id: uid('f_'), kind: finDraft.kind, title, amount, cat: finDraft.cat,
+    S.fin.unshift({ id: uid('f_'), kind: finDraft.kind, title, note, amount, cat: finDraft.cat,
                     by: S.currentUser, at: Date.now(), updatedAt: Date.now(), done:false });
   }
   $('fin-overlay').classList.add('hidden');
@@ -5810,6 +5943,15 @@ document.addEventListener('click', e=>{
   if(x = el('[data-fintab]')){ finTab = x.dataset.fintab; renderFin(); haptic('tap'); return; }
   if(el('#fin-btn-cat')){ openFinCatSheet(); return; }
   if(el('#fin-btn-sort')){ openFinSortSheet(); return; }
+  if(el('#fin-btn-range')){ openRangeSheet(); return; }
+  if(x = el('[data-rangeq]')){
+    const [a,b] = x.dataset.rangeq.split('|');
+    $('range-from').value = a; $('range-to').value = b;
+    ['range-from','range-to'].forEach(id=>$(id).classList.remove('empty'));
+    haptic('tap'); return; }
+  if(el('#range-save')){ saveRange(); return; }
+  if(el('#range-clear')){ const p=finPrefs(); p.finFrom=''; p.finTo=''; persist(); $('range-overlay').classList.add('hidden'); renderFin(); return; }
+  if(el('#range-overlay') && !el('.sheet')){ $('range-overlay').classList.add('hidden'); return; }
   if(x = el('[data-fincatpick]')){ finPrefs().finCat = x.dataset.fincatpick || null; persist(); $('cat-overlay').classList.add('hidden'); renderFin(); return; }
   if(x = el('[data-finsort]')){ finPrefs().finSort = x.dataset.finsort; persist(); $('sort-overlay').classList.add('hidden'); renderFin(); return; }
   if(el('#fin-add')){ openFinAdd(); return; }
@@ -6118,6 +6260,10 @@ $('fam-ava-input').addEventListener('change', e=>{ handleAvatarFile(e.target.fil
 $('f-title').addEventListener('input', e=>e.target.classList.remove('err'));
 $('f-desc').addEventListener('input', autoGrowDesc);
 $('q-date').addEventListener('change', syncQPh);
+['range-from','range-to'].forEach(id=>{
+  const el = $(id);
+  if(el) el.addEventListener('change', ()=>el.classList.toggle('empty', !el.value));
+});
 $('q-time').addEventListener('change', syncQPh);
 $('f-lock-pass').addEventListener('input', e=>{
   e.target.value = e.target.value.replace(/\D/g,'');       // только цифры
@@ -6161,7 +6307,8 @@ document.addEventListener('keydown', e=>{
       S = Object.assign(defaultState(), saved);
       S.prefs = S.prefs || {};
       S.chat = S.chat || []; S.chatSeen = S.chatSeen || {}; S.geo = S.geo || {};
-      S.tasks.forEach(t=>{ t.pinnedBy=t.pinnedBy||[]; t.imageIds=t.imageIds||[]; t.files=t.files||[]; t.voice=t.voice||null; t.lock=t.lock||null; t.checklist=t.checklist||[]; t.visibleTo=t.visibleTo||[]; delete t.status; });
+      S.tasks.forEach(t=>{ t.pinnedBy=t.pinnedBy||[]; t.imageIds=t.imageIds||[]; t.files=t.files||[]; t.voice=t.voice||null; t.lock=t.lock||null;
+    t.seenBy=t.seenBy||[]; if(!t.createdAt) t.createdAt = (typeof t.id==='number' && t.id>1e12) ? t.id : (t.updatedAt||Date.now()); t.checklist=t.checklist||[]; t.visibleTo=t.visibleTo||[]; delete t.status; });
       S.members.forEach((m,i)=>{ if(!MEMBER_COLORS.includes(m.color)) m.color = MEMBER_COLORS[i % MEMBER_COLORS.length]; });
     } else {
       await migrateLegacy();
