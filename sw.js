@@ -1,5 +1,5 @@
 /* FamilyHub — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v81';
+const CACHE = 'family-hub-v82';
 const SHARE_CACHE = 'fh-share';
 const SHELL = [
   './',
@@ -35,26 +35,56 @@ self.addEventListener('activate', e => {
   );
 });
 
-// раскладываем переданное по своему хранилищу и сообщаем результат
+// Отдельная база только для передачи: страница её не открывает,
+// поэтому заблокировать открытие некому.
+const SDB = 'fh-share-db';
+function shareDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(SDB, 1);
+    req.onupgradeneeded = () => {
+      const d = req.result;
+      if (!d.objectStoreNames.contains('items')) d.createObjectStore('items');
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = () => reject(req.error || new Error('idb open'));
+    req.onblocked = () => reject(new Error('idb blocked'));
+  });
+}
+function sdbPut(db, key, value) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('items', 'readwrite');
+    tx.objectStore('items').put(value, key);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror    = () => reject(tx.error || new Error('idb put'));
+    tx.onabort    = () => reject(tx.error || new Error('idb abort'));
+  });
+}
+
+// раскладываем переданное и сообщаем результат
 async function storeShared(request) {
   const form = await request.formData();
   const files = [...form.getAll('sfiles'), ...form.getAll('sdocs')]
     .filter(f => f && typeof f === 'object' && f.size);
-  const cache = await caches.open(SHARE_CACHE);
+
+  const db = await shareDB();
   const list = [];
-  for (let i = 0; i < files.length; i++) {
-    const key = '/shared/' + Date.now() + '-' + i;
-    await cache.put(key, new Response(files[i], {
-      headers: { 'Content-Type': files[i].type || 'application/octet-stream' },
-    }));
-    list.push({ key, name: files[i].name || ('file-' + i), type: files[i].type || '' });
-  }
-  await cache.put('/shared-meta', new Response(JSON.stringify({
-    title: form.get('stitle') || '',
-    text:  form.get('stext')  || '',
-    url:   form.get('surl')   || '',
-    files: list, at: Date.now(),
-  }), { headers: { 'Content-Type': 'application/json' } }));
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const key = 'f' + Date.now() + '-' + i;
+      // кладём как Blob: File напрямую часть движков хранить отказывается
+      const buf  = await files[i].arrayBuffer();
+      const blob = new Blob([buf], { type: files[i].type || 'application/octet-stream' });
+      await sdbPut(db, key, blob);
+      list.push({ key, name: files[i].name || ('file-' + i), type: files[i].type || '' });
+    }
+    await sdbPut(db, 'meta', {
+      title: form.get('stitle') || '',
+      text:  form.get('stext')  || '',
+      url:   form.get('surl')   || '',
+      files: list, at: Date.now(),
+    });
+  } finally { try { db.close(); } catch (_) {} }
+
   try {
     const cs = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     cs.forEach(c => c.postMessage({ type: 'shared-ready' }));
@@ -135,17 +165,18 @@ self.addEventListener('fetch', e => {
   if (e.request.method === 'POST' && url.pathname.endsWith('/share-target')) {
     // ответ обязан вернуться в любом случае: если обработчик зависнет,
     // браузер покажет «Failed to fetch» вместо приложения
-    const done = (st) => Response.redirect(
-      new URL('./index.html?shared=' + st, self.registration.scope).href, 303);
+    const done = (st, why) => Response.redirect(new URL(
+      './index.html?shared=' + st + (why ? '&why=' + encodeURIComponent(String(why).slice(0, 140)) : ''),
+      self.registration.scope).href, 303);
     e.respondWith((async () => {
       try {
         const st = await Promise.race([
           storeShared(e.request),
-          new Promise(r => setTimeout(() => r('timeout'), 5000)),
+          new Promise(r => setTimeout(() => r('timeout'), 8000)),
         ]);
         return done(st);
-      } catch (_) {
-        return done('error');
+      } catch (err) {
+        return done('error', (err && (err.message || err.name)) || err);
       }
     })());
     return;

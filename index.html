@@ -4431,29 +4431,42 @@ let sosHold = null, sosBusy = false;
 // быстрые действия с иконки и приём из меню «Поделиться»
 let pendingIntent = null;
 async function readSharedPayload(tries = 12){
+  const openDB = () => new Promise((res, rej)=>{
+    const r = indexedDB.open('fh-share-db', 1);
+    r.onupgradeneeded = () => { const d=r.result; if(!d.objectStoreNames.contains('items')) d.createObjectStore('items'); };
+    r.onsuccess = ()=>res(r.result);
+    r.onerror   = ()=>rej(r.error || new Error('open'));
+    r.onblocked = ()=>rej(new Error('blocked'));
+  });
+  const get = (db,k) => new Promise((res,rej)=>{
+    const rq = db.transaction('items','readonly').objectStore('items').get(k);
+    rq.onsuccess=()=>res(rq.result); rq.onerror=()=>rej(rq.error);
+  });
+  const del = (db,k) => new Promise(res=>{
+    const rq = db.transaction('items','readwrite').objectStore('items').delete(k);
+    rq.onsuccess=()=>res(); rq.onerror=()=>res();
+  });
+  let db;
   try{
-    if(!('caches' in window)) return { error:'нет доступа к хранилищу', blobs:[] };
-    const cache = await caches.open('fh-share');
-    let metaRes = await cache.match('/shared-meta');
+    db = await openDB();
+    let meta = await get(db,'meta');
     // служебный скрипт мог не успеть записать к моменту загрузки
-    while(!metaRes && tries-- > 0){
+    while(!meta && tries-- > 0){
       await new Promise(r=>setTimeout(r, 200));
-      metaRes = await cache.match('/shared-meta');
+      meta = await get(db,'meta');
     }
-    if(!metaRes) return null;
-    const meta = await metaRes.json();
+    if(!meta) return null;
     const blobs = [];
     for(const f of (meta.files||[])){
-      const r = await cache.match(f.key);
-      if(!r) continue;
-      const blob = await r.blob();
-      blobs.push({ blob, name:f.name, type:f.type || blob.type || '' });
+      const blob = await get(db, f.key);
+      if(blob) blobs.push({ blob, name:f.name, type:f.type || blob.type || '' });
+      await del(db, f.key);
     }
-    // подчищаем, чтобы не подставилось повторно
-    await cache.delete('/shared-meta');
-    for(const f of (meta.files||[])) await cache.delete(f.key);
+    await del(db,'meta');
     return { ...meta, blobs };
-  }catch(e){ return { error:String(e && e.message || e), blobs:[] }; }
+  }catch(e){
+    return { error:String((e && (e.message||e.name)) || e), blobs:[] };
+  }finally{ try{ db && db.close(); }catch(e){} }
 }
 function runPendingIntent(){
   const it = pendingIntent; pendingIntent = null;
@@ -6603,9 +6616,11 @@ document.addEventListener('keydown', e=>{
       history.replaceState({screen:'root'}, '', location.pathname);
       readSharedPayload().then(p=>{
         if(!p || p.error){
-          const why = sh === 'timeout' ? 'Файл слишком большой или передача зависла'
-                    : sh === 'error'   ? 'Не удалось прочитать файл'
-                    : (p && p.error) ? p.error : 'Файл не передан';
+          const swWhy = sp.get('why');
+          const why = swWhy ? 'Сбой: ' + swWhy
+                    : sh === 'timeout' ? 'Передача зависла — файл слишком большой'
+                    : (p && p.error) ? 'Сбой чтения: ' + p.error
+                    : 'Файл не передан';
           toast(why, 'warn');
           return;
         }
