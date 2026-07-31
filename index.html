@@ -2623,6 +2623,15 @@ function relDeadline(ds){
   if(diff<7)   return {text:d.toLocaleDateString('ru-RU',{weekday:'short'}) + (allDay?'':` ${time}`)};
   return {text:d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})};
 }
+function displayDeadline(t){
+  if(!t.deadline || !t.repeat) return t.deadline;
+  const ms = deadlineMs(t.deadline); if(isNaN(ms)) return t.deadline;
+  const allDay = isAllDay(t.deadline);
+  const d = new Date(ms);
+  const overMs = allDay ? new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).getTime() : ms;
+  if(Date.now() < overMs) return t.deadline;   // срок ещё не прошёл — как есть
+  return nextOccurrence(t.deadline, t.repeat); // повторяющееся не может быть «просрочено»
+}
 function canSee(t){
   if(t.isDraft && t.createdBy !== S.currentUser) return false;
   if(t.type==='notes' && (t.visibleTo||[]).length && !t.visibleTo.includes(S.currentUser)) return false;
@@ -2859,7 +2868,7 @@ function cardHTML(t){
   let chips = lbl;
   if(t.isDraft) chips += `<span class="chip soft-gray">Черновик</span>`;
   if(t.type==='tasks' && t.deadline && !t.completed){
-    const r = relDeadline(t.deadline);
+    const r = relDeadline(displayDeadline(t));
     if(r) chips += `<span class="chip ${r.over?'soft-rose':r.soon?'soft-amber':'soft-gray'}">${r.text}</span>`;
   }
   if(t.type==='tasks' && t.repeat && !t.completed) chips += `<span class="chip soft-green">${ICON.repeat(11)} ${repShort(t.repeat)}</span>`;
@@ -3290,11 +3299,11 @@ function renderDetail(){
   let info = '';
   if(t.type==='tasks'){
     const asg = member(t.assignedTo);
-    const r = t.deadline ? relDeadline(t.deadline) : null;
+    const r = t.deadline ? relDeadline(displayDeadline(t)) : null;
     info = `<div class="info-grid">
       <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?`<span class="ava-acc-wrap">${avaHTML(asg,'ava-xs')}${t.accepted?`<i class="acc-badge">${ICON.check(9)}</i>`:''}</span>`+esc(asg.name)+(t.accepted?' <span class="acc-note">принял</span>':''):generalAvaHTML('ava-xs')+'Общее'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
       <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">Запланировано</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text) : '—'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
-      ${t.deadline?`<div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${t.repeat?repLabel(t.repeat):'Без повтора'}${t.repeat&&t.deadline?` · далее: ${new Date(deadlineMs(t.deadline)).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>`:''}
+      ${t.deadline?`<div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${t.repeat?repLabel(t.repeat):'Без повтора'}${t.repeat&&t.deadline?` · далее: ${new Date(deadlineMs(displayDeadline(t))).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>`:''}
     </div>`;
   } else {
     const vis = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
