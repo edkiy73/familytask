@@ -976,6 +976,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .sheet-div{height:1px;background:var(--line);margin:6px 8px}
 .who-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
 .who-cell{display:flex;flex-direction:column;align-items:center;gap:7px;padding:15px 8px;background:var(--soft);border-radius:18px;transition:transform .24s var(--spring);box-shadow:inset 0 0 0 1px var(--ring)}
+.who-cell.off{opacity:.4;position:relative}
+.who-off-tag{position:absolute;top:6px;right:6px;font-size:9px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.03em}
 .who-cell:active{transform:scale(.92)}
 
 .who-cell b{font-size:11px}
@@ -1140,11 +1142,6 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         </div>
       </div>
 
-      <div class="fgroup">
-        <span class="label-cap" id="f-vis-title">Кто видит</span>
-        <div class="mem-scroll" id="f-visibility"></div>
-      </div>
-
       <div id="f-note-fields" class="fgroup hidden">
         <div class="lock-row" id="f-lock-row">
           <button type="button" class="lock-toggle" id="f-lock-btn"></button>
@@ -1193,6 +1190,11 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
           </button>
           <div class="file-list" id="f-docs"></div>
         </div>
+      </div>
+
+      <div class="fgroup">
+        <span class="label-cap" id="f-vis-title">Кто видит</span>
+        <div class="mem-scroll" id="f-visibility"></div>
       </div>
     </div>
     <div class="form-foot">
@@ -2162,8 +2164,8 @@ async function notify(title, body, tag){
   if(!('Notification' in window) || Notification.permission !== 'granted') return;
   try{
     const reg = await navigator.serviceWorker?.getRegistration?.();
-    if(reg && reg.showNotification) reg.showNotification(title, {body, tag, icon:'icon-192.png', badge:'badge-96.png', badge:'icon-192.png'});
-    else new Notification(title, {body, tag, icon:'icon-192.png', badge:'badge-96.png'});
+    if(reg && reg.showNotification) reg.showNotification(title, {body, tag, icon:'notif-icon.png', badge:'badge-96.png'});
+    else new Notification(title, {body, tag, icon:'notif-icon.png', badge:'badge-96.png'});
   }catch(e){ try{ new Notification(title, {body}); }catch(_){} }
 }
 function checkDeadlines(){
@@ -3141,18 +3143,26 @@ function ctxAction(act){
 /* ---------- ВЫБОР ИСПОЛНИТЕЛЯ ---------- */
 let asgId = null;         // id задачи (смена) или null (публикация)
 let asgPublishDraft = false;
-function assigneeGrid(){
+function assigneeGrid(visibleTo){
   const общ = `<button class="who-cell" data-asg-pick="" style="box-shadow:inset 0 0 0 1px var(--ring)">
       ${generalAvaHTML('who-ava')}<b>Общее</b></button>`;
-  return общ + S.members.map(m=>`
-    <button class="who-cell" data-asg-pick="${m.id}" style="box-shadow:inset 0 0 0 1px ${m.color}44">
-      ${avaHTML(m,'who-ava')}<b>${esc(m.name)}</b></button>`).join('');
+  const allowed = (visibleTo && visibleTo.length) ? new Set(visibleTo) : null;
+  const rows = S.members.map(m=>{
+    const hidden = allowed && !allowed.has(m.id);
+    if(hidden) return `<button class="who-cell off" disabled title="Не видит дело — сначала добавьте в «Кто видит»">
+        ${avaHTML(m,'who-ava')}<b>${esc(m.name)}</b><span class="who-off-tag">не видит</span></button>`;
+    return `<button class="who-cell" data-asg-pick="${m.id}" style="box-shadow:inset 0 0 0 1px ${m.color}44">
+      ${avaHTML(m,'who-ava')}<b>${esc(m.name)}</b></button>`;
+  }).join('');
+  return общ + rows;
 }
 function openAssignee(id, isChange){
   asgId = id; asgPublishDraft = false;
   $('asg-title').textContent = isChange ? 'Сменить исполнителя' : 'Кто исполнитель?';
   $('asg-sub').textContent = isChange ? 'Задача перейдёт выбранному' : 'По умолчанию — общее дело';
-  $('asg-grid').innerHTML = assigneeGrid();
+  // при создании берём видимость из черновика формы, при смене — из уже сохранённого дела
+  const visibleTo = id === null ? F.visibility : (task(id)?.visibleTo || []);
+  $('asg-grid').innerHTML = assigneeGrid(visibleTo);
   hydrateImages($('asg-grid'));
   $('assignee-overlay').classList.remove('hidden');
 }
@@ -3322,26 +3332,25 @@ function renderDetail(){
   if(t.type==='tasks'){
     const asg = member(t.assignedTo);
     const r = t.deadline ? relDeadline(displayDeadline(t)) : null;
-    const visT = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
-    const visAll = visT.length === S.members.length;
-    const visRow = visAll ? '' : (()=>{
-      const avas = visT.map(id=>member(id)).filter(Boolean).map(m=>`<span class="ava ava-sm" style="--mc:${m.color}">${m.avatarId?`<img data-img="${m.avatarId}" alt="">`:esc(m.name.trim()[0].toUpperCase())}</span>`).join('');
-      const names = visT.map(id=>member(id)?.name).filter(Boolean).join(', ');
-      return `<div class="info-cell wide" data-inline="visibility" style="cursor:pointer"><div class="k">Кто видит</div><div class="v vis-cell-v"><span class="ava-stack">${avas}</span><span>${esc(names)}</span><span class="edit-pencil">${ICON.edit(13)}</span></div></div>`;
-    })();
     info = `<div class="info-grid">
       <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?`<span class="ava-acc-wrap">${avaHTML(asg,'ava-xs')}${t.accepted?`<i class="acc-badge">${ICON.check(9)}</i>`:''}</span>`+esc(asg.name)+(t.accepted?' <span class="acc-note">принял</span>':''):generalAvaHTML('ava-xs')+'Общее'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
       <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">Запланировано</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text) : '—'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
       ${t.deadline?`<div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${t.repeat?repLabel(t.repeat):'Без повтора'}${t.repeat&&t.deadline?` · далее: ${new Date(deadlineMs(displayDeadline(t))).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>`:''}
-      ${visRow}
     </div>`;
   } else {
-    const vis = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
-    const all = vis.length === S.members.length;
-    const avas = vis.map(id=>member(id)).filter(Boolean).map(m=>`<span class="ava ava-sm" style="--mc:${m.color}">${m.avatarId?`<img data-img="${m.avatarId}" alt="">`:esc(m.name.trim()[0].toUpperCase())}</span>`).join('');
-    const names = all ? 'Вся семья' : vis.map(id=>member(id)?.name).filter(Boolean).join(', ');
-    info = `<div class="info-grid"><div class="info-cell wide"><div class="k">Кто видит</div><div class="v vis-cell-v"><span class="ava-stack">${avas}</span><span>${esc(names)}</span></div></div></div>`;
+    info = '';
   }
+  // «Кто видит» — общий отдельный блок для дел и заметок, показывается внизу карточки
+  const visT = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
+  const visAll = visT.length === S.members.length;
+  const visHtml = visAll ? '' : (()=>{
+    const avas = visT.map(id=>member(id)).filter(Boolean).map(m=>`<span class="ava ava-sm" style="--mc:${m.color}">${m.avatarId?`<img data-img="${m.avatarId}" alt="">`:esc(m.name.trim()[0].toUpperCase())}</span>`).join('');
+    const names = visT.map(id=>member(id)?.name).filter(Boolean).join(', ');
+    return `<div class="d-block">
+      <div class="d-sec in-block" data-inline="visibility" style="cursor:pointer"><b>Кто видит</b><span class="d-edit-hint">${ICON.edit(13)}</span></div>
+      <div class="vis-cell-v in-block"><span class="ava-stack">${avas}</span><span>${esc(names)}</span></div>
+    </div>`;
+  })();
 
   let chkHtml = '';
   const ch = t.checklist||[];
@@ -3419,7 +3428,7 @@ function renderDetail(){
         ? `<div class="d-desc md-render in-block">${renderMarkdown(t.description)}</div>`
         : `<div class="d-desc empty-desc in-block">Добавить описание</div>`}
     </div>
-    ${voiceHtml}${lockHtml}${chkHtml}${gal}${filesHtml}
+    ${voiceHtml}${lockHtml}${chkHtml}${gal}${filesHtml}${visHtml}
     <div class="d-actions">${actions}</div>`;
   hydrateImages(body);
   requestAnimationFrame(()=>{ layoutDetailActions(); });
@@ -6653,6 +6662,13 @@ document.addEventListener('keydown', e=>{
   });
   window.addEventListener('focus', markUiState);
   window.addEventListener('blur', markUiState);
+  // открыть конкретную запись по клику в уведомлении — с уважением к «кто видит»
+  function openTaskFromNotif(rawId){
+    const id = Number(rawId); if(!id) return;
+    const t = task(id);
+    if(!t || t.deleted || !canSee(t)){ toast('Запись недоступна или удалена','warn'); show('main'); return; }
+    S.currentTab = t.type; activeTaskId = id; show('detail');
+  }
   startUiBeat();
   window.addEventListener('pagehide', ()=>{ persistNow(); markAway(); });
   window.addEventListener('beforeunload', persistNow);
@@ -6663,6 +6679,7 @@ document.addEventListener('keydown', e=>{
     navigator.serviceWorker.addEventListener('message', e=>{
       const d = e.data || {};
       if(d.type === 'open-screen' && d.screen && S.currentUser) show(d.screen);
+      if(d.type === 'open-task' && d.taskId && S.currentUser) openTaskFromNotif(d.taskId);
     });
   }
   // открытие по ссылке из уведомления (когда приложение было закрыто)
@@ -6671,6 +6688,11 @@ document.addEventListener('keydown', e=>{
     const logged = S.currentUser && member(S.currentUser);
     if(sp.get('screen') === 'chat' && logged){
       setTimeout(()=>show('chat'), 300);
+      history.replaceState({screen:'root'}, '', location.pathname);
+    }
+    if(sp.get('task') && logged){
+      const tid = sp.get('task');
+      setTimeout(()=>openTaskFromNotif(tid), 300);
       history.replaceState({screen:'root'}, '', location.pathname);
     }
     // быстрые действия с иконки и приём того, чем поделились

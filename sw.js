@@ -1,11 +1,12 @@
 /* FamilyHub — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v84';
+const CACHE = 'family-hub-v86';
 const SHARE_CACHE = 'fh-share';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon-192.png',
+  './notif-icon.png',
   './icon-512.png',
   './maskable-512.png',
   './badge-96.png',
@@ -133,26 +134,49 @@ self.addEventListener('push', e => {
     await self.registration.showNotification(d.title || 'FamilyHub', {
       body: d.body || '',
       tag: d.tag || undefined,
-      icon: new URL('icon-192.png', self.registration.scope).href,
+      icon: new URL('notif-icon.png', self.registration.scope).href,
       badge: new URL('badge-96.png', self.registration.scope).href,
     });
   })());
 });
 
+// определяем, к чему ведёт уведомление, по его тегу
+function routeForTag(tag) {
+  tag = tag || '';
+  if (tag.indexOf('chat-') === 0) return { screen: 'chat' };
+  if (tag.indexOf('call-') === 0) return { screen: 'chat' };   // звонок уже закончился к моменту клика
+  // дело/заметка: вытаскиваем числовой id из разных форматов тега
+  const patterns = [
+    /^evt-new-(\d+)/, /^evt-asg-(\d+)-/, /^evt-done-(\d+)-/, /^evt-acc-(\d+)-/,
+    /^ping-(\d+)-/, /^s(\d+)\|/, /^d(\d+)\|/,
+  ];
+  for (const re of patterns) {
+    const m = tag.match(re);
+    if (m) return { taskId: m[1] };
+  }
+  if (tag.indexOf('od|') === 0) return { screen: 'main' };     // сводка просроченных — список дел
+  return {};
+}
+
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  const tag = e.notification.tag || '';
-  const goChat = tag.indexOf('chat-') === 0;   // сообщения и SOS ведут в чат
+  const route = routeForTag(e.notification.tag);
+  const qs = route.taskId ? ('?task=' + route.taskId)
+           : route.screen ? ('?screen=' + route.screen)
+           : '';
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async cs => {
       for (const c of cs) {
         if ('focus' in c) {
           await c.focus();
-          if (goChat) { try { c.postMessage({ type: 'open-screen', screen: 'chat' }); } catch (_) {} }
+          try {
+            if (route.taskId) c.postMessage({ type: 'open-task', taskId: route.taskId });
+            else if (route.screen) c.postMessage({ type: 'open-screen', screen: route.screen });
+          } catch (_) {}
           return;
         }
       }
-      return clients.openWindow(goChat ? './?screen=chat' : './');
+      return clients.openWindow('./' + qs);
     })
   );
 });
