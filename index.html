@@ -3762,7 +3762,7 @@ function renderFormType(){
   $('f-task-fields').classList.toggle('hidden', F.type!=='tasks');
   $('f-note-fields').classList.toggle('hidden', F.type!=='notes');
   $('f-vis-title').textContent = F.type==='notes' ? 'Кто видит заметку' : 'Кто видит дело';
-  if(F.type==='notes') renderVisibility();
+  renderVisibility();   // блок общий для дел и заметок — рисуем всегда
 }
 function renderFormSelectors(){
   $('f-labels').innerHTML = `<button type="button" class="p-chip ${!F.label?'sel':''}" data-lbl="" style="--lc:#9B9CA4"><i class="p-dot"></i>Нет</button>` +
