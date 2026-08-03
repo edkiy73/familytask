@@ -1140,9 +1140,12 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         </div>
       </div>
 
-      <div id="f-note-fields" class="fgroup hidden">
-        <span class="label-cap">Кто видит заметку</span>
+      <div class="fgroup">
+        <span class="label-cap" id="f-vis-title">Кто видит</span>
         <div class="mem-scroll" id="f-visibility"></div>
+      </div>
+
+      <div id="f-note-fields" class="fgroup hidden">
         <div class="lock-row" id="f-lock-row">
           <button type="button" class="lock-toggle" id="f-lock-btn"></button>
           <div class="lock-info"><b>Пароль на заметку</b></div>
@@ -1333,6 +1336,21 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
         <div class="row2" style="margin-top:12px">
           <button class="btn btn-soft" data-close="rep-overlay">Отмена</button>
           <button class="btn btn-acc" id="rep-save">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- БЫСТРАЯ ПРАВКА «КТО ВИДИТ» -->
+  <div class="overlay sheet-mode hidden" id="vis-overlay">
+    <div class="sheet">
+      <div class="sheet-grip"></div>
+      <div class="sheet-title" id="vis-sheet-title">Кто видит</div>
+      <div class="sheet-form">
+        <div class="mem-scroll" id="vis-picker"></div>
+        <div class="row2" style="margin-top:12px">
+          <button class="btn btn-soft" data-close="vis-overlay">Отмена</button>
+          <button class="btn btn-acc" id="vis-save">Сохранить</button>
         </div>
       </div>
     </div>
@@ -2157,6 +2175,7 @@ function checkDeadlines(){
     if(t.type!=='tasks' || t.completed || t.isDraft || !t.deadline) return;
     // локальный фолбэк: показываем только свои дела и общие (без исполнителя)
     if(t.assignedTo && t.assignedTo !== S.currentUser) return;
+    if(!canSee(t)) return;   // дело скрыто от меня «кто видит» — уведомления быть не должно
     const d = deadlineMs(t.deadline); if(isNaN(d)) return;
     const kS = 's'+t.id+'|'+t.deadline, kD = 'd'+t.id+'|'+t.deadline;
     const time = isAllDay(t.deadline) ? 'сегодня' : new Date(d).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
@@ -2477,16 +2496,10 @@ const SYNC = {
         if(t.deleted || t.isDraft) return;
         const b = before.get(t.id);
         const who = member(t.updatedBy)?.name || member(t.createdBy)?.name || '';
+        if(!canSee(t)) return;   // «кто видит» скрывает и запись, и любые уведомления о ней
         if(!b || b.del){
           if(t.createdBy === S.currentUser) return;
-          // заметку показываем только если она видна мне
-          if(t.type==='notes'){
-            const vis = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
-            if(!vis.includes(S.currentUser)) return;
-            news.push(['Новая заметка', t.title + (who?` — ${who}`:''), 'evt-new-'+t.id]);
-          } else {
-            news.push(['Новое дело', t.title + (who?` — ${who}`:''), 'evt-new-'+t.id]);
-          }
+          news.push([t.type==='notes'?'Новая заметка':'Новое дело', t.title + (who?` — ${who}`:''), 'evt-new-'+t.id]);
         } else if((t.updatedAt||0) > b.u && t.updatedBy !== S.currentUser){
           if(t.assignedTo === S.currentUser && b.a !== S.currentUser)
             news.push(['Вам назначено дело', t.title + (who?` — ${who}`:''), 'evt-asg-'+t.id+'-'+(t.updatedAt||0)]);
@@ -2632,9 +2645,15 @@ function displayDeadline(t){
   if(Date.now() < overMs) return t.deadline;   // срок ещё не прошёл — как есть
   return nextOccurrence(t.deadline, t.repeat); // повторяющееся не может быть «просрочено»
 }
+// список тех, кому запись видна, кроме автора действия — единая точка адресации push
+function visAudience(t, excludeSelf=true){
+  const all = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
+  return excludeSelf ? all.filter(id=>id!==S.currentUser) : all;
+}
 function canSee(t){
   if(t.isDraft && t.createdBy !== S.currentUser) return false;
-  if(t.type==='notes' && (t.visibleTo||[]).length && !t.visibleTo.includes(S.currentUser)) return false;
+  // «кто видит» работает одинаково для дел и заметок
+  if((t.visibleTo||[]).length && !t.visibleTo.includes(S.currentUser)) return false;
   return true;
 }
 
@@ -2712,7 +2731,7 @@ function updateNav(){
     } else { ha.style.setProperty('--mc','#9B9CA4'); ha.textContent='•'; }
   });
 
-  const cnt = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===S.currentUser).length;
+  const cnt = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===S.currentUser && canSee(t)).length;
   const badge = $('nav-badge-tasks');
   badge.classList.toggle('hidden', !cnt);
   badge.textContent = cnt;
@@ -2788,7 +2807,7 @@ function renderFilterLabel(){
 }
 function openCatSheet(){
   const P = prefs();
-  const used = new Set(liveTasks().filter(t=>t.type===S.currentTab && !t.isDraft).map(t=>t.label));
+  const used = new Set(liveTasks().filter(t=>t.type===S.currentTab && !t.isDraft && canSee(t)).map(t=>t.label));
   const cats = S.labels.filter(l=>used.has(l.name));
   let html = `<div class="sheet-grip"></div><div class="sheet-title">Категория</div>`;
   html += `<button class="sheet-btn ${!P.catFilter?'green':''}" data-catpick="">${!P.catFilter?ICO.done:'<span style="width:18px"></span>'}Все категории</button>`;
@@ -2799,7 +2818,7 @@ function openCatSheet(){
   $('cat-overlay').classList.remove('hidden');
 }
 function renderFilterBar(){
-  const openBy = id => liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===id).length;
+  const openBy = id => liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===id && canSee(t)).length;
   let html = S.members.map(m=>{
     const c = openBy(m.id);
     return `<button class="f-item ${S.activeFilter===m.id?'active':''}" data-filter="${m.id}" style="--mc:${m.color}" title="${esc(m.name)}">
@@ -3146,6 +3165,9 @@ function chooseAssignee(mid){
   }
   const t = task(asgId); if(!t) return;   // смена у существующего
   if(t.assignedTo === mid) return;
+  if(mid && (t.visibleTo||[]).length && !t.visibleTo.includes(mid)){
+    toast('Этот участник не видит дело — сначала добавьте его в «Кто видит»','warn'); return;
+  }
   t.assignedTo = mid; t.accepted = (mid === S.currentUser); t.updatedBy = S.currentUser; touch(t);
   persist();
   const name = mid ? member(mid)?.name : 'Общее';
@@ -3246,7 +3268,7 @@ function markDone(id){
   const t = task(id); if(!t) return;
   t.completed = true; t.updatedBy = S.currentUser; touch(t);
   persist(); toast('Дело выполнено','ok');
-  pushEvent('Выполнено', `${t.title} — ${member(S.currentUser)?.name||''}`, 'evt-done-'+t.id+'-'+(t.updatedAt||0));
+  { const aud = visAudience(t); if(aud.length) pushEvent('Выполнено', `${t.title} — ${member(S.currentUser)?.name||''}`, 'evt-done-'+t.id+'-'+(t.updatedAt||0), aud); }
   activeScreen==='detail' ? renderDetail() : renderMain();
 }
 function toggleComplete(id){
@@ -3300,10 +3322,18 @@ function renderDetail(){
   if(t.type==='tasks'){
     const asg = member(t.assignedTo);
     const r = t.deadline ? relDeadline(displayDeadline(t)) : null;
+    const visT = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
+    const visAll = visT.length === S.members.length;
+    const visRow = visAll ? '' : (()=>{
+      const avas = visT.map(id=>member(id)).filter(Boolean).map(m=>`<span class="ava ava-sm" style="--mc:${m.color}">${m.avatarId?`<img data-img="${m.avatarId}" alt="">`:esc(m.name.trim()[0].toUpperCase())}</span>`).join('');
+      const names = visT.map(id=>member(id)?.name).filter(Boolean).join(', ');
+      return `<div class="info-cell wide" data-inline="visibility" style="cursor:pointer"><div class="k">Кто видит</div><div class="v vis-cell-v"><span class="ava-stack">${avas}</span><span>${esc(names)}</span><span class="edit-pencil">${ICON.edit(13)}</span></div></div>`;
+    })();
     info = `<div class="info-grid">
       <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?`<span class="ava-acc-wrap">${avaHTML(asg,'ava-xs')}${t.accepted?`<i class="acc-badge">${ICON.check(9)}</i>`:''}</span>`+esc(asg.name)+(t.accepted?' <span class="acc-note">принял</span>':''):generalAvaHTML('ava-xs')+'Общее'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
       <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">Запланировано</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text) : '—'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
       ${t.deadline?`<div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${t.repeat?repLabel(t.repeat):'Без повтора'}${t.repeat&&t.deadline?` · далее: ${new Date(deadlineMs(displayDeadline(t))).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>`:''}
+      ${visRow}
     </div>`;
   } else {
     const vis = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
@@ -3413,6 +3443,28 @@ function inlineEdit(kind){
   }
   if(kind === 'date'){ openDateSheet(t); return; }
   if(kind === 'repeat'){ openRepeatSheet(t); return; }
+  if(kind === 'visibility'){ openVisSheet(t); return; }
+}
+let qVis = null;
+function openVisSheet(t){
+  qVis = (t.visibleTo && t.visibleTo.length) ? [...t.visibleTo] : S.members.map(m=>m.id);
+  $('vis-sheet-title').textContent = t.type==='notes' ? 'Кто видит заметку' : 'Кто видит дело';
+  renderVisSheet();
+  $('vis-overlay').classList.remove('hidden');
+}
+function renderVisSheet(){
+  $('vis-picker').innerHTML = S.members.map(m=>`
+    <button type="button" class="mem-pick ${qVis.includes(m.id)?'sel':''}" data-qvis="${m.id}" style="--mc:${m.color}" title="${esc(m.name)}">
+      <span class="tick">${ICON.check(12)}</span>${avaHTML(m,'em-ava')}</button>`).join('');
+  hydrateImages($('vis-picker'));
+}
+function saveVisSheet(){
+  const t = task(activeTaskId); if(!t) return;
+  // «видят все» храним как пустой список — так же, как это уже устроено для заметок
+  t.visibleTo = (qVis.length === S.members.length) ? [] : [...qVis];
+  t.updatedBy = S.currentUser; touch(t); persist();
+  $('vis-overlay').classList.add('hidden');
+  renderDetail(); haptic('ok'); toast('Кто видит — изменено','edit');
 }
 let qRepeat = null;
 function openRepeatSheet(t){
@@ -3504,11 +3556,12 @@ function inlineSave(){
 }
 function pingTask(t){
   const who = t.assignedTo ? member(t.assignedTo)?.name : null;
-  const target = who || 'всей семье';
-  confirmDlg('Отправить напоминание?', `${who ? who+' получит' : 'Все получат'} уведомление о «${t.title}».`, 'Отправить', false, ()=>{
+  confirmDlg('Отправить напоминание?', `${who ? who+' получит' : 'Все, кто видит дело, получат'} уведомление о «${t.title}».`, 'Отправить', false, ()=>{
     const title = t.assignedTo ? 'Напоминание' : 'Общее напоминание';
-    pushEvent(title, t.title, 'ping-'+t.id+'-'+Date.now(), t.assignedTo || null);
-    toast(who ? `Напомнили: ${who}` : 'Напомнили всей семье', 'bell');
+    const target = t.assignedTo || visAudience(t);   // исполнителю адресно, иначе — всем, кто видит
+    if(Array.isArray(target) && !target.length){ toast('Некому напоминать — дело никто не видит','warn'); return; }
+    pushEvent(title, t.title, 'ping-'+t.id+'-'+Date.now(), target);
+    toast(who ? `Напомнили: ${who}` : 'Напомнили всем, кто видит', 'bell');
     haptic('med');
   });
 }
@@ -3570,15 +3623,11 @@ function detailAction(act){
   if(act==='publish'){
     t.isDraft=false; touch(t); persist(); toast('Опубликовано','rocket');
     const me = member(S.currentUser)?.name || '';
-    if(t.type==='notes'){
-      // приватная заметка — только тем, кому она видна
-      const aud = ((t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id)).filter(id=>id!==S.currentUser);
-      if(aud.length) pushEvent('Новая заметка', t.title + (me?' — '+me:''), 'evt-new-'+t.id, aud);
-    } else {
-      pushEvent('Новое дело', t.title + (me?' — '+me:''), 'evt-new-'+t.id);
-      if(t.assignedTo && t.assignedTo!==S.currentUser)
-        pushEvent('Вам назначено дело', t.title, 'evt-asg-'+t.id+'-'+(t.updatedAt||0), t.assignedTo);
-    }
+    // «кто видит» ограничивает и дела, и заметки одинаково
+    const aud = ((t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id)).filter(id=>id!==S.currentUser);
+    if(aud.length) pushEvent(t.type==='notes'?'Новая заметка':'Новое дело', t.title + (me?' — '+me:''), 'evt-new-'+t.id, aud);
+    if(t.type==='tasks' && t.assignedTo && t.assignedTo!==S.currentUser && aud.includes(t.assignedTo))
+      pushEvent('Вам назначено дело', t.title, 'evt-asg-'+t.id+'-'+(t.updatedAt||0), t.assignedTo);
     renderDetail(); }
   if(act==='chk-all'){
     const all = (t.checklist||[]).every(c=>c.done);
@@ -3703,6 +3752,7 @@ function renderFormType(){
   document.querySelectorAll('#type-seg button').forEach(b=>b.classList.toggle('on', b.dataset.type===F.type));
   $('f-task-fields').classList.toggle('hidden', F.type!=='tasks');
   $('f-note-fields').classList.toggle('hidden', F.type!=='notes');
+  $('f-vis-title').textContent = F.type==='notes' ? 'Кто видит заметку' : 'Кто видит дело';
   if(F.type==='notes') renderVisibility();
 }
 function renderFormSelectors(){
@@ -3937,7 +3987,7 @@ async function saveForm(asDraft){
     for(const id of [...(F.removedFileIds||[]), ...(F.removedVoiceIds||[])]){ try{ await DB.del('img', id); }catch(e){} SYNC.imgDel(id); }
     Object.assign(t, { title, description:desc, deadline:dl, repeat:rp,
       label:F.label, labelColor:F.labelColor, assignedTo:F.type==='tasks'?F.assignee:null,
-      visibleTo:F.type==='notes'?[...F.visibility]:[], imageIds:[...F.imageIds],
+      visibleTo:[...F.visibility], imageIds:[...F.imageIds],
       files:[...(F.files||[])], voice:F.voice||null,
       lock: F.type==='notes' && F.lockOn
               ? (F.lockHash || (F.lockKeep ? t.lock : null))
@@ -3958,7 +4008,7 @@ function finalizeCreate(assignee, asDraft){
     id:Date.now(), type:F.type, title:p.title, description:p.desc, deadline:p.dl, repeat:p.rp,
     label:F.label, labelColor:F.labelColor,
     assignedTo:F.type==='tasks'?(assignee||null):null, status:'pending', completed:false,
-    visibleTo:F.type==='notes'?[...F.visibility]:[],
+    visibleTo:[...F.visibility],
     createdBy:S.currentUser, updatedBy:S.currentUser,
     lock: (F.type==='notes' && F.lockOn && F.lockHash) ? F.lockHash : null,
     createdAt: Date.now(), seenBy: [],
@@ -3972,15 +4022,11 @@ function finalizeCreate(assignee, asDraft){
   persist(); toast(asDraft?'Сохранено в черновики':'Опубликовано','ok');
   if(!asDraft){
     const me = member(S.currentUser)?.name || '';
-    if(F.type==='notes'){
-      // приватная заметка — только тем, кому она видна (кроме автора)
-      const audience = (nt.visibleTo && nt.visibleTo.length ? nt.visibleTo : S.members.map(m=>m.id)).filter(id=>id!==S.currentUser);
-      if(audience.length) pushEvent('Новая заметка', p.title + (me?' — '+me:''), 'evt-new-'+nt.id, audience);
-    } else {
-      pushEvent('Новое дело', p.title + (me?' — '+me:''), 'evt-new-'+nt.id);
-      if(nt.assignedTo && nt.assignedTo!==S.currentUser)
-        pushEvent('Вам назначено дело', p.title, 'evt-asg-'+nt.id+'-'+(nt.updatedAt||0), nt.assignedTo);
-    }
+    // «кто видит» ограничивает и дела, и заметки одинаково — шлём только тем, кому видно
+    const audience = (nt.visibleTo && nt.visibleTo.length ? nt.visibleTo : S.members.map(m=>m.id)).filter(id=>id!==S.currentUser);
+    if(audience.length) pushEvent(F.type==='notes'?'Новая заметка':'Новое дело', p.title + (me?' — '+me:''), 'evt-new-'+nt.id, audience);
+    if(F.type==='tasks' && nt.assignedTo && nt.assignedTo!==S.currentUser && audience.includes(nt.assignedTo))
+      pushEvent('Вам назначено дело', p.title, 'evt-asg-'+nt.id+'-'+(nt.updatedAt||0), nt.assignedTo);
   }
   F._pending = null;
   show('main');
@@ -5831,14 +5877,14 @@ let famAvaTarget = null;     // 'new' или id члена семьи, кото�
 const CAM_SVG = '<span class="cam-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3"/></svg></span>';
 function renderFamily(){
   const fs = $('fam-sub'); if(fs) fs.textContent = `Участников: ${S.members.length}`;
-  const genOpen = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===null).length;
+  const genOpen = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===null && canSee(t)).length;
   const genRow = '';
   const _genRowUnused = `<div class="fam-row" style="--mc:#5E7186">
       <span class="fam-ring ava-general">${ICON.users(19)}</span>
       <div class="fam-info"><b>Общее</b><span>${genOpen ? 'Открытых дел: '+genOpen : 'Дела без исполнителя'}</span></div>
     </div>`;
   $('fam-list').innerHTML = genRow + S.members.map(m=>{
-    const open = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===m.id).length;
+    const open = liveTasks().filter(t=>t.type==='tasks' && !t.completed && !t.isDraft && t.assignedTo===m.id && canSee(t)).length;
     return `<div class="fam-row" style="--mc:${m.color}">
       <button type="button" class="fam-ring-btn" data-ava-mem="${m.id}" title="Изменить фото">
         ${avaHTML(m,'fam-ring')}${CAM_SVG}
@@ -6164,7 +6210,7 @@ document.addEventListener('click', e=>{
     else {
       t.completed = true; t.updatedBy = S.currentUser; touch(t);
       persist(); toast('Серия завершена — напоминаний больше не будет','ok');
-      pushEvent('Выполнено (серия завершена)', `${t.title} — ${member(S.currentUser)?.name||''}`, 'evt-done-'+t.id+'-'+(t.updatedAt||0));
+      { const aud = visAudience(t); if(aud.length) pushEvent('Выполнено (серия завершена)', `${t.title} — ${member(S.currentUser)?.name||''}`, 'evt-done-'+t.id+'-'+(t.updatedAt||0), aud); }
       activeScreen==='detail' ? renderDetail() : renderMain();
     }
     return; }
@@ -6225,6 +6271,15 @@ document.addEventListener('click', e=>{
     }
     return; }
   if(el('#rep-save')){ saveRepeatSheet(); return; }
+  if(x = el('[data-qvis]')){
+    const id = x.dataset.qvis;
+    const set = new Set(qVis);
+    set.has(id) ? set.delete(id) : set.add(id);
+    qVis = [...set];
+    if(!qVis.length) qVis = [S.currentUser];   // хотя бы сам себе дело должно быть видно
+    renderVisSheet(); haptic('tap'); return;
+  }
+  if(el('#vis-save')){ saveVisSheet(); return; }
   if(el('#rep-overlay') && !el('.sheet')){ $('rep-overlay').classList.add('hidden'); return; }
   if(x = el('[data-qdate]')){ $('q-date').value = x.dataset.qdate; if(!$('q-time').value) $('q-time').value = '09:00'; syncQPh(); haptic('tap'); return; }
   if(x = el('[data-qtime]')){
