@@ -4164,7 +4164,15 @@ async function familyKey(){
   _cryptoKeyFor = code;
   return _cryptoKey;
 }
-const _b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const _b64 = buf => {
+  // безопасно для любого размера: собираем строку кусками по 32КБ вместо
+  // передачи всего массива байт разом — иначе переполняется стек вызовов
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  const CHUNK = 0x8000;
+  for(let i=0;i<bytes.length;i+=CHUNK) binary += String.fromCharCode.apply(null, bytes.subarray(i, i+CHUNK));
+  return btoa(binary);
+};
 const _unb64 = s => Uint8Array.from(atob(s), c=>c.charCodeAt(0));
 async function encJSON(obj){
   const key = await familyKey();
@@ -4208,7 +4216,13 @@ function bioAvailable(){
   return !!(window.PublicKeyCredential && navigator.credentials && location.protocol === 'https:');
 }
 function bioEnabled(mid){ try{ return !!localStorage.getItem(bioKey(mid)); }catch(e){ return false; } }
-function b64u(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function b64u(buf){
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  const CHUNK = 0x8000;
+  for(let i=0;i<bytes.length;i+=CHUNK) binary += String.fromCharCode.apply(null, bytes.subarray(i, i+CHUNK));
+  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
 function fromB64u(s){
   s = s.replace(/-/g,'+').replace(/_/g,'/');
   const bin = atob(s + '==='.slice((s.length + 3) % 4));
