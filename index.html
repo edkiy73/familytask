@@ -3912,19 +3912,28 @@ async function openStoredFile(id, name, type){
   try{
     let blob = await DB.get('img', id);
     if(!blob) blob = await SYNC.imgGet(id);
-    if(!blob){ toast('Файл недоступен','warn'); return; }
-    // пытаемся открыть во вкладке (pdf/txt/html браузер покажет сам), иначе скачиваем
+    if(!blob){
+      // не нашли ни локально, ни на сервере — файл ещё не долетел или синхронизация не удалась
+      toast((S.pendingImg||[]).includes(id) ? 'Файл ещё загружается, попробуйте позже' : 'Файл недоступен','warn');
+      return;
+    }
     const typed = type ? new Blob([blob], {type}) : blob;
     const url = URL.createObjectURL(typed);
-    const viewable = /pdf|text|html|json|xml|image/i.test(type||'');
-    if(viewable){
+    // pdf и картинки браузер показывает в своём защищённом просмотрщике — открываем сразу.
+    // HTML, текст и подобное НЕ открываем как живую страницу нашего сайта: адрес вида
+    // blob:… работает только в этой вкладке и исчезает — у других он не откроется вовсе,
+    // а скрипты внутри чужого HTML выполнялись бы с доступом к данным приложения.
+    const safePreview = /pdf|image/i.test(type||'');
+    if(safePreview){
       const w = window.open(url, '_blank');
       if(!w){ const a=document.createElement('a'); a.href=url; a.download=name||'file'; a.click(); }
+      setTimeout(()=>URL.revokeObjectURL(url), 60000);
     } else {
       const a = document.createElement('a'); a.href = url; a.download = name || 'file';
       document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 4000);
+      toast('Файл сохранён','clip');
     }
-    setTimeout(()=>URL.revokeObjectURL(url), 60000);
   }catch(e){ toast('Не удалось открыть файл','warn'); }
 }
 function renderFormPhotos(){
