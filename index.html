@@ -948,6 +948,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .sheet-grip{width:40px;height:4.5px;border-radius:6px;background:var(--line);margin:4px auto 14px}
 .sheet-title{font-size:13px;font-weight:800;letter-spacing:-.01em;padding:0 8px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sheet-btn{width:100%;display:flex;align-items:center;gap:13px;padding:14px 13px;border-radius:18px;font-size:14px;font-weight:650;text-align:left;transition:background .12s,transform .18s var(--spring)}
+.filesheet-warn{font-size:12px;line-height:1.5;color:var(--rose);padding:2px 13px 12px;display:none}
+.filesheet-warn.show{display:block}
 .sheet-btn:active{background:var(--soft);transform:scale(.98)}
 .sheet-btn svg{width:19px;height:19px;color:var(--mut);flex-shrink:0}
 .sw-toggle{margin-left:auto;width:42px;height:25px;border-radius:26px;background:var(--line);position:relative;flex-shrink:0;transition:background .18s}
@@ -1579,6 +1581,17 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
     </div>
   </div>
 
+  <!-- ОТКРЫТЬ ФАЙЛ -->
+  <div class="overlay sheet-mode hidden" id="filesheet-overlay">
+    <div class="sheet">
+      <div class="sheet-grip"></div>
+      <div class="sheet-title" id="filesheet-title">Файл</div>
+      <button class="sheet-btn" id="filesheet-open"></button>
+      <div class="filesheet-warn" id="filesheet-warn"></div>
+      <button class="sheet-btn" id="filesheet-save"></button>
+    </div>
+  </div>
+
   <!-- MARKDOWN ВВОД -->
   <div class="overlay top-anchor hidden" id="md-overlay">
     <div class="modal">
@@ -1696,6 +1709,7 @@ const ICON = {
   clip:(s)=>_svg('<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.5 3.5 0 0 1 5 5L10.5 18a2 2 0 0 1-3-3l8-8"/>',s),
   phone:(s)=>_svg('<path d="M6.5 3h3l1.5 4.5-2 1.5a12 12 0 0 0 6 6l1.5-2 4.5 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3z"/>',s),
   file:(s)=>_svg('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',s),
+  download:(s)=>_svg('<path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/>',s),
   geoPin:(s)=>_svg('<path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>',s),
   play:(s)=>_svg('<path d="M7 5l12 7-12 7z" fill="currentColor" stroke="none"/>',s),
   pause:(s)=>_svg('<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/>',s),
@@ -3908,28 +3922,40 @@ async function handleDocs(files){
   renderFormDocs();
   toast('Файл прикреплён','clip');
 }
-async function openStoredFile(id, name, type){
+let fileSheetCtx = null;   // {id, name, type} для текущей открытой шторки файла
+async function loadStoredBlob(id){
+  let blob = await DB.get('img', id);
+  if(!blob) blob = await SYNC.imgGet(id);
+  return blob;
+}
+function openStoredFile(id, name, type){
+  fileSheetCtx = { id, name, type };
+  const safePreview = /pdf|image/i.test(type||'');
+  $('filesheet-title').textContent = name || 'Файл';
+  $('filesheet-open').innerHTML = ICON.eye(18) + (safePreview ? ' Открыть' : ' Открыть в браузере');
+  $('filesheet-save').innerHTML = ICON.download(18) + ' Скачать';
+  const warn = $('filesheet-warn');
+  warn.textContent = 'Небезопасно: файл откроется как страница на этом сайте — скрипты внутри него получат доступ к данным приложения. Открывайте, только если доверяете источнику.';
+  warn.classList.toggle('show', !safePreview);
+  $('filesheet-overlay').classList.remove('hidden');
+}
+async function fileSheetAction(kind){
+  const ctx = fileSheetCtx; if(!ctx) return;
+  $('filesheet-overlay').classList.add('hidden');
   try{
-    let blob = await DB.get('img', id);
-    if(!blob) blob = await SYNC.imgGet(id);
+    const blob = await loadStoredBlob(ctx.id);
     if(!blob){
-      // не нашли ни локально, ни на сервере — файл ещё не долетел или синхронизация не удалась
-      toast((S.pendingImg||[]).includes(id) ? 'Файл ещё загружается, попробуйте позже' : 'Файл недоступен','warn');
+      toast((S.pendingImg||[]).includes(ctx.id) ? 'Файл ещё загружается, попробуйте позже' : 'Файл недоступен','warn');
       return;
     }
-    const typed = type ? new Blob([blob], {type}) : blob;
+    const typed = ctx.type ? new Blob([blob], {type:ctx.type}) : blob;
     const url = URL.createObjectURL(typed);
-    // pdf и картинки браузер показывает в своём защищённом просмотрщике — открываем сразу.
-    // HTML, текст и подобное НЕ открываем как живую страницу нашего сайта: адрес вида
-    // blob:… работает только в этой вкладке и исчезает — у других он не откроется вовсе,
-    // а скрипты внутри чужого HTML выполнялись бы с доступом к данным приложения.
-    const safePreview = /pdf|image/i.test(type||'');
-    if(safePreview){
+    if(kind === 'open'){
       const w = window.open(url, '_blank');
-      if(!w){ const a=document.createElement('a'); a.href=url; a.download=name||'file'; a.click(); }
+      if(!w){ const a=document.createElement('a'); a.href=url; a.download=ctx.name||'file'; a.click(); }
       setTimeout(()=>URL.revokeObjectURL(url), 60000);
     } else {
-      const a = document.createElement('a'); a.href = url; a.download = name || 'file';
+      const a = document.createElement('a'); a.href = url; a.download = ctx.name || 'file';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=>URL.revokeObjectURL(url), 4000);
       toast('Файл сохранён','clip');
@@ -6482,6 +6508,9 @@ document.addEventListener('click', e=>{
   if(x = el('[data-del-mem]')){ delMember(x.dataset.delMem); return; }
   /* lightbox */
   if(el('#lb-save')){ openSaveChoice(); return; }
+  if(el('#filesheet-open')){ fileSheetAction('open'); return; }
+  if(el('#filesheet-save')){ fileSheetAction('save'); return; }
+  if(el('#filesheet-overlay') && !el('.sheet')){ $('filesheet-overlay').classList.add('hidden'); fileSheetCtx=null; return; }
   if(el('#lb-save-one')){ $('lbsave-overlay').classList.add('hidden'); saveOneImage(lbImgs[lbIdx]); return; }
   if(el('#lb-save-all')){ $('lbsave-overlay').classList.add('hidden'); saveAllImages(); return; }
   if(el('#lbsave-overlay') && !el('.sheet')){ $('lbsave-overlay').classList.add('hidden'); return; }
