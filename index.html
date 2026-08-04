@@ -859,6 +859,9 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .file-row .fn{flex:1;min-width:0}
 .file-row .fn b{display:block;font-size:var(--fs-sm);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fn-stuck{display:block;font-size:var(--fs-2xs);font-weight:700;color:var(--rose)}
+.fn-uploading{display:flex;align-items:center;gap:5px;font-size:var(--fs-2xs);font-weight:700;color:var(--mut)}
+.fn-uploading .sp{width:10px;height:10px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--acc);animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
 .file-row .fn span{font-size:11px;color:var(--faint)}
 .file-row .fx{width:var(--h-xs);height:var(--h-xs);border-radius:10px;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .18s var(--spring)}
 .file-row .fx:active{transform:scale(.86)}
@@ -2573,16 +2576,27 @@ const SYNC = {
     this.pushing = false;
   },
   async imgPut(id){
-    if(!this.enabled() || !this.client){ queuePendingImg(id); return; }
+    if(!this.enabled() || !this.client){ queuePendingImg(id); return {ok:false, reason:'нет связи с облаком'}; }
     try{
       const blob = await DB.get('img', id);
-      if(!blob){ S.pendingImg = (S.pendingImg||[]).filter(x=>x!==id); return; }
+      if(!blob){ S.pendingImg = (S.pendingImg||[]).filter(x=>x!==id); return {ok:false, reason:'файла нет локально'}; }
       const b64 = await blobToB64(blob);
       await this.rpc('hub_img_put', {p_fid:S.familyCode, p_id:id, p_data: await encText(b64)});
       S.pendingImg = (S.pendingImg||[]).filter(x=>x!==id);
       if(S.pendingImgAt) delete S.pendingImgAt[id];
+      if(S.pendingImgErr) delete S.pendingImgErr[id];
       persistLocal();
-    }catch(e){ queuePendingImg(id); }
+      return {ok:true};
+    }catch(e){
+      // раньше причина сбоя терялась молча — теперь видна в консоли и запоминается для показа в интерфейсе
+      const reason = (e && (e.message || e.error_description || e.hint)) || String(e);
+      console.error('imgPut failed for', id, e);
+      queuePendingImg(id);
+      S.pendingImgErr = S.pendingImgErr || {};
+      S.pendingImgErr[id] = reason;
+      persistLocal();
+      return {ok:false, reason};
+    }
   },
   async imgGet(id){
     if(!this.enabled() || !this.client) return null;
@@ -3881,13 +3895,16 @@ function fileExt(name){
 }
 function fileRowHTML(f, removable){
   const k = fileKind(f.name, f.type);
-  // «застряло» видно только тому, у кого файл реально не долетел до сервера —
-  // pendingImgAt хранится локально, у других устройств этой отметки нет
+  const uploading = typeof uploadingIds!=='undefined' && uploadingIds.has(f.id);
+  const err = (S.pendingImgErr||{})[f.id];
   const stuckAt = (S.pendingImgAt||{})[f.id];
-  const stuck = stuckAt && Date.now()-stuckAt > 3*60e3;
+  const stuck = !uploading && stuckAt && Date.now()-stuckAt > 3*60e3;
+  let status = '';
+  if(uploading) status = '<span class="fn-uploading"><span class="sp"></span>загружается…</span>';
+  else if(stuck) status = `<span class="fn-stuck">${err ? esc(err) : 'не загрузился на сервер'}</span>`;
   return `<div class="file-row ${removable?'':'tapable'}" ${removable?'':`data-openfile="${f.id}"`}>
     <span class="fi" style="background:${FILE_COLORS[k]}">${fileExt(f.name) ? esc(fileExt(f.name)) : ICON.file(13)}</span>
-    <span class="fn"><b>${esc(f.name)}</b>${stuck?'<span class="fn-stuck">не загрузился на сервер</span>':''}</span>
+    <span class="fn"><b>${esc(f.name)}</b>${status}</span>
     ${removable ? `<button type="button" class="fx" data-rmfile="${f.id}">${ICON.x(14)}</button>` : ''}
   </div>`;
 }
@@ -3925,6 +3942,7 @@ function renderFormDocs(){
   $('f-doc-cnt').textContent = `(${F.files.length} из 5)`;
   $('f-docs').innerHTML = F.files.map(f=>fileRowHTML(f, true)).join('');
 }
+const uploadingIds = new Set();   // id, которые прямо сейчас грузятся — для спиннера на строке файла
 async function handleDocs(files){
   let arr = Array.from(files||[]);
   if(!arr.length) return;
@@ -3932,17 +3950,24 @@ async function handleDocs(files){
   const freeF = 5 - F.files.length;
   if(freeF <= 0){ toast('Уже 5 файлов — больше нельзя','warn'); return; }
   if(arr.length > freeF){ toast(`Добавлю только ${freeF} из ${arr.length} — лимит 5`,'warn'); arr = arr.slice(0, freeF); }
+  let okN=0, failReason=null;
   for(const f of arr){
     if(f.size > 4*1024*1024){ toast(`«${f.name}» больше 4 МБ — файлы (в отличие от фото) не сжимаются и могут не дойти до сервера`,'warn'); continue; }
+    let id;
     try{
-      const id = uid('doc_');
+      id = uid('doc_');
       await DB.set('img', id, f);          // храним как blob рядом с фото
       F.files.push({ id, name:f.name, type:f.type||'', size:f.size });
-      queuePendingImg(id); SYNC.imgPut(id);
-    }catch(e){ console.error(e); toast('Не удалось добавить файл','warn'); }
+      queuePendingImg(id);
+      uploadingIds.add(id); renderFormDocs();
+      const res = await SYNC.imgPut(id);    // ждём настоящий результат, а не «отправили и забыли»
+      uploadingIds.delete(id);
+      if(res && res.ok) okN++; else failReason = (res && res.reason) || 'неизвестная ошибка';
+    }catch(e){ console.error(e); if(id) uploadingIds.delete(id); toast('Не удалось добавить файл','warn'); }
   }
   renderFormDocs();
-  toast('Файл прикреплён','clip');
+  if(failReason) toast(`Файл добавлен, но не загрузился на сервер: ${failReason}`,'warn');
+  else if(okN) toast('Файл загружен на сервер','clip');
 }
 let fileSheetCtx = null;   // {id, name, type} для текущей открытой шторки файла
 async function loadStoredBlob(id){
