@@ -864,6 +864,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 @keyframes spin{to{transform:rotate(360deg)}}
 .file-row .fn span{font-size:11px;color:var(--faint)}
 .file-row .fx{width:var(--h-xs);height:var(--h-xs);border-radius:10px;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .18s var(--spring)}
+.file-row .fx-retry{width:var(--h-xs);height:var(--h-xs);border-radius:10px;background:var(--acc-soft);color:var(--acc);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .18s var(--spring)}
+.file-row .fx-retry:active{transform:scale(.88)}
 .file-row .fx:active{transform:scale(.86)}
 .file-row.tapable{cursor:pointer}
 .file-row.tapable:active{transform:scale(.985)}
@@ -2097,7 +2099,15 @@ async function deleteTaskImages(t){
     SYNC.imgDel(id);
   }
 }
-function blobToB64(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); }); }
+function blobToB64(blob){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(String(r.result).split(',')[1]);
+    // событие ошибки само по себе бесполезно для диагностики — настоящая причина лежит в reader.error
+    r.onerror=()=>rej(r.error || new Error('не удалось прочитать файл'));
+    r.readAsDataURL(blob);
+  });
+}
 function b64toBlob(b64){ const bin=atob(b64); const a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new Blob([a],{type:'image/jpeg'}); }
 function queuePendingImg(id){
   S.pendingImg = S.pendingImg||[];
@@ -2589,7 +2599,11 @@ const SYNC = {
       return {ok:true};
     }catch(e){
       // раньше причина сбоя терялась молча — теперь видна в консоли и запоминается для показа в интерфейсе
-      const reason = (e && (e.message || e.error_description || e.hint)) || String(e);
+      // сетевые ошибки (обрыв связи при отправке) иногда приходят как «сырое» событие
+      // ProgressEvent, а не как объект ошибки с текстом — превращаем это в понятную фразу
+      const isRawEvent = e && typeof e === 'object' && 'isTrusted' in e && !e.message;
+      const reason = isRawEvent ? 'обрыв связи при отправке — повторится автоматически'
+                    : (e && (e.message || e.error_description || e.hint)) || String(e);
       console.error('imgPut failed for', id, e);
       queuePendingImg(id);
       S.pendingImgErr = S.pendingImgErr || {};
@@ -3902,9 +3916,11 @@ function fileRowHTML(f, removable){
   let status = '';
   if(uploading) status = '<span class="fn-uploading"><span class="sp"></span>загружается…</span>';
   else if(stuck) status = `<span class="fn-stuck">${err ? esc(err) : 'не загрузился на сервер'}</span>`;
+  const retryBtn = (removable && stuck) ? `<button type="button" class="fx-retry" data-retryfile="${f.id}" title="Повторить отправку">${ICON.repeat(14)}</button>` : '';
   return `<div class="file-row ${removable?'':'tapable'}" ${removable?'':`data-openfile="${f.id}"`}>
     <span class="fi" style="background:${FILE_COLORS[k]}">${fileExt(f.name) ? esc(fileExt(f.name)) : ICON.file(13)}</span>
     <span class="fn"><b>${esc(f.name)}</b>${status}</span>
+    ${retryBtn}
     ${removable ? `<button type="button" class="fx" data-rmfile="${f.id}">${ICON.x(14)}</button>` : ''}
   </div>`;
 }
@@ -3956,7 +3972,11 @@ async function handleDocs(files){
     let id;
     try{
       id = uid('doc_');
-      await DB.set('img', id, f);          // храним как blob рядом с фото
+      // читаем байты сразу, пока доступ к файлу точно есть — иначе повторное чтение
+      // позже (при отправке на сервер) может провалиться, если Android закроет доступ
+      const buf = await f.arrayBuffer();
+      const stableBlob = new Blob([buf], { type: f.type || 'application/octet-stream' });
+      await DB.set('img', id, stableBlob);
       F.files.push({ id, name:f.name, type:f.type||'', size:f.size });
       queuePendingImg(id);
       uploadingIds.add(id); renderFormDocs();
@@ -6471,6 +6491,15 @@ document.addEventListener('click', e=>{
     F.removedFileIds.push(id);
     F.files = (F.files||[]).filter(f=>f.id!==id);
     renderFormDocs(); return; }
+  if(x = el('[data-retryfile]')){
+    const id = x.dataset.retryfile;
+    uploadingIds.add(id); renderFormDocs();
+    haptic('tap');
+    SYNC.imgPut(id).then(res=>{
+      uploadingIds.delete(id); renderFormDocs();
+      toast(res && res.ok ? 'Файл загружен на сервер' : `Снова не вышло: ${res && res.reason}`, res && res.ok ? 'clip' : 'warn');
+    });
+    return; }
   if(x = el('[data-openfile]')){
     const id = x.dataset.openfile;
     const tk = task(activeTaskId);
