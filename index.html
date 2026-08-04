@@ -766,6 +766,7 @@ select.field{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w
 .mem-scroll{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:14px 8px;margin:-10px -8px}
 .mem-scroll::-webkit-scrollbar{display:none}
 .mem-pick{position:relative;display:flex;align-items:center;justify-content:center;padding:6px;background:var(--card);border-radius:50%;flex-shrink:0;transition:all .24s var(--spring);box-shadow:var(--shadow), inset 0 0 0 1.5px transparent}
+.mem-pick.locked{opacity:.85}
 .mem-pick:active{transform:scale(.93)}
 .mem-pick.sel{box-shadow:var(--shadow), inset 0 0 0 2px var(--mc,var(--acc)), 0 6px 16px color-mix(in srgb,var(--mc,var(--acc)) 22%,transparent)}
 
@@ -3476,9 +3477,11 @@ function openVisSheet(t){
   $('vis-overlay').classList.remove('hidden');
 }
 function renderVisSheet(){
-  $('vis-picker').innerHTML = S.members.map(m=>`
-    <button type="button" class="mem-pick ${qVis.includes(m.id)?'sel':''}" data-qvis="${m.id}" style="--mc:${m.color}" title="${esc(m.name)}">
-      <span class="tick">${ICON.check(12)}</span>${avaHTML(m,'em-ava')}</button>`).join('');
+  $('vis-picker').innerHTML = S.members.map(m=>{
+    const isMe = m.id === S.currentUser;
+    return `<button type="button" class="mem-pick ${qVis.includes(m.id)||isMe?'sel':''} ${isMe?'locked':''}" data-qvis="${m.id}" style="--mc:${m.color}" title="${isMe?'Вам всегда видно своё':esc(m.name)}">
+      <span class="tick">${ICON.check(12)}</span>${avaHTML(m,'em-ava')}</button>`;
+  }).join('');
   hydrateImages($('vis-picker'));
 }
 function saveVisSheet(){
@@ -3840,9 +3843,11 @@ function renderDowPick(){
   box.innerHTML = N.map(([lbl,i])=>`<button type="button" class="${days.includes(i)?'on':''}" data-dow="${i}">${lbl}</button>`).join('');
 }
 function renderVisibility(){
-  $('f-visibility').innerHTML = S.members.map(m=>`
-    <button type="button" class="mem-pick ${F.visibility.includes(m.id)?'sel':''}" data-vis="${m.id}" style="--mc:${m.color}" title="${esc(m.name)}">
-      <span class="tick">${ICON.check(12)}</span>${avaHTML(m,'em-ava')}</button>`).join('');
+  $('f-visibility').innerHTML = S.members.map(m=>{
+    const isMe = m.id === S.currentUser;
+    return `<button type="button" class="mem-pick ${F.visibility.includes(m.id)||isMe?'sel':''} ${isMe?'locked':''}" data-vis="${m.id}" style="--mc:${m.color}" title="${isMe?'Вам всегда видно своё':esc(m.name)}">
+      <span class="tick">${ICON.check(12)}</span>${avaHTML(m,'em-ava')}</button>`;
+  }).join('');
   hydrateImages($('f-visibility'));
 }
 const FILE_COLORS = {pdf:'#E5484D', doc:'#3B82F6', xls:'#10B981', txt:'#8B8D98', img:'#A855F7', zip:'#F59E0B', other:'#5E7186'};
@@ -3860,7 +3865,6 @@ function fileExt(name){
   const e = (name.split('.').pop()||'').toUpperCase();
   return (e && e.length <= 4) ? e : '';     // длинное/пустое расширение — покажем иконку
 }
-function fmtSize(b){ if(!b) return ''; if(b<1024) return b+' Б'; if(b<1048576) return (b/1024).toFixed(0)+' КБ'; return (b/1048576).toFixed(1)+' МБ'; }
 function fileRowHTML(f, removable){
   const k = fileKind(f.name, f.type);
   return `<div class="file-row ${removable?'':'tapable'}" ${removable?'':`data-openfile="${f.id}"`}>
@@ -4031,7 +4035,7 @@ async function saveForm(asDraft){
     for(const id of [...(F.removedFileIds||[]), ...(F.removedVoiceIds||[])]){ try{ await DB.del('img', id); }catch(e){} SYNC.imgDel(id); }
     Object.assign(t, { title, description:desc, deadline:dl, repeat:rp,
       label:F.label, labelColor:F.labelColor, assignedTo:F.type==='tasks'?F.assignee:null,
-      visibleTo:[...F.visibility], imageIds:[...F.imageIds],
+      visibleTo:(F.visibility.includes(S.currentUser)?[...F.visibility]:[...F.visibility,S.currentUser]), imageIds:[...F.imageIds],
       files:[...(F.files||[])], voice:F.voice||null,
       lock: F.type==='notes' && F.lockOn
               ? (F.lockHash || (F.lockKeep ? t.lock : null))
@@ -4052,7 +4056,7 @@ function finalizeCreate(assignee, asDraft){
     id:Date.now(), type:F.type, title:p.title, description:p.desc, deadline:p.dl, repeat:p.rp,
     label:F.label, labelColor:F.labelColor,
     assignedTo:F.type==='tasks'?(assignee||null):null, status:'pending', completed:false,
-    visibleTo:[...F.visibility],
+    visibleTo:(F.visibility.includes(S.currentUser)?[...F.visibility]:[...F.visibility,S.currentUser]),
     createdBy:S.currentUser, updatedBy:S.currentUser,
     lock: (F.type==='notes' && F.lockOn && F.lockHash) ? F.lockHash : null,
     createdAt: Date.now(), seenBy: [],
@@ -6317,10 +6321,11 @@ document.addEventListener('click', e=>{
   if(el('#rep-save')){ saveRepeatSheet(); return; }
   if(x = el('[data-qvis]')){
     const id = x.dataset.qvis;
+    if(id === S.currentUser){ toast('Себе всегда видно','warn'); haptic('warn'); return; }
     const set = new Set(qVis);
     set.has(id) ? set.delete(id) : set.add(id);
+    set.add(S.currentUser);   // себя нельзя исключить — иначе потеряете доступ к своей же записи
     qVis = [...set];
-    if(!qVis.length) qVis = [S.currentUser];   // хотя бы сам себе дело должно быть видно
     renderVisSheet(); haptic('tap'); return;
   }
   if(el('#vis-save')){ saveVisSheet(); return; }
@@ -6354,8 +6359,9 @@ document.addEventListener('click', e=>{
   if(x = el('[data-dot]')){ F.newLabelColor = x.dataset.dot; renderFormSelectors(); return; }
   if(x = el('[data-asg]')){ F.assignee = x.dataset.asg || null; renderFormSelectors(); return; }
   if(x = el('[data-vis]')){ const id = x.dataset.vis;
+    if(id === S.currentUser){ toast('Себе всегда видно','warn'); haptic('warn'); return; }
     F.visibility.includes(id) ? F.visibility=F.visibility.filter(v=>v!==id) : F.visibility.push(id);
-    if(!F.visibility.length) F.visibility=[S.currentUser];
+    if(!F.visibility.includes(S.currentUser)) F.visibility.push(S.currentUser);
     renderVisibility(); return; }
   if(x = el('[data-rep]')){
     const k = x.dataset.rep;

@@ -1,5 +1,5 @@
 /* FamilyHub — service worker: оффлайн-оболочка */
-const CACHE = 'family-hub-v89';
+const CACHE = 'family-hub-v90';
 const SHARE_CACHE = 'fh-share';
 const SHELL = [
   './',
