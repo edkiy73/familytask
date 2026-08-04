@@ -858,6 +858,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .file-row .fi{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:800;color:#fff;letter-spacing:0}
 .file-row .fn{flex:1;min-width:0}
 .file-row .fn b{display:block;font-size:var(--fs-sm);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fn-stuck{display:block;font-size:var(--fs-2xs);font-weight:700;color:var(--rose)}
 .file-row .fn span{font-size:11px;color:var(--faint)}
 .file-row .fx{width:var(--h-xs);height:var(--h-xs);border-radius:10px;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .18s var(--spring)}
 .file-row .fx:active{transform:scale(.86)}
@@ -2095,7 +2096,19 @@ async function deleteTaskImages(t){
 }
 function blobToB64(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); }); }
 function b64toBlob(b64){ const bin=atob(b64); const a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new Blob([a],{type:'image/jpeg'}); }
-function queuePendingImg(id){ S.pendingImg = S.pendingImg||[]; if(!S.pendingImg.includes(id)) S.pendingImg.push(id); persistLocal(); }
+function queuePendingImg(id){
+  S.pendingImg = S.pendingImg||[];
+  if(!S.pendingImg.includes(id)) S.pendingImg.push(id);
+  S.pendingImgAt = S.pendingImgAt||{};
+  if(!S.pendingImgAt[id]) S.pendingImgAt[id] = Date.now();   // отметка, когда впервые встал в очередь
+  persistLocal();
+}
+function warnIfStuckUpload(id, name){
+  const at = (S.pendingImgAt||{})[id];
+  if(at && Date.now()-at > 3*60e3){   // висит в очереди больше 3 минут — сервер файл не принимает
+    toast(`«${name||'Файл'}» не смог загрузиться на сервер — другие его не увидят`,'warn');
+  }
+}
 const REPEAT_OPTS = [
   {k:'',        label:'Без повтора'},
   {k:'daily',   label:'Ежедн.'},
@@ -2567,6 +2580,7 @@ const SYNC = {
       const b64 = await blobToB64(blob);
       await this.rpc('hub_img_put', {p_fid:S.familyCode, p_id:id, p_data: await encText(b64)});
       S.pendingImg = (S.pendingImg||[]).filter(x=>x!==id);
+      if(S.pendingImgAt) delete S.pendingImgAt[id];
       persistLocal();
     }catch(e){ queuePendingImg(id); }
   },
@@ -3867,9 +3881,13 @@ function fileExt(name){
 }
 function fileRowHTML(f, removable){
   const k = fileKind(f.name, f.type);
+  // «застряло» видно только тому, у кого файл реально не долетел до сервера —
+  // pendingImgAt хранится локально, у других устройств этой отметки нет
+  const stuckAt = (S.pendingImgAt||{})[f.id];
+  const stuck = stuckAt && Date.now()-stuckAt > 3*60e3;
   return `<div class="file-row ${removable?'':'tapable'}" ${removable?'':`data-openfile="${f.id}"`}>
     <span class="fi" style="background:${FILE_COLORS[k]}">${fileExt(f.name) ? esc(fileExt(f.name)) : ICON.file(13)}</span>
-    <span class="fn"><b>${esc(f.name)}</b></span>
+    <span class="fn"><b>${esc(f.name)}</b>${stuck?'<span class="fn-stuck">не загрузился на сервер</span>':''}</span>
     ${removable ? `<button type="button" class="fx" data-rmfile="${f.id}">${ICON.x(14)}</button>` : ''}
   </div>`;
 }
@@ -3915,7 +3933,7 @@ async function handleDocs(files){
   if(freeF <= 0){ toast('Уже 5 файлов — больше нельзя','warn'); return; }
   if(arr.length > freeF){ toast(`Добавлю только ${freeF} из ${arr.length} — лимит 5`,'warn'); arr = arr.slice(0, freeF); }
   for(const f of arr){
-    if(f.size > 8*1024*1024){ toast(`«${f.name}» больше 8 МБ`,'warn'); continue; }
+    if(f.size > 4*1024*1024){ toast(`«${f.name}» больше 4 МБ — файлы (в отличие от фото) не сжимаются и могут не дойти до сервера`,'warn'); continue; }
     try{
       const id = uid('doc_');
       await DB.set('img', id, f);          // храним как blob рядом с фото
@@ -3949,7 +3967,10 @@ async function fileSheetAction(kind){
   try{
     const blob = await loadStoredBlob(ctx.id);
     if(!blob){
-      toast((S.pendingImg||[]).includes(ctx.id) ? 'Файл ещё загружается, попробуйте позже' : 'Файл недоступен','warn');
+      const stuckHere = (S.pendingImg||[]).includes(ctx.id);   // это моё собственное вложение, ещё не отправленное
+      toast(stuckHere
+        ? 'Файл ещё не загрузился на сервер — попробуйте позже'
+        : 'Файл недоступен — возможно, отправитель ещё не в сети или файл не смог загрузиться','warn');
       return;
     }
     const typed = ctx.type ? new Blob([blob], {type:ctx.type}) : blob;
