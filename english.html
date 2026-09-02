@@ -2921,6 +2921,12 @@ function dismissSheet(){
   closeSheet();
 }
 scrim.onclick=dismissSheet;
+function openSheetHTML(html,wire){
+  sheet.innerHTML='<div class="grab"></div>'+html;
+  if(!sheetOpen)pushHist({sheet:true});
+  sheetOpen=true;sheet.classList.add("on");scrim.classList.add("on");
+  if(wire)wire();
+}
 function openWord(word){
   const d=dictLook(word);
   const exs=findExamples(word,2);
@@ -3089,7 +3095,7 @@ function viewLesson(id){
     '<div class="label">Шаг 2 \u00B7 Разбор</div>'+
     '<p class="small" style="margin-bottom:12px">Медленно и с объяснениями: понять, как собирается конструкция.</p>'+ph+
     (pat?'<div class="label">Шаг 3 \u00B7 Дрилл на скорость</div>'+
-      '<p class="small" style="margin-bottom:12px">Одна конструкция, восемь подстановок, пять секунд на фразу. Здесь не думают — здесь доводят до автомата.</p>'+
+      '<p class="small" style="margin-bottom:12px">Одна конструкция, восемь подстановок. Сначала пара секунд на чтение, потом пять на саму фразу. Здесь не думают — здесь доводят до автомата.</p>'+
       '<button class="btn '+(s3?"sec":"")+'" id="goDrill">'+ICON.repeat+' Дрилл \u00B7 '+pat.items.length+' фраз'+(s3?" \u00B7 пройден":"")+'</button>'+
       '<div class="label">Шаг 4 \u00B7 На слух</div>'+
       '<p class="small" style="margin-bottom:12px">Шесть фраз без текста: слушаешь и выбираешь смысл. В разговоре чаще проваливаются не на своей речи, а на чужой.</p>'+
@@ -3146,7 +3152,7 @@ function viewPat(){
   const it=pat.items[pat.pos],L=byId(pat.id);
   setHead(pat.mixed?"Смешанный дрилл":L.t,
     pat.mode==="drill"?"дрилл":(pat.mode==="listen"?"на слух":"голос"));
-  const task=pat.mode==="drill"?"Скажи вслух за пять секунд"
+  const task=pat.mode==="drill"?"Прочитай, потом скажи за пять секунд"
             :(pat.mode==="listen"?"Слушай и выбери перевод":"Скажи вслух в микрофон");
   let head,body="";
 
@@ -3168,14 +3174,16 @@ function viewPat(){
       (pat.phase==="show"&&pat.lastFast!=null
         ? '<div class="verdict '+(pat.lastFast?"ok":"typo")+'" style="margin:0 0 16px"><div class="vh">'+
           (pat.lastFast?ICON.check+"Успел":ICON.x+"Медленно")+'</div>'+
-          (pat.lastFast?"Конструкция уже на автомате.":"Пока собираешь по кирпичикам. Повтори эту фразу вслух ещё три раза.")+'</div>'
+          (pat.lastFast?"Конструкция уже на автомате.":"Пока собираешь по кирпичикам. Время на чтение не считается — пять секунд идут только на саму фразу. Повтори её вслух ещё три раза.")+'</div>'
         : "");
     body=(pat.phase==="ask")
-      ? '<div class="tbar"><i id="tb"></i></div><button class="btn" id="said">Сказал</button>'+
+      ? '<div class="tbar"><i id="tb"></i></div><div class="small" id="tnote" style="margin:-10px 0 16px">Читаешь…</div>'+
+        '<button class="btn" id="said">Сказал</button>'+
         '<div style="height:10px"></div><button class="btn ghost" id="skip">Не получилось</button>'
       : '<div class="target">'+esc(it[1])+' <button class="spk" style="position:static;margin-left:6px" id="spk">'+ICON.sound+'</button></div>'+
         '<div style="height:16px"></div><button class="btn" id="next">Сказал так же</button>'+
-        '<div style="height:10px"></div><button class="btn sec" id="wrong">Сказал не так</button>';
+        '<div style="height:10px"></div><button class="btn sec" id="wrong">Сказал не так</button>'+
+        (pat.lastFast===false?'<div style="height:10px"></div><button class="btn ghost" id="wasfast">Успел, просто не нажал</button>':"");
   }else{
     head='<div class="prompt">'+esc(it[0])+'</div>'+
       (pat.phase==="show"
@@ -3208,11 +3216,19 @@ function viewPat(){
     });
   }
   if(pat.mode==="drill"&&pat.phase==="ask"){
+    // время на чтение зависит от длины фразы; пять секунд идут только на речь
+    const words=it[0].split(/\s+/).filter(Boolean).length;
+    const readMs=Math.min(3200,Math.max(1200,600+320*words)),sayMs=5000;
     pat.t0=Date.now();
-    const tb=document.getElementById("tb");
-    requestAnimationFrame(()=>{tb.style.transition="width 5s linear";tb.style.width="0%";});
-    pat.timer=setTimeout(()=>{if(pat.phase==="ask")patReveal(false);},5600);
-    document.getElementById("said").onclick=()=>patReveal((Date.now()-pat.t0)<=5200);
+    const tb=document.getElementById("tb"),note=document.getElementById("tnote");
+    tb.style.width="100%";
+    pat.startTimer=setTimeout(()=>{
+      if(pat.phase!=="ask")return;
+      if(note)note.textContent="Говори";
+      tb.style.transition="width "+(sayMs/1000)+"s linear";tb.style.width="0%";
+      pat.timer=setTimeout(()=>{if(pat.phase==="ask")patReveal(false);},sayMs+600);
+    },readMs);
+    document.getElementById("said").onclick=()=>patReveal((Date.now()-pat.t0)<=readMs+sayMs+600);
     document.getElementById("skip").onclick=()=>patReveal(false);
   }
   if(pat.mode==="voice"&&pat.phase==="ask"){
@@ -3228,6 +3244,25 @@ function viewPat(){
       pat.pos++;pat.phase="ask";pat.lastFast=null;pat.opts=null;render();
     };
     const mk=document.getElementById("mark");if(mk)mk.onclick=()=>{pat.miss--;pat.hit++;pat.ok=true;render();};
+    const wf=document.getElementById("wasfast");
+    if(wf)wf.onclick=()=>{
+      openSheetHTML(
+        '<div class="word" style="font-size:20px">Точно успел?</div>'+
+        '<p class="small" style="margin-top:10px">Эта кнопка нужна только для одного случая: ты договорил вовремя, но не успел ткнуть в экран.</p>'+
+        '<p class="small">Если внутри было «ну почти» — не засчитывай. Скорость в прогрессе показывает, готов ли ты говорить вживую, и обманывать тут можно только себя. Лишний повтор фразы вслух даст больше, чем красивая цифра.</p>'+
+        '<div style="height:16px"></div><button class="btn sec" id="cfYes">Да, успел вовремя</button>'+
+        '<div style="height:8px"></div><button class="btn" id="cfNo">Лучше повторю ещё раз</button>',
+        ()=>{
+          document.getElementById("cfYes").onclick=()=>{
+            pat.slow--;pat.fast++;pat.lastFast=true;dismissSheet();render();
+          };
+          document.getElementById("cfNo").onclick=()=>{
+            pat.items.push(it);           // фраза вернётся в конце подхода
+            pat.pos++;pat.phase="ask";pat.lastFast=null;pat.opts=null;
+            dismissSheet();render();
+          };
+        });
+    };
     document.getElementById("next").onclick=()=>{
       stopRec();pat.pos++;pat.phase="ask";pat.heard=null;pat.lastFast=null;pat.opts=null;render();
     };
@@ -3235,7 +3270,7 @@ function viewPat(){
   }
 }
 function patReveal(fast){
-  clearTimeout(pat.timer);
+  clearTimeout(pat.timer);clearTimeout(pat.startTimer);
   pat.lastFast=fast;if(fast)pat.fast++;else pat.slow++;
   pat.phase="show";render();
 }
