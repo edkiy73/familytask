@@ -169,6 +169,11 @@ tr:last-child td{border-bottom:0}
 .qprog{height:3px;background:var(--elev);border-radius:99px;overflow:hidden;margin-bottom:20px}
 .qprog i{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .25s ease}
 .qtask{font-size:13px;color:var(--muted);margin-bottom:10px}
+.prompt{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.3;margin:4px 0 22px}
+.tbar{height:6px;background:var(--elev);border-radius:99px;overflow:hidden;margin-bottom:18px}
+.tbar i{display:block;height:100%;width:100%;background:var(--accent);border-radius:99px}
+.target{font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1.35;display:flex;align-items:center;flex-wrap:wrap}
+.btn.mic.on{background:var(--no);border-color:var(--no);color:#fff}
 .qtext{font-size:21px;line-height:1.4;font-weight:500;letter-spacing:-.02em;margin-bottom:6px}
 .qtext .gap{display:inline-block;min-width:52px;border-bottom:2px solid var(--accent);margin:0 3px}
 .qru{font-size:15px;color:var(--muted);font-weight:400;margin:8px 0 24px;letter-spacing:-.01em}
@@ -2134,6 +2139,161 @@ Object.keys(FIX).forEach(k=>{
 
 
 
+
+/* ============ подстановочные дриллы: одна конструкция, меняется одно слово ============ */
+const PATTERNS={
+"mech":{p:"do / does / did — помощник",items:[
+["Я здесь не работаю.","I don't work here."],["Он здесь не работает.","He doesn't work here."],
+["Ты здесь работаешь?","Do you work here?"],["Он здесь работает?","Does he work here?"],
+["Я вчера не работал.","I didn't work yesterday."],["Ты вчера работал?","Did you work yesterday?"],
+["Она этого не знает.","She doesn't know that."],["Они об этом знают?","Do they know about it?"]]},
+"pres-simple":{p:"привычки: I / he + глагол",items:[
+["Я работаю из дома.","I work from home."],["Он работает из дома.","He works from home."],
+["Я не работаю по воскресеньям.","I don't work on Sundays."],["Она не пьёт кофе.","She doesn't drink coffee."],
+["Мы живём на Бали.","We live in Bali."],["Он живёт в Убуде.","He lives in Ubud."],
+["Ты говоришь по-английски?","Do you speak English?"],["Она говорит по-русски?","Does she speak Russian?"]]},
+"pres-cont":{p:"am / is / are + -ing",items:[
+["Я сейчас работаю.","I'm working right now."],["Он сейчас спит.","He's sleeping right now."],
+["Мы обедаем.","We're having lunch."],["Я сегодня не работаю.","I'm not working today."],
+["Что ты делаешь?","What are you doing?"],["Куда ты идёшь?","Where are you going?"],
+["Она ищет работу.","She's looking for a job."],["Я учу английский.","I'm learning English."]]},
+"past-simple":{p:"прошлое: did / вторая форма",items:[
+["Вчера я работал.","I worked yesterday."],["Вчера я туда ходил.","I went there yesterday."],
+["Я вчера не работал.","I didn't work yesterday."],["Я туда не ходил.","I didn't go there."],
+["Ты ему звонил?","Did you call him?"],["Что ты сказал?","What did you say?"],
+["Я купил это вчера.","I bought it yesterday."],["Она мне не сказала.","She didn't tell me."]]},
+"pres-perf":{p:"have + третья форма",items:[
+["Я был в Японии.","I've been to Japan."],["Я никогда не был в США.","I've never been to the US."],
+["Ты когда-нибудь пробовал дуриан?","Have you ever tried durian?"],["Я потерял ключи.","I've lost my keys."],
+["Я живу здесь два года.","I've lived here for two years."],["Я работаю здесь с 2015.","I've worked here since 2015."],
+["Ты уже закончил?","Have you finished yet?"],["Я только что поел.","I've just eaten."]]},
+"future":{p:"will / going to",items:[
+["Я тебе позвоню.","I'll call you."],["Я не опоздаю.","I won't be late."],
+["Я собираюсь сменить работу.","I'm going to change my job."],["Мы собираемся переехать.","We're going to move."],
+["Сейчас пойдёт дождь.","It's going to rain."],["Ты будешь дома?","Will you be at home?"],
+["Я собирался позвонить, но забыл.","I was going to call, but I forgot."],["Я встречаюсь с ним в семь.","I'm meeting him at seven."]]},
+"questions":{p:"вопросительное слово + помощник",items:[
+["Где ты живёшь?","Where do you live?"],["Где он работает?","Where does he work?"],
+["Что ты вчера делал?","What did you do yesterday?"],["Почему ты мне не сказал?","Why didn't you tell me?"],
+["Сколько это стоит?","How much is it?"],["Как долго ты здесь?","How long have you been here?"],
+["Что ты об этом думаешь?","What do you think about it?"],["Как часто ты туда ходишь?","How often do you go there?"]]},
+"haveto":{p:"have to / need to",items:[
+["Мне надо работать.","I have to work."],["Ему надо работать.","He has to work."],
+["Мне не обязательно идти.","I don't have to go."],["Тебе надо завтра работать?","Do you have to work tomorrow?"],
+["Мне пришлось ждать.","I had to wait."],["Мне нужно поспать.","I need to get some sleep."],
+["Мне нужно это проверить.","I need to check it."],["Мне придётся им позвонить.","I'll have to call them."]]},
+"cancould":{p:"can / could",items:[
+["Я не слышу тебя.","I can't hear you."],["Ты можешь мне помочь?","Can you help me?"],
+["Не мог бы ты мне помочь?","Could you help me?"],["Можно тебя спросить?","Could I ask you something?"],
+["Мы могли бы встретиться завтра.","We could meet tomorrow."],["Мы могли бы попробовать другое место.","We could try another place."],
+["Я не смог прийти.","I couldn't come."],["Я смогу помочь завтра.","I'll be able to help tomorrow."]]},
+"should":{p:"should",items:[
+["Тебе стоит попробовать.","You should try it."],["Тебе не стоит столько работать.","You shouldn't work so much."],
+["Мне ему позвонить?","Should I call him?"],["Нам стоит забронировать столик?","Should we book a table?"],
+["Мне бы стоило больше спать.","I should sleep more."],["Тебе, наверное, стоит спросить её.","You should probably ask her."],
+["На твоём месте я бы подождал.","If I were you, I'd wait."],["Лучше тебе не опаздывать.","You'd better not be late."]]},
+"would":{p:"would: бы и вежливость",items:[
+["Я бы хотел кофе.","I'd like a coffee."],["Я бы хотел забронировать столик.","I'd like to book a table."],
+["Я бы лучше остался дома.","I'd rather stay home."],["Я бы лучше не говорил об этом.","I'd rather not talk about it."],
+["Я бы сказал, минут двадцать.","I'd say about twenty minutes."],["Я бы купил, но дорого.","I'd buy it, but it's expensive."],
+["Не хочешь присоединиться?","Would you like to join us?"],["Не подождёшь минутку?","Would you mind waiting a minute?"]]},
+"supposed":{p:"supposed to / used to",items:[
+["Я по идее должен быть там в девять.","I'm supposed to be there at nine."],["Здесь не положено парковаться.","You're not supposed to park here."],
+["Мне подождать здесь?","Am I supposed to wait here?"],["Я должен был позвонить ей вчера.","I was supposed to call her yesterday."],
+["Раньше я много играл в CS.","I used to play CS a lot."],["Раньше я не любил кофе.","I didn't use to like coffee."],
+["Я привык работать по ночам.","I'm used to working at night."],["Я привыкаю к жаре.","I'm getting used to the heat."]]},
+"perfmodal":{p:"should have / could have",items:[
+["Мне надо было сказать раньше.","I should have told you earlier."],["Зря я это сказал.","I shouldn't have said that."],
+["Ты мог бы мне позвонить.","You could have called me."],["Я бы сделал то же самое.","I would have done the same."],
+["Он, наверное, забыл.","He must have forgotten."],["Возможно, она опоздала на автобус.","She might have missed the bus."],
+["Тебе не нужно было ничего приносить.","You didn't have to bring anything."],["Могло быть и хуже.","That could have been worse."]]},
+"cond":{p:"if: реальное и нереальное",items:[
+["Если пойдёт дождь, я останусь дома.","If it rains, I'll stay home."],["Если у меня будет время, я помогу.","If I have time, I'll help."],
+["Если бы у меня было больше времени, я бы учил испанский.","If I had more time, I'd learn Spanish."],["На твоём месте я бы поговорил с ним.","If I were you, I'd talk to him."],
+["Если бы я знал, я бы пришёл.","If I had known, I would have come."],["Я не приду, если ты не позовёшь.","I won't come unless you invite me."],
+["Возьми наличные на случай, если карты не принимают.","Take cash in case they don't accept cards."],["Можешь остаться, если будешь вести себя тихо.","You can stay as long as you're quiet."]]},
+"get":{p:"get: становиться, добираться, доставать",items:[
+["Становится поздно.","It's getting late."],["Я устаю.","I'm getting tired."],
+["Позвони, когда доберёшься домой.","Call me when you get home."],["Как добраться до пляжа?","How do I get to the beach?"],
+["Где ты это взял?","Where did you get that?"],["Я куплю воды.","I'll get some water."],
+["Мне надо подстричься.","I need to get my hair cut."],["Я не понял.","I don't get it."]]},
+"caus":{p:"want / make / let + кто-то",items:[
+["Мне нужно, чтобы ты это проверил.","I need you to check this."],["Я хочу, чтобы он мне позвонил.","I want him to call me."],
+["Она заставила меня ждать.","She made me wait."],["Дай я помогу.","Let me help you."],
+["Дай знать.","Let me know."],["Она попросила меня подождать.","She asked me to wait."],
+["Я добился, чтобы он подписал.","I got him to sign it."],["Он всё время меня перебивает.","He keeps interrupting me."]]},
+"survival":{p:"фразы-спасатели",items:[
+["Извини, я не расслышал.","Sorry, I didn't catch that."],["Можешь повторить?","Could you say that again?"],
+["Можешь говорить чуть медленнее?","Could you speak a little slower?"],["Что это значит?","What does that mean?"],
+["Как это будет по-английски?","How do you say it in English?"],["Дай подумать.","Let me think."],
+["Мой английский пока так себе.","My English isn't great yet."],["А ты?","How about you?"]]},
+"linkers":{p:"связки: because, so, though",items:[
+["Я остался дома, потому что устал.","I stayed home because I was tired."],["Я устал, поэтому остался дома.","I was tired, so I stayed home."],
+["Мне нравится здесь, но движение сумасшедшее.","I like it here, but the traffic is crazy."],["Дорого, правда.","It's expensive, though."],
+["Вообще-то я никогда это не пробовал.","Actually, I've never tried it."],["Кстати, ты ему звонил?","By the way, did you call him?"],
+["В общем, мне пора.","Anyway, I have to go."],["Я тоже работаю с клиентами.","I also work with clients."]]},
+"relative":{p:"who / that / where",items:[
+["Это парень, который мне помог.","That's the guy who helped me."],["Это место, где мы познакомились.","That's the place where we met."],
+["Книга, которую я прочитал, отличная.","The book I read is great."],["Это инструмент, которым закручивают винты.","It's a tool you use for screws."],
+["Это место, где оставляют байк.","It's a place where you leave your bike."],["Это когда не можешь вспомнить слово.","It's when you can't remember a word."],
+["Мне нужна та, что с синей обложкой.","I need the one with the blue cover."],["Парень, который звонил, ждёт.","The guy who called is waiting."]]},
+"story":{p:"фон и событие в прошлом",items:[
+["Я работал, когда он позвонил.","I was working when he called."],["Мы ужинали, когда выключили свет.","We were having dinner when the power went out."],
+["Пока я ждал, я выпил кофе.","While I was waiting, I had a coffee."],["Короче, вчера случилась странная штука.","So yesterday something weird happened."],
+["Потом мы пошли обедать.","Then we went out for lunch."],["Оказалось, магазин был закрыт.","It turned out the shop was closed."],
+["В итоге мы никуда не пошли.","In the end we didn't go anywhere."],["И что потом?","And then what?"]]},
+"compare":{p:"сравнение",items:[
+["Это дешевле.","It's cheaper."],["Здесь дешевле, чем в Убуде.","It's cheaper than in Ubud."],
+["Это дороже, чем я думал.","It's more expensive than I thought."],["Это лучший день поездки.","It's the best day of the trip."],
+["Это не так дорого, как я думал.","It's not as expensive as I thought."],["Здесь намного тише.","It's much quieter here."],
+["Это слишком дорого.","It's too expensive."],["Комната недостаточно большая.","The room isn't big enough."]]},
+"hedge":{p:"смягчить и усилить",items:[
+["Это как бы странно.","It's kind of weird."],["Я немного устал.","I'm a bit tired."],
+["Довольно неплохо.","It's pretty good."],["Не особо.","Not really."],
+["Если честно, мне не понравилось.","To be honest, I didn't like it."],["Наверное, да.","I guess so."],
+["Полностью согласен.","Totally agree."],["Это сложно объяснить.","It's kind of hard to explain."]]},
+"articles":{p:"a / the",items:[
+["Я дизайнер.","I'm a designer."],["У меня есть вопрос.","I have a question."],
+["Я купил ноутбук.","I bought a laptop."],["Ноутбук быстрый.","The laptop is fast."],
+["Открой дверь, пожалуйста.","Open the door, please."],["Я живу в маленькой квартире.","I live in a small apartment."],
+["Он на работе.","He's at work."],["Это был лучший день.","It was the best day."]]},
+"there":{p:"there is / there are",items:[
+["Здесь рядом есть кафе.","There's a cafe nearby."],["Есть два варианта.","There are two options."],
+["Молока не осталось.","There isn't any milk left."],["Здесь есть туалет?","Is there a toilet here?"],
+["Билеты ещё есть?","Are there any tickets left?"],["Вчера было много народу.","There were a lot of people yesterday."],
+["Сегодня жарко.","It's hot today."],["Это недалеко.","It's not far."]]},
+"prep-time":{p:"at / on / in",items:[
+["Увидимся в понедельник.","See you on Monday."],["Встреча в три.","The meeting is at three."],
+["Увидимся утром.","See you in the morning."],["Буду через десять минут.","I'll be there in ten minutes."],
+["Он на работе.","He's at work."],["Ключи на столе.","The keys are on the table."],
+["Ключи в сумке.","The keys are in my bag."],["Увидимся на следующей неделе.","See you next week."]]},
+"prep-verb":{p:"хвосты глаголов",items:[
+["Я слушаю музыку.","I'm listening to music."],["Подожди меня.","Wait for me."],
+["Это зависит от цены.","It depends on the price."],["Объясни мне это.","Explain it to me."],
+["Я ищу телефон.","I'm looking for my phone."],["Не переживай об этом.","Don't worry about it."],
+["Мне это интересно.","I'm interested in it."],["Я устал ждать.","I'm tired of waiting."]]},
+"put":{p:"put / take: бытовые действия",items:[
+["Положи это на стол.","Put it on the table."],["Убери это.","Put it away."],
+["Верни это на место.","Put it back."],["Надень куртку.","Put on a jacket."],
+["Сними обувь.","Take off your shoes."],["Подними это.","Pick it up."],
+["Накрой это полотенцем.","Cover it with a towel."],["Уложи детей спать.","Put the kids to bed."]]},
+"colloc":{p:"have / take / make / do",items:[
+["Я принимаю душ.","I take a shower."],["Я завтракаю в восемь.","I have breakfast at eight."],
+["Я варю кофе.","I make coffee."],["Мне надо помыть посуду.","I need to do the dishes."],
+["Давай сделаем перерыв.","Let's take a break."],["Сфотографируешь нас?","Can you take a photo of us?"],
+["Мне надо принять решение.","I have to make a decision."],["Мы отлично провели время.","We had a great time."]]},
+"contr":{p:"сокращения в речи",items:[
+["Я готов.","I'm ready."],["Мы опаздываем.","We're late."],
+["Я тебе позвоню.","I'll call you."],["Я это видел.","I've seen it."],
+["Он закончил.","He's finished."],["Мне пора.","I've got to go."],
+["Я должен был догадаться.","I should've known."],["Я сейчас проверю.","I'm going to check."]]},
+"about-me":{p:"рассказ о себе",items:[
+["Я из России, но живу на Бали.","I'm from Russia, but I live in Bali."],["Я работаю в IT.","I work in IT."],
+["У меня своя небольшая студия.","I have my own small studio."],["Я здесь пару лет.","I've been here for a couple of years."],
+["Мы переехали из-за погоды.","We moved here because of the weather."],["Я здесь с семьёй.","I'm here with my family."],
+["Я собираюсь запустить свой продукт.","I'm going to start my own product."],["Ничего особенного.","Nothing special."]]}
+};
+
 /* ============ теги и план по дням ============ */
 const TAGS={
 abc:["основы"], mech:["основы","грамматика"],
@@ -2401,7 +2561,7 @@ async function loadState(){
   if(raw===null){ try{raw=localStorage.getItem(KEY);}catch(e){} }
   if(raw===null&&mem)raw=mem;
   let s=null; try{s=raw?JSON.parse(raw):null;}catch(e){}
-  return Object.assign({srs:{},day:null,streak:0,total:0,right:0,theme:null},s||{});
+  return Object.assign({srs:{},pat:{},voc:{},speed:{},day:null,streak:0,total:0,right:0,theme:null},s||{});
 }
 async function saveState(){
   const raw=JSON.stringify(S); mem=raw;
@@ -2411,6 +2571,15 @@ async function saveState(){
 
 /* ================= утилиты ================= */
 const INTERVALS=[0,1,3,7,16,35];
+const PINT=[0,2,6,16,35];
+function patDue(){const t=dayNum(today());return Object.keys(PATTERNS).filter(id=>{const st=S.pat[id];return st&&st.due<=t;});}
+function vocDue(){const t=dayNum(today());return Object.keys(PATTERNS).filter(id=>{const st=S.voc[id];return st&&st.due<=t;});}
+function gradePat(store,id,ok){
+  const m=S[store]||(S[store]={}),st=m[id]||{box:0,due:0};
+  st.box=ok?Math.min(4,st.box+1):0;
+  st.due=dayNum(today())+PINT[st.box];
+  m[id]=st;markDay();saveState();
+}
 const app=document.getElementById("app"), navEl=document.getElementById("nav");
 const sheet=document.getElementById("sheet"), scrim=document.getElementById("scrim");
 function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -2432,9 +2601,40 @@ function grade(l,i,ok){
 function norm(s){return String(s).toLowerCase().replace(/[\u2019\u02BC]/g,"'").replace(/[.,!?;:"()\u2014\u2013-]/g," ").replace(/\s+/g," ").trim();}
 function expand(s){return (" "+s+" ").replace(/n't\b/g," not").replace(/'ll\b/g," will").replace(/'re\b/g," are").replace(/'ve\b/g," have").replace(/'d\b/g," would").replace(/'m\b/g," am").replace(/\bcannot\b/g,"can not").replace(/\s+/g," ").trim();}
 function bare(s){return String(s).replace(/'/g,"");}
+const TIME1={yesterday:1,today:1,tomorrow:1,tonight:1,now:1,then:1,later:1,soon:1,always:1,usually:1,often:1,sometimes:1};
+const TIME2A={last:1,next:1,this:1,every:1},TIME2B={week:1,year:1,month:1,weekend:1,morning:1,evening:1,night:1,day:1,summer:1,winter:1,monday:1,friday:1,sunday:1};
+/* убираем обстоятельство времени с начала и конца — его можно ставить и туда, и туда */
+function stripTime(ws){
+  let a=ws.slice(),ch=true;
+  while(ch){
+    ch=false;
+    if(a.length>1&&TIME1[a[0]]){a.shift();ch=true;}
+    if(a.length>1&&TIME1[a[a.length-1]]){a.pop();ch=true;}
+    if(a.length>2&&TIME2A[a[0]]&&TIME2B[a[1]]){a.splice(0,2);ch=true;}
+    if(a.length>2&&TIME2A[a[a.length-2]]&&TIME2B[a[a.length-1]]){a.splice(-2,2);ch=true;}
+    if(a.length>2&&a[0]==="right"&&a[1]==="now"){a.splice(0,2);ch=true;}
+    if(a.length>2&&a[a.length-2]==="right"&&a[a.length-1]==="now"){a.splice(-2,2);ch=true;}
+  }
+  return a;
+}
+function splitCore(t){
+  const ws=bare(expand(norm(t))).split(" ").filter(Boolean);
+  const core=stripTime(ws),cnt={};
+  ws.forEach(w=>cnt[w]=(cnt[w]||0)+1);
+  core.forEach(w=>cnt[w]--);
+  const moved=[];
+  Object.keys(cnt).forEach(w=>{for(let i=0;i<cnt[w];i++)moved.push(w);});
+  return {c:core.join(" "),t:moved.sort().join(" ")};
+}
 function check(input,list){
-  const a=norm(input),ae=expand(a),ab=bare(a);
-  return list.some(x=>{const b=norm(x);return a===b||ab===bare(b)||ae===expand(b);});
+  const a=norm(input),ae=expand(a),ab=bare(a),A=splitCore(input);
+  return list.some(x=>{
+    const b=norm(x);
+    if(a===b||ab===bare(b)||ae===expand(b))return true;
+    const B=splitCore(x);
+    // порядок обстоятельства времени свободный, но само оно должно быть на месте
+    return A.c.split(" ").length>2&&A.c===B.c&&A.t===B.t;
+  });
 }
 function lev(a,b){
   if(a===b)return 0;
@@ -2581,14 +2781,41 @@ function addSpeakers(root){
 function decorate(){ttsify(app);addSpeakers(app);}
 let sheetOpen=false;
 let EXPOOL=null;
+/* блок теории вида "A · B · C" с переводом "A' · B' · C'" режем на отдельные пары */
+function splitPair(en,ru,out){
+  en=String(en).replace(/\s+/g," ").trim();
+  ru=String(ru).replace(/\s+/g," ").trim();
+  if(!en||!ru)return;
+  const cut=(t,sep)=>t.split(sep).map(x=>x.trim()).filter(Boolean);
+  let ep=cut(en,/\s*[·•]\s*/),rp=cut(ru,/\s*[·•]\s*/);
+  if(ep.length!==rp.length){ep=[en];rp=[ru];}
+  for(let i=0;i<ep.length;i++){
+    let e=cut(ep[i],/(?<=[.!?])\s+(?=[A-Z"'\u2014])/),r=cut(rp[i],/(?<=[.!?])\s+(?=[А-ЯЁA-Z])/);
+    if(e.length!==r.length){e=[ep[i]];r=[rp[i]];}
+    for(let k=0;k<e.length;k++){
+      const ee=e[k],rr=r[k];
+      if(!/[A-Za-z]{2}/.test(ee))continue;
+      if(!/[\u0400-\u04FF]/.test(rr))continue;
+      if(ee.length<6||ee.length>85)continue;
+      out.push([ee,rr]);
+    }
+  }
+}
 function buildExamples(){
   if(EXPOOL)return EXPOOL;
   const pool=[];
-  PHRASES.forEach(g=>g.items.forEach(i=>pool.push([i[0],i[1]])));
+  PHRASES.forEach(g=>g.items.forEach(i=>splitPair(i[0],i[1],pool)));
   LESSONS.forEach(l=>{
     l.cards.forEach(c=>{
       if(c.q&&c.ru&&/[A-Za-z]{2}/.test(c.q)&&/[\u0400-\u04FF]/.test(c.ru)&&c.q.indexOf("___")<0)
-        pool.push([c.q,c.ru]);
+        splitPair(c.q,c.ru,pool);
+      // правильные ответы заданий на перевод — это готовые пары «фраза + перевод»
+      if(c.t!=="mc"&&c.ru&&Array.isArray(c.a)&&c.a[0]&&/[\u0400-\u04FF]/.test(c.ru)&&!c.q){
+        let en=c.a[0].replace(/\bi\b/g,"I").replace(/\bi'/g,"I'").replace(/\bin it\b/g,"in IT").replace(/\bbali\b/gi,"Bali").replace(/\benglish\b/gi,"English").replace(/\brussia\b/gi,"Russia").replace(/\bjapan\b/gi,"Japan").replace(/\bfriday\b/gi,"Friday").replace(/\bmonday\b/gi,"Monday").replace(/\bspanish\b/gi,"Spanish").replace(/\bubud\b/gi,"Ubud");
+        en=en.charAt(0).toUpperCase()+en.slice(1);
+        if(!/[.!?]$/.test(en))en+=/\?\s*$/.test(c.ru)?"?":".";
+        splitPair(en,c.ru,pool);
+      }
     });
     try{
       const d=document.createElement("div");d.innerHTML=l.theory;
@@ -2597,7 +2824,7 @@ function buildExamples(){
         const ru=ruEl.textContent.replace(/\s+/g," ").trim();
         const c2=el.cloneNode(true);c2.querySelectorAll(".ru").forEach(x=>x.remove());
         const en=c2.textContent.replace(/\s+/g," ").trim();
-        if(en&&ru&&/[A-Za-z]{2}/.test(en)&&en.length<90)pool.push([en,ru]);
+        splitPair(en,ru,pool);
       });
     }catch(e){}
   });
@@ -2611,7 +2838,12 @@ function findExamples(word,max){
   const base=w.replace(/(ies|es|ed|ing|s)$/,"");if(base.length>2)forms[base]=1;
   let re;try{re=new RegExp("\\b("+Object.keys(forms).join("|")+")\\b","i");}catch(e){return [];}
   const hits=buildExamples().filter(p=>re.test(p[0]));
-  hits.sort((a,b)=>Math.abs(a[0].length-38)-Math.abs(b[0].length-38));
+  hits.sort((a,b)=>{
+    const ea=new RegExp("\\b"+w+"\\b","i").test(a[0])?0:1;
+    const eb=new RegExp("\\b"+w+"\\b","i").test(b[0])?0:1;
+    if(ea!==eb)return ea-eb;
+    return Math.abs(a[0].length-34)-Math.abs(b[0].length-34);
+  });
   const out=[],seen={};
   for(const h of hits){const k=h[0].toLowerCase();if(seen[k])continue;seen[k]=1;out.push(h);if(out.length>=(max||2))break;}
   return out;
@@ -2673,15 +2905,16 @@ function render(){
   if(n==="lessons")viewLessons();
   else if(n==="lesson")viewLesson(view.id);
   else if(n==="drill")viewDrill();
+  else if(n==="pat")viewPat();
   else if(n==="review")viewReview();
   else if(n==="bank")viewBank();
   else if(n==="progress")viewProgress();
   renderNav();decorate();
 }
 function renderNav(){
-  const d=dueCards().length;
+  const d=dueCards().length+patDue().length+vocDue().length;
   const tabs=[["lessons","Уроки",ICON.book],["review","Повтор",ICON.repeat],["bank","Банк",ICON.layers],["progress","Прогресс",ICON.chart]];
-  const cur=(view.n==="lesson")?"lessons":(view.n==="drill"?(drill&&drill.mode==="review"?"review":"lessons"):view.n);
+  const cur=(view.n==="lesson"||view.n==="pat")?"lessons":(view.n==="drill"?(drill&&drill.mode==="review"?"review":"lessons"):view.n);
   navEl.innerHTML=tabs.map(t=>'<button data-nav="'+t[0]+'" class="'+(cur===t[0]?"on":"")+'">'+t[2]+t[1]+
     (t[0]==="review"&&d>0?'<span class="dot">'+d+'</span>':'')+'</button>').join("");
 }
@@ -2708,7 +2941,7 @@ function viewLessons(){
   if(S.total===0){
     h+='<div class="card"><div class="t" style="font-weight:600;font-size:16px;margin-bottom:6px">Курс на '+PLAN.length+' дней</div>'+
        '<p class="small" style="margin:0 0 8px">'+LESSONS.length+' уроков, по одному в день, плюс дни без нового материала — они нужны, чтобы догнали повторы. Тапни на любое английское слово: оно произнесётся и покажет перевод с транскрипцией.</p>'+
-       '<p class="small" style="margin:0">Режим: утром повтор, днём задание вслух, вечером новый урок. Всего 20\u201325 минут. Подробнее — во вкладке «Прогресс».</p></div>';
+       '<p class="small" style="margin:0">Каждый урок идёт четырьмя шагами: теория, разбор, дрилл на скорость и проговаривание в микрофон. Подробнее — во вкладке «Прогресс».</p></div>';
   }
   if(d>0)h+='<button class="btn" id="goRev">'+ICON.repeat+' Повтор: '+d+' '+plural(d,"карточка","карточки","карточек")+'</button><div style="height:18px"></div>';
   h+='<div class="label">День '+dn+' из '+PLAN.length+'</div>';
@@ -2737,39 +2970,185 @@ function viewLessons(){
   app.querySelectorAll("[data-les]").forEach(el=>el.onclick=()=>go({n:"lesson",id:el.dataset.les}));
   app.querySelectorAll("[data-day]").forEach(el=>el.onclick=()=>{const x=PLAN[+el.dataset.day];if(x&&x.ids.length)go({n:"lesson",id:x.ids[0]});});
 }
+function stepMark(done,cur,n){
+  return '<div class="mark '+(done?"done":(cur?"cur":""))+'" style="'+MARKST+'">'+(done?"\u2713":n)+'</div>';
+}
 function viewLesson(id){
-  const l=byId(id),st=lessonStat(l),p=PLAN.find(x=>x.ids.indexOf(id)>=0);
+  const l=byId(id),st=lessonStat(l),p=PLAN.find(x=>x.ids.indexOf(id)>=0),pat=PATTERNS[id];
   setHead(l.t,(p?"день "+dayIndex(p):""));
+  const cards=l.cards.map((c,i)=>({l:l.id,i:i,c:c})),CH=10;
+  const s2=st.started===st.total, s3=!!(S.pat[id]&&S.pat[id].box>0), s4=!!(S.voc[id]&&S.voc[id].box>0);
+  let ph="";
+  if(cards.length<=12){
+    ph='<button class="btn '+(s2?"sec":"")+'" data-p="0">'+(st.started?"Пройти ещё раз":"Начать разбор")+' \u00B7 '+cards.length+'</button>';
+  }else{
+    ph='<p class="small" style="margin-bottom:10px">'+cards.length+' заданий — проходи блоками, по одному за подход.</p>';
+    for(let k=0;k<cards.length;k+=CH){
+      const part=cards.slice(k,k+CH),seen=part.every(x=>S.srs[key(x.l,x.i)]);
+      ph+='<button class="btn '+(seen?"sec":"")+'" data-p="'+k+'">Блок '+(k/CH+1)+' \u00B7 '+(k+1)+'\u2013'+Math.min(k+CH,cards.length)+(seen?" \u00B7 пройден":"")+'</button><div style="height:10px"></div>';
+    }
+  }
   app.innerHTML=backBtn("lessons","Уроки")+
     '<h2 style="margin-top:10px">'+esc(l.t)+'</h2>'+
     '<p class="small" style="margin-bottom:4px">'+esc(l.s)+'</p>'+
     '<div style="margin-bottom:22px">'+tagLine(l.id)+'</div>'+
+    '<div class="label">Шаг 1 \u00B7 Теория</div>'+
     '<div class="theory">'+l.theory+'</div>'+
-    '<div style="height:10px"></div><div id="parts"></div>';
-  const cards=l.cards.map((c,i)=>({l:l.id,i:i,c:c})),CH=10;
-  let ph="";
-  if(cards.length<=12){
-    ph='<button class="btn" data-p="0">'+(st.started?"Пройти ещё раз":"Практика")+' \u00B7 '+cards.length+'</button>';
-  }else{
-    ph='<p class="small" style="margin-bottom:10px">В уроке '+cards.length+' заданий — проходи блоками, по одному за подход.</p>';
-    for(let k=0;k<cards.length;k+=CH){
-      const part=cards.slice(k,k+CH),seen=part.every(x=>S.srs[key(x.l,x.i)]);
-      ph+='<button class="btn '+(seen?"sec":"")+'" data-p="'+k+'">Блок '+(k/CH+1)+' \u00B7 задания '+(k+1)+'\u2013'+Math.min(k+CH,cards.length)+(seen?" \u00B7 пройден":"")+'</button><div style="height:10px"></div>';
-    }
-  }
-  document.getElementById("parts").innerHTML=ph;
+    '<div class="label">Шаг 2 \u00B7 Разбор</div>'+
+    '<p class="small" style="margin-bottom:12px">Медленно и с объяснениями: понять, как собирается конструкция.</p>'+ph+
+    (pat?'<div class="label">Шаг 3 \u00B7 Дрилл на скорость</div>'+
+      '<p class="small" style="margin-bottom:12px">Одна конструкция, восемь подстановок, пять секунд на фразу. Здесь не думают — здесь доводят до автомата.</p>'+
+      '<button class="btn '+(s3?"sec":"")+'" id="goDrill">'+ICON.repeat+' Дрилл \u00B7 '+pat.items.length+' фраз'+(s3?" \u00B7 пройден":"")+'</button>'+
+      '<div class="label">Шаг 4 \u00B7 Скажи вслух</div>'+
+      '<p class="small" style="margin-bottom:12px">Те же фразы, но голосом. Телефон слушает и печатает — видно, где ты тормозишь и где произношение мешает.</p>'+
+      '<button class="btn '+(s4?"sec":"")+'" id="goVoice">'+ICON.sound+' Голос \u00B7 '+pat.items.length+' фраз'+(s4?" \u00B7 пройден":"")+'</button>':"")+
+    '<div style="height:20px"></div>';
   app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{
     const k=+b.dataset.p;
     startDrill(cards.length<=12?cards.slice():cards.slice(k,k+CH),"lesson",l.t);
   });
+  const gd=document.getElementById("goDrill");if(gd)gd.onclick=()=>startPat(id,"drill");
+  const gv=document.getElementById("goVoice");if(gv)gv.onclick=()=>startPat(id,"voice");
+}
+
+/* ================= дрилл и голос ================= */
+let pat=null;
+function startPat(id,mode){
+  const items=shuffle(PATTERNS[id].items.slice());
+  pat={id:id,mode:mode,items:items,pos:0,fast:0,slow:0,hit:0,miss:0,t0:0,phase:"ask"};
+  go({n:"pat"});
+}
+function patHeadline(){
+  const P=PATTERNS[pat.id];
+  return '<div class="qmeta"><span>'+esc(P.p)+'</span><span>'+(pat.pos+1)+' / '+pat.items.length+'</span></div>'+
+    '<div class="qprog"><i style="width:'+Math.round(pat.pos/pat.items.length*100)+'%"></i></div>';
+}
+function viewPat(){
+  if(pat.pos>=pat.items.length)return patDone();
+  const it=pat.items[pat.pos];
+  setHead(byId(pat.id).t,pat.mode==="drill"?"дрилл":"голос");
+  let body;
+  if(pat.mode==="drill"){
+    body=(pat.phase==="ask")
+      ? '<div class="tbar"><i id="tb"></i></div><button class="btn" id="said">Сказал</button>'+
+        '<div style="height:10px"></div><button class="btn ghost" id="skip">Не получилось</button>'
+      : '<div class="target">'+esc(it[1])+'<button class="spk" style="position:static;margin-left:8px" id="spk">'+ICON.sound+'</button></div>'+
+        '<div style="height:14px"></div><button class="btn" id="next">Дальше</button>';
+  }else{
+    body=(pat.phase==="ask")
+      ? '<button class="btn mic" id="mic">'+ICON.sound+' Нажми и скажи</button>'+
+        '<div style="height:10px"></div><button class="btn ghost" id="showit">Показать ответ</button>'+
+        '<div id="rec" class="small" style="margin-top:12px"></div>'
+      : '<div class="target">'+esc(it[1])+'<button class="spk" style="position:static;margin-left:8px" id="spk">'+ICON.sound+'</button></div>'+
+        (pat.heard?'<div class="small" style="margin-top:8px">Услышано: '+esc(pat.heard)+'</div>':'')+
+        '<div style="height:14px"></div>'+
+        (pat.ok?'':'<button class="btn sec" id="mark">Всё же засчитать</button><div style="height:10px"></div>')+
+        '<button class="btn" id="next">Дальше</button>';
+  }
+  app.innerHTML=backBtn("lessons","Выйти")+patHeadline()+
+    '<div class="qtask">'+(pat.mode==="drill"?"Скажи вслух за пять секунд":"Скажи вслух в микрофон")+'</div>'+
+    '<div class="prompt">'+esc(it[0])+'</div>'+
+    (pat.phase==="show"&&pat.mode==="drill"&&pat.lastFast!==null
+      ? '<div class="verdict '+(pat.lastFast?"ok":"typo")+'" style="margin:0 0 16px"><div class="vh">'+
+        (pat.lastFast?ICON.check+"Успел":ICON.x+"Медленно")+'</div>'+
+        (pat.lastFast?"Конструкция уже на автомате.":"Пока собираешь по кирпичикам. Повтори эту фразу вслух ещё три раза.")+'</div>'
+      : "")+
+    (pat.phase==="show"&&pat.mode==="voice"
+      ? '<div class="verdict '+(pat.ok?"ok":"no")+'" style="margin:0 0 16px"><div class="vh">'+
+        (pat.ok?ICON.check+"Похоже на эталон":ICON.x+"Не совпало")+'</div>'+
+        (pat.ok?"Так и звучит.":"Микрофон услышал другое. Иногда виноват шум, иногда произношение — послушай эталон и повтори.")+'</div>'
+      : "")+
+    body;
+  if(pat.mode==="drill"&&pat.phase==="ask"){
+    pat.t0=Date.now();
+    const tb=document.getElementById("tb");
+    requestAnimationFrame(()=>{tb.style.transition="width 5s linear";tb.style.width="0%";});
+    pat.timer=setTimeout(()=>{if(pat.phase==="ask")patReveal(false);},5600);
+    document.getElementById("said").onclick=()=>patReveal((Date.now()-pat.t0)<=5200);
+    document.getElementById("skip").onclick=()=>patReveal(false);
+  }
+  if(pat.mode==="voice"&&pat.phase==="ask"){
+    document.getElementById("mic").onclick=listen;
+    document.getElementById("showit").onclick=()=>{pat.heard="";pat.ok=false;pat.phase="show";pat.miss++;render();};
+  }
+  if(pat.phase==="show"){
+    const sp=document.getElementById("spk");if(sp)sp.onclick=()=>say(it[1]);
+    const mk=document.getElementById("mark");if(mk)mk.onclick=()=>{pat.miss--;pat.hit++;pat.ok=true;render();};
+    document.getElementById("next").onclick=()=>{pat.pos++;pat.phase="ask";pat.heard=null;pat.lastFast=null;render();};
+    say(it[1]);
+  }
+}
+function patReveal(fast){
+  clearTimeout(pat.timer);
+  pat.lastFast=fast;if(fast)pat.fast++;else pat.slow++;
+  pat.phase="show";render();
+}
+function looseSame(heard,target){
+  const drop={a:1,an:1,the:1,to:1,of:1};
+  const norm2=t=>bare(norm(t)).split(" ").filter(w=>w&&!drop[w]);
+  const h=norm2(heard),t=norm2(target);
+  if(!h.length)return false;
+  let hit=0;t.forEach(w=>{const i=h.indexOf(w);if(i>=0){hit++;h.splice(i,1);}});
+  return hit/t.length>=0.7;
+}
+function listen(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const box=document.getElementById("rec");
+  if(!SR){box.innerHTML="Браузер не умеет распознавать речь. Открой файл в Chrome или пройди шаг с кнопкой «Показать ответ» — тогда оценивай себя сам.";return;}
+  const r=new SR();r.lang="en-US";r.interimResults=false;r.maxAlternatives=3;
+  box.textContent="Слушаю…";
+  const btn=document.getElementById("mic");if(btn)btn.classList.add("on");
+  r.onresult=e=>{
+    let best="",ok=false;
+    for(let i=0;i<e.results[0].length;i++){
+      const alt=e.results[0][i].transcript;
+      if(!best)best=alt;
+      if(looseSame(alt,pat.items[pat.pos][1])){best=alt;ok=true;break;}
+    }
+    pat.heard=best;pat.ok=ok;if(ok)pat.hit++;else pat.miss++;
+    pat.phase="show";render();
+  };
+  r.onerror=ev=>{
+    box.innerHTML=ev.error==="not-allowed"
+      ? "Микрофон запрещён. Разреши доступ в настройках сайта — иконка замка в адресной строке."
+      : (ev.error==="no-speech"?"Ничего не услышал. Попробуй ещё раз, ближе к телефону."
+                               :"Распознавание недоступно: "+esc(ev.error)+". Нужен интернет и https.");
+    if(btn)btn.classList.remove("on");
+  };
+  r.onend=()=>{if(btn)btn.classList.remove("on");};
+  try{r.start();}catch(e){box.textContent="Не удалось включить микрофон.";}
+}
+function patDone(){
+  const P=PATTERNS[pat.id],n=pat.items.length;
+  const good=pat.mode==="drill"?pat.fast:pat.hit;
+  const okAll=good/n>=0.7;
+  if(pat.mode==="drill"){
+    gradePat("pat",pat.id,okAll);
+    S.speed=S.speed||{};S.speed[pat.id]=Math.round(good/n*100);saveState();
+  }else gradePat("voc",pat.id,okAll);
+  setHead(byId(pat.id).t,"готово");
+  const nextVoice=pat.mode==="drill"&&PATTERNS[pat.id];
+  app.innerHTML='<div class="done"><div class="big">'+good+' из '+n+'</div>'+
+    '<p class="small" style="margin-top:8px">'+
+    (pat.mode==="drill"
+      ? (okAll?"Конструкция идёт на автомате. Дрилл вернётся через пару дней."
+             :"Пока медленно — это нормально на первом заходе. Дрилл придёт снова завтра.")
+      : (okAll?"Микрофон тебя понимает. Значит и человек поймёт."
+             :"Часть фраз не распозналась. Послушай эталоны и прогони дрилл ещё раз."))+
+    '</p></div>'+
+    (nextVoice?'<button class="btn" id="toVoice">'+ICON.sound+' Теперь то же вслух</button><div style="height:10px"></div>':"")+
+    '<button class="btn sec" id="again">Ещё раз</button><div style="height:10px"></div>'+
+    '<button class="btn ghost" data-nav="lessons">К урокам</button>';
+  const tv=document.getElementById("toVoice");if(tv)tv.onclick=()=>startPat(pat.id,"voice");
+  document.getElementById("again").onclick=()=>startPat(pat.id,pat.mode);
 }
 
 /* ================= повтор ================= */
 function viewReview(){
-  const d=dueCards();
+  const d=dueCards(),dp=patDue(),dv=vocDue();
   setHead("Повтор","интервальный");
   let h="";
-  if(!d.length){
+  if(!d.length&&!dp.length&&!dv.length){
     h+='<div class="card"><p style="margin:0 0 6px;font-weight:600">Сегодня повторять нечего</p>'+
        '<p class="small" style="margin:0">Карточки возвращаются по расписанию: на следующий день, через три дня, через неделю, через шестнадцать дней и через месяц. Ошибся — карточка падает в начало цепочки и приходит завтра.</p></div>'+
        '<button class="btn sec" data-nav="lessons">'+ICON.book+' К урокам</button>';
@@ -2781,9 +3160,17 @@ function viewReview(){
     Object.keys(by).forEach(k=>{h+='<div class="row" style="cursor:default"><div class="body"><div class="t" style="font-size:15px">'+esc(byId(k).t)+'</div></div><div class="small">'+by[k]+'</div></div>';});
     h+='<div style="height:10px"></div><button class="btn" id="startRev">'+ICON.repeat+' Начать повтор</button>';
   }
+  if(dp.length||dv.length){
+    h+='<div class="label">Дриллы и голос</div>'+
+       '<p class="small" style="margin-bottom:12px">Конструкции, которые пора прогнать на скорость. Карточки держат знание, дриллы держат скорость — это две половины одного повтора.</p>';
+    dp.forEach(id=>{h+='<button class="btn sec" data-pd="'+id+'" style="margin-bottom:8px">'+ICON.repeat+' Дрилл: '+esc(byId(id).t)+'</button>';});
+    dv.forEach(id=>{h+='<button class="btn sec" data-vd="'+id+'" style="margin-bottom:8px">'+ICON.sound+' Голос: '+esc(byId(id).t)+'</button>';});
+  }
   app.innerHTML=h;
   const b=document.getElementById("startRev");
   if(b)b.onclick=()=>startDrill(shuffle(d.slice()).slice(0,30),"review","Повтор");
+  app.querySelectorAll("[data-pd]").forEach(x=>x.onclick=()=>startPat(x.dataset.pd,"drill"));
+  app.querySelectorAll("[data-vd]").forEach(x=>x.onclick=()=>startPat(x.dataset.vd,"voice"));
 }
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
@@ -2854,8 +3241,10 @@ function drillDone(){
   app.innerHTML='<div class="done"><div class="big">'+drill.total+' из '+drill.total+'</div>'+
     '<p class="small" style="margin-top:8px">'+(bad===0?"Пройдено без ошибок. Карточки вернутся через несколько дней.":
       "Пройдено, ошибок по дороге: "+bad+". Эти карточки придут завтра — так они и запоминаются.")+'</p></div>'+
-    '<button class="btn" data-nav="lessons">'+ICON.book+' К урокам</button><div style="height:10px"></div>'+
+    (patDue()[0]?'<button class="btn" id="toPat">'+ICON.repeat+' Дальше: дрилл на скорость</button><div style="height:10px"></div>':
+                 '<button class="btn" data-nav="lessons">'+ICON.book+' К урокам</button><div style="height:10px"></div>')+
     '<button class="btn sec" id="again">Пройти ещё раз</button>';
+  const tp=document.getElementById("toPat");if(tp)tp.onclick=()=>startPat(patDue()[0],"drill");
   document.getElementById("again").onclick=()=>startDrill(shuffle(q),m,t);
 }
 
@@ -2897,13 +3286,15 @@ function viewProgress(){
     '<div><div class="n">'+acc+'%</div><div class="l">верных<br>ответов</div></div></div>'+
     '<p class="small">Карточка считается выученной после трёх верных ответов подряд с растущими промежутками.</p>'+
     '<div class="label">По урокам</div>'+
+    '<p class="small">Скорость — доля фраз из дрилла, выданных быстрее пяти секунд. Знание проверяется карточками, а готовность говорить — только дриллом.</p>'+
     '<p class="small">Разобрано — сколько карточек урока ты вообще проходил. Закреплено — сколько уже сидит в памяти: три верных ответа подряд с растущими промежутками. Сразу после первого прохода закреплено всегда ноль, это нормально — карточка вернётся завтра, потом через три дня, потом через неделю.</p>';
   LESSONS.forEach(l=>{
     const st=lessonStat(l),pct=Math.round(st.learned/st.total*100),spct=Math.round(st.started/st.total*100);
     const state=st.learned===st.total?"выучен":(st.started===0?"не начат":(st.started<st.total?"в процессе":"на закреплении"));
     h+='<div class="row" data-les="'+l.id+'" style="padding:12px 14px"><div class="body">'+
       '<div class="t" style="font-size:14.5px">'+esc(l.t)+'</div>'+
-      '<div class="small" style="font-size:12px;margin-top:3px">разобрано '+st.started+'/'+st.total+' · закреплено '+st.learned+'/'+st.total+'</div>'+
+      '<div class="small" style="font-size:12px;margin-top:3px">разобрано '+st.started+'/'+st.total+' · закреплено '+st.learned+'/'+st.total+
+        ((S.speed&&S.speed[l.id]!==undefined)?' · скорость '+S.speed[l.id]+'%':'')+'</div>'+
       '<div class="bar"><i style="width:'+spct+'%;background:var(--border-strong)"></i>'+
       '<b style="display:block;height:100%;width:'+pct+'%;background:var(--ok);border-radius:99px;margin-top:-4px"></b></div></div>'+
       '<div class="small" style="font-size:11.5px;text-align:right;max-width:78px">'+state+'</div></div>';
@@ -2913,10 +3304,17 @@ function viewProgress(){
     '<table style="margin:0"><tr><td style="white-space:nowrap;font-weight:600">Утро</td>'+
     '<td>Повтор, 5\u20138 мин. На свежую голову — то, что вот-вот забудется.</td></tr>'+
     '<tr><td style="white-space:nowrap;font-weight:600">Днём</td>'+
-    '<td>Задание вслух, 3\u20135 мин. Без экрана: за рулём, в очереди, на кухне.</td></tr>'+
+    '<td>Дрилл на скорость или голос, 3\u20135 мин. Можно на ходу — телефон читает и слушает.</td></tr>'+
     '<tr><td style="white-space:nowrap;font-weight:600">Вечер</td>'+
-    '<td>Новый урок, 12\u201315 мин: теория плюс один блок из десяти заданий. Разобранное перед сном лучше закрепляется.</td></tr></table>'+
+    '<td>Новый урок, 12\u201315 мин: теория, блок разбора, потом дрилл и голос по той же конструкции.</td></tr></table>'+
     '<p class="small" style="margin:10px 0 0">Итого 20\u201325 минут в день урока и 8\u201310 в дни без нового материала.</p></div>'+
+    '<div class="label">Четыре шага урока</div>'+
+    '<div class="card" style="padding:14px 16px"><table style="margin:0">'+
+    '<tr><td style="white-space:nowrap;font-weight:600">1. Теория</td><td>Понять, как устроена конструкция.</td></tr>'+
+    '<tr><td style="white-space:nowrap;font-weight:600">2. Разбор</td><td>Медленные задания с объяснением каждой ошибки.</td></tr>'+
+    '<tr><td style="white-space:nowrap;font-weight:600">3. Дрилл</td><td>Восемь подстановок по пять секунд. Здесь не думают — доводят до автомата.</td></tr>'+
+    '<tr><td style="white-space:nowrap;font-weight:600">4. Голос</td><td>Те же фразы в микрофон. Видно, где тормозишь и где произношение мешает понять.</td></tr>'+
+    '</table><p class="small" style="margin:10px 0 0">Шаги 1 и 2 дают знание, шаги 3 и 4 — речь. Пропускать вторую половину бессмысленно: именно она отвечает за то, чтобы заговорить.</p></div>'+
     '<div class="label">Пять правил</div>'+
     '<div class="card" style="padding:14px 16px"><ul class="small" style="margin:0;padding-left:18px;line-height:1.6">'+
     '<li>Не делай всё за один присест: три подхода по семь минут дают больше, чем двадцать пять подряд.</li>'+
