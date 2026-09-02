@@ -172,7 +172,8 @@ tr:last-child td{border-bottom:0}
 .prompt{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.3;margin:4px 0 22px}
 .tbar{height:6px;background:var(--elev);border-radius:99px;overflow:hidden;margin-bottom:18px}
 .tbar i{display:block;height:100%;width:100%;background:var(--accent);border-radius:99px}
-.target{font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1.35;display:flex;align-items:center;flex-wrap:wrap}
+.target{font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1.4}
+.target .spk{vertical-align:middle;display:inline-flex}
 .btn.mic.on{background:var(--no);border-color:var(--no);color:#fff}
 .qtext{font-size:21px;line-height:1.4;font-weight:500;letter-spacing:-.02em;margin-bottom:6px}
 .qtext .gap{display:inline-block;min-width:52px;border-bottom:2px solid var(--accent);margin:0 3px}
@@ -254,7 +255,8 @@ nav .dot{
 #sheet .sx{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
 #sheet .sxi{margin-bottom:12px}
 #sheet .sxi:last-child{margin-bottom:0}
-#sheet .sxe{font-size:15.5px;font-weight:500;line-height:1.4;display:flex;align-items:center;flex-wrap:wrap}
+#sheet .sxe{font-size:15.5px;font-weight:500;line-height:1.45}
+#sheet .sxe .spk{vertical-align:middle;display:inline-flex}
 #sheet .sxr{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.4}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -3032,8 +3034,9 @@ function viewPat(){
     body=(pat.phase==="ask")
       ? '<div class="tbar"><i id="tb"></i></div><button class="btn" id="said">Сказал</button>'+
         '<div style="height:10px"></div><button class="btn ghost" id="skip">Не получилось</button>'
-      : '<div class="target">'+esc(it[1])+'<button class="spk" style="position:static;margin-left:8px" id="spk">'+ICON.sound+'</button></div>'+
-        '<div style="height:14px"></div><button class="btn" id="next">Дальше</button>';
+      : '<div class="target">'+esc(it[1])+' <button class="spk" style="position:static;margin-left:6px" id="spk">'+ICON.sound+'</button></div>'+
+        '<div style="height:16px"></div><button class="btn" id="next">Сказал так же</button>'+
+        '<div style="height:10px"></div><button class="btn sec" id="wrong">Сказал не так</button>';
   }else{
     body=(pat.phase==="ask")
       ? '<button class="btn mic" id="mic">'+ICON.sound+' Нажми и скажи</button>'+
@@ -3069,12 +3072,18 @@ function viewPat(){
   }
   if(pat.mode==="voice"&&pat.phase==="ask"){
     document.getElementById("mic").onclick=listen;
-    document.getElementById("showit").onclick=()=>{pat.heard="";pat.ok=false;pat.phase="show";pat.miss++;render();};
+    document.getElementById("showit").onclick=()=>{stopRec();pat.heard="";pat.ok=false;pat.phase="show";pat.miss++;render();};
   }
   if(pat.phase==="show"){
     const sp=document.getElementById("spk");if(sp)sp.onclick=()=>say(it[1]);
+    const wr=document.getElementById("wrong");
+    if(wr)wr.onclick=()=>{
+      if(pat.lastFast){pat.fast--;pat.slow++;}
+      pat.items.push(it);                       // фраза вернётся в конце подхода
+      pat.pos++;pat.phase="ask";pat.lastFast=null;render();
+    };
     const mk=document.getElementById("mark");if(mk)mk.onclick=()=>{pat.miss--;pat.hit++;pat.ok=true;render();};
-    document.getElementById("next").onclick=()=>{pat.pos++;pat.phase="ask";pat.heard=null;pat.lastFast=null;render();};
+    document.getElementById("next").onclick=()=>{stopRec();pat.pos++;pat.phase="ask";pat.heard=null;pat.lastFast=null;render();};
     say(it[1]);
   }
 }
@@ -3091,14 +3100,25 @@ function looseSame(heard,target){
   let hit=0;t.forEach(w=>{const i=h.indexOf(w);if(i>=0){hit++;h.splice(i,1);}});
   return hit/t.length>=0.7;
 }
+function stopRec(){
+  if(pat&&pat.rec){try{pat.rec.abort();}catch(e){}pat.rec=null;}
+}
 function listen(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const box=document.getElementById("rec");
-  if(!SR){box.innerHTML="Браузер не умеет распознавать речь. Открой файл в Chrome или пройди шаг с кнопкой «Показать ответ» — тогда оценивай себя сам.";return;}
+  const box=document.getElementById("rec"),btn=document.getElementById("mic");
+  if(pat.rec){                                   // уже слушаем — второй тап заканчивает запись
+    try{pat.rec.stop();}catch(e){stopRec();}
+    if(btn)btn.classList.remove("on");
+    if(box)box.textContent="";
+    return;
+  }
+  if(!SR){box.innerHTML="Браузер не умеет распознавать речь. Открой страницу в Chrome или пройди шаг через «Показать ответ» — тогда оценивай себя сам.";return;}
   const r=new SR();r.lang="en-US";r.interimResults=false;r.maxAlternatives=3;
-  box.textContent="Слушаю…";
-  const btn=document.getElementById("mic");if(btn)btn.classList.add("on");
+  pat.rec=r;
+  box.textContent="Слушаю… нажми ещё раз, когда закончишь";
+  if(btn){btn.classList.add("on");btn.innerHTML=ICON.sound+" Слушаю…";}
   r.onresult=e=>{
+    pat.rec=null;
     let best="",ok=false;
     for(let i=0;i<e.results[0].length;i++){
       const alt=e.results[0][i].transcript;
@@ -3108,14 +3128,25 @@ function listen(){
     pat.heard=best;pat.ok=ok;if(ok)pat.hit++;else pat.miss++;
     pat.phase="show";render();
   };
-  r.onerror=ev=>{
-    box.innerHTML=ev.error==="not-allowed"
-      ? "Микрофон запрещён. Разреши доступ в настройках сайта — иконка замка в адресной строке."
-      : (ev.error==="no-speech"?"Ничего не услышал. Попробуй ещё раз, ближе к телефону."
-                               :"Распознавание недоступно: "+esc(ev.error)+". Нужен интернет и https.");
-    if(btn)btn.classList.remove("on");
+  const reset=()=>{
+    pat.rec=null;
+    const b=document.getElementById("mic");
+    if(b){b.classList.remove("on");b.innerHTML=ICON.sound+" Нажми и скажи";}
   };
-  r.onend=()=>{if(btn)btn.classList.remove("on");};
+  r.onerror=ev=>{
+    reset();
+    if(ev.error==="aborted"){const b=document.getElementById("rec");if(b)b.textContent="";return;}
+    const b=document.getElementById("rec");if(!b)return;
+    b.innerHTML=ev.error==="not-allowed"
+      ? "Микрофон запрещён. Разреши доступ в настройках сайта — иконка замка в адресной строке."
+      : (ev.error==="no-speech"?"Ничего не услышал. Нажми и скажи ещё раз, ближе к телефону."
+                               :"Распознавание недоступно: "+esc(ev.error)+". Нужен интернет и https.");
+  };
+  r.onend=()=>{
+    const listening=!!pat.rec;
+    reset();
+    if(listening){const b=document.getElementById("rec");if(b)b.textContent="Не расслышал. Нажми и скажи ещё раз.";}
+  };
   try{r.start();}catch(e){box.textContent="Не удалось включить микрофон.";}
 }
 function patDone(){
