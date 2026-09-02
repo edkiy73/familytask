@@ -170,6 +170,10 @@ tr:last-child td{border-bottom:0}
 .qprog i{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .25s ease}
 .qtask{font-size:13px;color:var(--muted);margin-bottom:10px}
 .prompt{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.3;margin:4px 0 22px}
+.playbox{margin-bottom:18px}
+.bubble{background:var(--card);border:1px solid var(--border);border-radius:16px 16px 16px 4px;padding:14px 16px}
+.bubble .be{font-size:18px;font-weight:600;line-height:1.4;letter-spacing:-.01em}
+.bubble .br{font-size:13.5px;color:var(--muted);margin-top:5px}
 .tbar{height:6px;background:var(--elev);border-radius:99px;overflow:hidden;margin-bottom:18px}
 .tbar i{display:block;height:100%;width:100%;background:var(--accent);border-radius:99px}
 .target{font-size:21px;font-weight:600;letter-spacing:-.02em;line-height:1.4}
@@ -2296,6 +2300,50 @@ const PATTERNS={
 ["Я собираюсь запустить свой продукт.","I'm going to start my own product."],["Ничего особенного.","Nothing special."]]}
 };
 
+
+/* ============ диалоги: реплика собеседника — твой ответ ============ */
+const DIALOGS=[
+{id:"d1",t:"Знакомство на вечеринке",day:9,lines:[
+{q:"Hi! Are you here on holiday?",ru:"Привет! Ты тут в отпуске?",task:"Скажи, что живёшь здесь",a:["no, i live here","no i live here","i live here"],ans:"No, I live here."},
+{q:"Oh nice. How long have you been in Bali?",ru:"Классно. Давно ты на Бали?",task:"Скажи: пару лет",a:["i've been here for a couple of years","for a couple of years","i've been here for two years"],ans:"I've been here for a couple of years."},
+{q:"And what do you do?",ru:"А чем занимаешься?",task:"Скажи, что работаешь в IT",a:["i work in it","i work in tech","i work in it, i have my own studio"],ans:"I work in IT."},
+{q:"Where are you from originally?",ru:"А откуда ты вообще?",task:"Скажи, что из России",a:["i'm from russia","i am from russia"],ans:"I'm from Russia."},
+{q:"Do you like it here?",ru:"Тебе тут нравится?",task:"Скажи, что да, потому что тихо",a:["yes, i like it because it's quiet","i like it because it's quiet","yeah, i like it because it's quiet"],ans:"Yes, I like it because it's quiet."},
+{q:"What brought you here?",ru:"Что тебя сюда привело?",task:"Скажи: погода",a:["because of the weather","the weather","we moved here because of the weather"],ans:"Because of the weather."},
+{q:"Are you here with family?",ru:"Ты здесь с семьёй?",task:"Скажи: с женой и ребёнком",a:["yes, i'm here with my wife and kid","i'm here with my wife and kid","yes, with my wife and kid"],ans:"Yes, I'm here with my wife and kid."},
+{q:"It was nice talking to you!",ru:"Приятно было пообщаться!",task:"Ответь тем же",a:["nice talking to you too","you too","nice to meet you too"],ans:"Nice talking to you too."}]},
+
+{id:"d2",t:"Кафе и заказ",day:17,lines:[
+{q:"Hi there, what can I get you?",ru:"Привет, что вам принести?",task:"Закажи кофе вежливо",a:["i'd like a coffee please","i'd like a coffee","can i have a coffee please"],ans:"I'd like a coffee, please."},
+{q:"Anything else?",ru:"Что-нибудь ещё?",task:"Спроси, есть ли у них еда",a:["do you have any food","do you have food","what food do you have"],ans:"Do you have any food?"},
+{q:"We serve breakfast until eleven.",ru:"Завтраки до одиннадцати.",task:"Скажи, что возьмёшь завтрак",a:["i'll have breakfast","i'd like breakfast","i'll take breakfast"],ans:"I'll have breakfast."},
+{q:"Would you like it with milk?",ru:"С молоком?",task:"Откажись вежливо",a:["no, thank you","no thanks","no thank you"],ans:"No, thank you."},
+{q:"That'll be sixty thousand rupiah.",ru:"С вас шестьдесят тысяч.",task:"Спроси, можно ли картой",a:["can i pay by card","can i pay with a card","do you take card"],ans:"Can I pay by card?"},
+{q:"Sorry, cash only.",ru:"Извините, только наличные.",task:"Спроси, где банкомат",a:["where is the atm","where's the atm","where can i find an atm"],ans:"Where's the ATM?"},
+{q:"It's right around the corner.",ru:"Прямо за углом.",task:"Скажи спасибо и что вернёшься",a:["thanks, i'll be back","thank you, i'll be back","thanks i'll come back"],ans:"Thanks, I'll be back."},
+{q:"Sure, take your time.",ru:"Конечно, не спешите.",task:"Поблагодари",a:["thank you","thanks","thanks a lot"],ans:"Thank you."}]},
+
+{id:"d3",t:"Быт и просьбы",day:25,lines:[
+{q:"Hey, are you busy right now?",ru:"Слушай, ты сейчас занят?",task:"Скажи, что работаешь",a:["i'm working","i'm working right now","yes, i'm working"],ans:"I'm working right now."},
+{q:"Could you help me for a second?",ru:"Поможешь на секунду?",task:"Согласись и спроси, что нужно",a:["sure, what do you need","sure what do you need","of course, what do you need"],ans:"Sure, what do you need?"},
+{q:"Can you pass me the salt?",ru:"Передашь соль?",task:"Скажи «держи»",a:["here you go","here you are","sure, here you go"],ans:"Here you go."},
+{q:"Where should I put this?",ru:"Куда это положить?",task:"Скажи: на стол",a:["put it on the table","on the table"],ans:"Put it on the table."},
+{q:"Do I need to take my shoes off?",ru:"Разуваться надо?",task:"Скажи да, у двери",a:["yes, take them off by the door","yes, please take them off","yes please"],ans:"Yes, take them off by the door."},
+{q:"I'll be back in ten minutes.",ru:"Я вернусь через десять минут.",task:"Скажи, что подождёшь",a:["ok, i'll wait","i'll wait for you","ok i'll wait here"],ans:"OK, I'll wait."},
+{q:"Sorry I'm late.",ru:"Извини, я опоздал.",task:"Скажи, что ничего страшного",a:["no worries","that's ok","no problem"],ans:"No worries."},
+{q:"Can you turn the light off?",ru:"Выключишь свет?",task:"Скажи, что сейчас сделаешь",a:["sure, i'll do it now","yes, i'll turn it off","sure i'll do it"],ans:"Sure, I'll do it now."}]},
+
+{id:"d4",t:"Работа и планы",day:33,lines:[
+{q:"So what are you working on these days?",ru:"Над чем сейчас работаешь?",task:"Скажи: над своим продуктом",a:["i'm working on my own product","i'm building my own product","i'm working on my product"],ans:"I'm working on my own product."},
+{q:"How long have you been doing design?",ru:"Давно занимаешься дизайном?",task:"Скажи: больше десяти лет",a:["for more than ten years","i've been doing design for more than ten years","more than ten years"],ans:"For more than ten years."},
+{q:"Do you have to work with clients?",ru:"Тебе приходится работать с клиентами?",task:"Скажи, что приходится, но хочешь перестать",a:["i have to, but i want to stop","i have to but i want to stop","yes, but i want to stop"],ans:"I have to, but I want to stop."},
+{q:"What would you do if you had more time?",ru:"Что бы ты делал, будь у тебя больше времени?",task:"Скажи: запустил бы свой продукт",a:["i'd start my own product","i would start my own product","i'd launch my own product"],ans:"I'd start my own product."},
+{q:"Are you going to stay in Bali?",ru:"Собираешься остаться на Бали?",task:"Скажи, что пока не уверен",a:["i'm not sure yet","i don't know yet","not sure yet"],ans:"I'm not sure yet."},
+{q:"You should try selling it online.",ru:"Тебе стоит попробовать продавать это онлайн.",task:"Согласись мягко",a:["yeah, i guess so","i guess so","yeah, maybe"],ans:"Yeah, I guess so."},
+{q:"Let me know if you need help.",ru:"Дай знать, если понадобится помощь.",task:"Поблагодари и скажи, что напишешь",a:["thanks, i'll let you know","thank you, i'll let you know","thanks, i'll text you"],ans:"Thanks, I'll let you know."},
+{q:"Good luck with the project!",ru:"Удачи с проектом!",task:"Поблагодари",a:["thanks a lot","thank you","thanks"],ans:"Thanks a lot!"}]}
+];
+
 /* ============ теги и план по дням ============ */
 const TAGS={
 abc:["основы"], mech:["основы","грамматика"],
@@ -2563,7 +2611,7 @@ async function loadState(){
   if(raw===null){ try{raw=localStorage.getItem(KEY);}catch(e){} }
   if(raw===null&&mem)raw=mem;
   let s=null; try{s=raw?JSON.parse(raw):null;}catch(e){}
-  return Object.assign({srs:{},pat:{},voc:{},speed:{},day:null,streak:0,total:0,right:0,theme:null},s||{});
+  return Object.assign({srs:{},pat:{},voc:{},lis:{},err:{},words:{},dia:{},speed:{},day:null,streak:0,total:0,right:0,theme:null},s||{});
 }
 async function saveState(){
   const raw=JSON.stringify(S); mem=raw;
@@ -2574,12 +2622,26 @@ async function saveState(){
 /* ================= утилиты ================= */
 const INTERVALS=[0,1,3,7,16,35];
 const PINT=[0,2,6,16,35];
-function patDue(){const t=dayNum(today());return Object.keys(PATTERNS).filter(id=>{const st=S.pat[id];return st&&st.due<=t;});}
-function vocDue(){const t=dayNum(today());return Object.keys(PATTERNS).filter(id=>{const st=S.voc[id];return st&&st.due<=t;});}
+const VINT=[0,3,9,24,45];
+const PAT_CAP=3,VOC_CAP=2,LIS_CAP=2;
+const LINT=[0,2,7,18,40];
+function overdue(store,cap){
+  const t=dayNum(today()),m=S[store]||{};
+  return Object.keys(PATTERNS)
+    .filter(id=>m[id]&&m[id].due<=t)
+    .sort((a,b)=>m[a].due-m[b].due)
+    .slice(0,cap);
+}
+function patDue(){return overdue("pat",PAT_CAP);}
+function vocDue(){return overdue("voc",VOC_CAP);}
+function lisDue(){return overdue("lis",LIS_CAP);}
+function patWaiting(){const t=dayNum(today()),m=S.pat||{},v=S.voc||{};
+  return Object.keys(PATTERNS).filter(id=>m[id]&&m[id].due<=t).length-PAT_CAP
+       + Object.keys(PATTERNS).filter(id=>v[id]&&v[id].due<=t).length-VOC_CAP;}
 function gradePat(store,id,ok){
   const m=S[store]||(S[store]={}),st=m[id]||{box:0,due:0};
   st.box=ok?Math.min(4,st.box+1):0;
-  st.due=dayNum(today())+PINT[st.box];
+  st.due=dayNum(today())+(store==="voc"?VINT:(store==="lis"?LINT:PINT))[st.box];
   m[id]=st;markDay();saveState();
 }
 const app=document.getElementById("app"), navEl=document.getElementById("nav");
@@ -2598,7 +2660,9 @@ function grade(l,i,ok){
   const k=key(l,i),st=S.srs[k]||{box:0,due:0};
   st.box=ok?Math.min(5,st.box+1):0;
   st.due=dayNum(today())+INTERVALS[st.box];
-  S.srs[k]=st;S.total++;if(ok)S.right++;markDay();saveState();
+  S.srs[k]=st;S.total++;if(ok)S.right++;
+  const e=S.err[k]||{t:0,w:0};e.t++;if(!ok)e.w++;S.err[k]=e;
+  markDay();saveState();
 }
 function norm(s){return String(s).toLowerCase().replace(/[\u2019\u02BC]/g,"'").replace(/[.,!?;:"()\u2014\u2013-]/g," ").replace(/\s+/g," ").trim();}
 function expand(s){return (" "+s+" ").replace(/n't\b/g," not").replace(/'ll\b/g," will").replace(/'re\b/g," are").replace(/'ve\b/g," have").replace(/'d\b/g," would").replace(/'m\b/g," am").replace(/\bcannot\b/g,"can not").replace(/\s+/g," ").trim();}
@@ -2867,8 +2931,19 @@ function openWord(word){
       '<div class="sxi"><div class="sxe">'+esc(e[0])+'<button class="spk" style="position:static;margin-left:8px" data-sx="'+i+'">'+ICON.sound+'</button></div>'+
       '<div class="sxr">'+esc(e[1])+'</div></div>').join("")+'</div>':"")+
     '<div style="height:16px"></div><button class="btn" id="sayBtn">'+ICON.sound+' Произнести ещё раз</button>'+
+    '<div style="height:8px"></div><button class="btn sec" id="addBtn">'+
+      (S.words[word.toLowerCase()]?ICON.check+' Уже в словарике':'+ В словарик на повтор')+'</button>'+
     '<div style="height:8px"></div><button class="btn ghost" id="clsBtn">Закрыть</button>';
   document.getElementById("sayBtn").onclick=()=>say(word);
+  document.getElementById("addBtn").onclick=e=>{
+    const k=word.toLowerCase();
+    if(S.words[k]){delete S.words[k];e.target.closest("button").innerHTML="+ В словарик на повтор";}
+    else{
+      S.words[k]={ru:d?d[0]:"",box:0,due:dayNum(today())+1};
+      e.target.closest("button").innerHTML=ICON.check+" Добавлено";
+    }
+    saveState();
+  };
   sheet.querySelectorAll("[data-sx]").forEach(b=>b.onclick=e=>{e.stopPropagation();say(exs[+b.dataset.sx][0]);});
   document.getElementById("clsBtn").onclick=dismissSheet;
   if(!sheetOpen)pushHist({sheet:true});
@@ -2908,13 +2983,15 @@ function render(){
   else if(n==="lesson")viewLesson(view.id);
   else if(n==="drill")viewDrill();
   else if(n==="pat")viewPat();
+  else if(n==="words")viewWords();
+  else if(n==="dia")viewDia();
   else if(n==="review")viewReview();
   else if(n==="bank")viewBank();
   else if(n==="progress")viewProgress();
   renderNav();decorate();
 }
 function renderNav(){
-  const d=dueCards().length+patDue().length+vocDue().length;
+  const d=dueCards().length+patDue().length+vocDue().length+lisDue().length+wordsDue().length;
   const tabs=[["lessons","Уроки",ICON.book],["review","Повтор",ICON.repeat],["bank","Банк",ICON.layers],["progress","Прогресс",ICON.chart]];
   const cur=(view.n==="lesson"||view.n==="pat")?"lessons":(view.n==="drill"?(drill&&drill.mode==="review"?"review":"lessons"):view.n);
   navEl.innerHTML=tabs.map(t=>'<button data-nav="'+t[0]+'" class="'+(cur===t[0]?"on":"")+'">'+t[2]+t[1]+
@@ -2950,6 +3027,17 @@ function viewLessons(){
   h+=p.ids.length?p.ids.map(id=>lessonRow(byId(id))).join(""):'<p class="small">Новых уроков сегодня нет — только повтор.</p>';
   h+='<div class="goal"><b>Задание вслух.</b> '+esc(p.g)+
      (p.ex?'<div class="gex">'+p.ex.map(x=>'<div>'+esc(x)+'</div>').join("")+'</div>':"")+'</div>';
+  const cd2=dayIndex(currentPlan());
+  h+='<div class="label">Диалоги</div>'+
+     '<p class="small" style="margin-bottom:12px">Собеседник говорит — ты отвечаешь голосом или текстом. Открываются по мере прохождения курса.</p>';
+  DIALOGS.forEach(D=>{
+    const open=cd2>=D.day,done=!!S.dia[D.id];
+    h+='<div class="row"'+(open?' data-dia="'+D.id+'"':' style="opacity:.5"')+'>'+
+      '<div class="mark '+(done?"done":"")+'" style="'+MARKST+'">'+(done?"\u2713":"")+'</div>'+
+      '<div class="body"><div class="t">'+esc(D.t)+'</div>'+
+      '<div class="s">'+(open?D.lines.length+' реплик'+(done&&S.dia[D.id].score!==undefined?' · '+S.dia[D.id].score+'%':''):'откроется на '+D.day+'-й день')+'</div></div>'+
+      (open?'<div class="chev">'+ICON.chevR+'</div>':'')+'</div>';
+  });
   h+='<div class="seg"><button data-h="plan" class="'+(homeMode==="plan"?"on":"")+'">План</button>'+
      '<button data-h="tags" class="'+(homeMode==="tags"?"on":"")+'">Темы</button></div>';
   if(homeMode==="plan"){
@@ -2970,6 +3058,7 @@ function viewLessons(){
   const gr=document.getElementById("goRev");if(gr)gr.onclick=()=>go({n:"review"});
   app.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{homeMode=b.dataset.h;render();});
   app.querySelectorAll("[data-les]").forEach(el=>el.onclick=()=>go({n:"lesson",id:el.dataset.les}));
+  app.querySelectorAll("[data-dia]").forEach(el=>el.onclick=()=>startDia(el.dataset.dia));
   app.querySelectorAll("[data-day]").forEach(el=>el.onclick=()=>{const x=PLAN[+el.dataset.day];if(x&&x.ids.length)go({n:"lesson",id:x.ids[0]});});
 }
 function stepMark(done,cur,n){
@@ -2979,7 +3068,8 @@ function viewLesson(id){
   const l=byId(id),st=lessonStat(l),p=PLAN.find(x=>x.ids.indexOf(id)>=0),pat=PATTERNS[id];
   setHead(l.t,(p?"день "+dayIndex(p):""));
   const cards=l.cards.map((c,i)=>({l:l.id,i:i,c:c})),CH=10;
-  const s2=st.started===st.total, s3=!!(S.pat[id]&&S.pat[id].box>0), s4=!!(S.voc[id]&&S.voc[id].box>0);
+  const s2=st.started===st.total, s3=!!(S.pat[id]&&S.pat[id].box>0),
+        s4=!!(S.lis[id]&&S.lis[id].box>0), s5=!!(S.voc[id]&&S.voc[id].box>0);
   let ph="";
   if(cards.length<=12){
     ph='<button class="btn '+(s2?"sec":"")+'" data-p="0">'+(st.started?"Пройти ещё раз":"Начать разбор")+' \u00B7 '+cards.length+'</button>';
@@ -3001,36 +3091,85 @@ function viewLesson(id){
     (pat?'<div class="label">Шаг 3 \u00B7 Дрилл на скорость</div>'+
       '<p class="small" style="margin-bottom:12px">Одна конструкция, восемь подстановок, пять секунд на фразу. Здесь не думают — здесь доводят до автомата.</p>'+
       '<button class="btn '+(s3?"sec":"")+'" id="goDrill">'+ICON.repeat+' Дрилл \u00B7 '+pat.items.length+' фраз'+(s3?" \u00B7 пройден":"")+'</button>'+
-      '<div class="label">Шаг 4 \u00B7 Скажи вслух</div>'+
+      '<div class="label">Шаг 4 \u00B7 На слух</div>'+
+      '<p class="small" style="margin-bottom:12px">Шесть фраз без текста: слушаешь и выбираешь смысл. В разговоре чаще проваливаются не на своей речи, а на чужой.</p>'+
+      '<button class="btn '+(s4?"sec":"")+'" id="goListen">'+ICON.sound+' На слух \u00B7 6 фраз'+(s4?" \u00B7 пройден":"")+'</button>'+
+      '<div class="label">Шаг 5 \u00B7 Скажи вслух</div>'+
       '<p class="small" style="margin-bottom:12px">Те же фразы, но голосом. Телефон слушает и печатает — видно, где ты тормозишь и где произношение мешает.</p>'+
-      '<button class="btn '+(s4?"sec":"")+'" id="goVoice">'+ICON.sound+' Голос \u00B7 '+pat.items.length+' фраз'+(s4?" \u00B7 пройден":"")+'</button>':"")+
+      '<button class="btn '+(s5?"sec":"")+'" id="goVoice">'+ICON.sound+' Голос \u00B7 6 фраз'+(s5?" \u00B7 пройден":"")+'</button>':"")+
     '<div style="height:20px"></div>';
   app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{
     const k=+b.dataset.p;
     startDrill(cards.length<=12?cards.slice():cards.slice(k,k+CH),"lesson",l.t);
   });
   const gd=document.getElementById("goDrill");if(gd)gd.onclick=()=>startPat(id,"drill");
+  const gl=document.getElementById("goListen");if(gl)gl.onclick=()=>startPat(id,"listen");
   const gv=document.getElementById("goVoice");if(gv)gv.onclick=()=>startPat(id,"voice");
 }
 
 /* ================= дрилл и голос ================= */
 let pat=null;
 function startPat(id,mode){
-  const items=shuffle(PATTERNS[id].items.slice());
+  let items=shuffle(PATTERNS[id].items.slice());
+  if(mode==="voice")items=items.slice(0,6);   // голос дороже по времени — берём часть
+  if(mode==="listen")items=items.slice(0,6);
   pat={id:id,mode:mode,items:items,pos:0,fast:0,slow:0,hit:0,miss:0,t0:0,phase:"ask"};
   go({n:"pat"});
 }
+/* смешанный дрилл: фразы из разных пройденных уроков вперемешку */
+function studiedPatterns(){return Object.keys(PATTERNS).filter(id=>S.pat[id]&&S.pat[id].box>0);}
+function startMixed(){
+  const ids=studiedPatterns(),bag=[];
+  ids.forEach(id=>PATTERNS[id].items.forEach(it=>bag.push(it)));
+  pat={id:ids[0],mixed:true,mode:"drill",items:shuffle(bag).slice(0,10),
+       pos:0,fast:0,slow:0,hit:0,miss:0,t0:0,phase:"ask"};
+  go({n:"pat"});
+}
+/* три варианта перевода для задания на слух */
+function lisOptions(it){
+  const wrong=[];
+  const ids=Object.keys(PATTERNS);
+  while(wrong.length<2){
+    const p=PATTERNS[ids[Math.floor(Math.random()*ids.length)]];
+    const c=p.items[Math.floor(Math.random()*p.items.length)][0];
+    if(c!==it[0]&&wrong.indexOf(c)<0)wrong.push(c);
+  }
+  return shuffle([it[0]].concat(wrong));
+}
 function patHeadline(){
   const P=PATTERNS[pat.id];
-  return '<div class="qmeta"><span>'+esc(P.p)+'</span><span>'+(pat.pos+1)+' / '+pat.items.length+'</span></div>'+
+  return '<div class="qmeta"><span>'+esc(pat.mixed?"смешанный дрилл":P.p)+'</span><span>'+(pat.pos+1)+' / '+pat.items.length+'</span></div>'+
     '<div class="qprog"><i style="width:'+Math.round(pat.pos/pat.items.length*100)+'%"></i></div>';
 }
 function viewPat(){
   if(pat.pos>=pat.items.length)return patDone();
-  const it=pat.items[pat.pos];
-  setHead(byId(pat.id).t,pat.mode==="drill"?"дрилл":"голос");
-  let body;
-  if(pat.mode==="drill"){
+  const it=pat.items[pat.pos],L=byId(pat.id);
+  setHead(pat.mixed?"Смешанный дрилл":L.t,
+    pat.mode==="drill"?"дрилл":(pat.mode==="listen"?"на слух":"голос"));
+  const task=pat.mode==="drill"?"Скажи вслух за пять секунд"
+            :(pat.mode==="listen"?"Слушай и выбери перевод":"Скажи вслух в микрофон");
+  let head,body="";
+
+  if(pat.mode==="listen"){
+    if(pat.phase==="ask"){
+      if(!pat.opts)pat.opts=lisOptions(it);
+      head='<div class="playbox"><button class="btn" id="play">'+ICON.sound+' Прослушать ещё раз</button></div>';
+      body=pat.opts.map((o,k)=>'<button class="opt" data-l="'+k+'">'+esc(o)+'</button>').join("");
+    }else{
+      head='<div class="verdict '+(pat.ok?"ok":"no")+'" style="margin:0 0 16px"><div class="vh">'+
+        (pat.ok?ICON.check+"Верно":ICON.x+"Не то")+'</div>'+
+        (pat.ok?"Услышал правильно.":"Послушай ещё раз и сравни с текстом — так ухо и настраивается.")+'</div>'+
+        '<div class="target">'+esc(it[1])+' <button class="spk" style="position:static;margin-left:6px" id="spk">'+ICON.sound+'</button></div>'+
+        '<div class="small" style="margin-top:6px">'+esc(it[0])+'</div>';
+      body='<div style="height:16px"></div><button class="btn" id="next">Дальше</button>';
+    }
+  }else if(pat.mode==="drill"){
+    head='<div class="prompt">'+esc(it[0])+'</div>'+
+      (pat.phase==="show"&&pat.lastFast!=null
+        ? '<div class="verdict '+(pat.lastFast?"ok":"typo")+'" style="margin:0 0 16px"><div class="vh">'+
+          (pat.lastFast?ICON.check+"Успел":ICON.x+"Медленно")+'</div>'+
+          (pat.lastFast?"Конструкция уже на автомате.":"Пока собираешь по кирпичикам. Повтори эту фразу вслух ещё три раза.")+'</div>'
+        : "");
     body=(pat.phase==="ask")
       ? '<div class="tbar"><i id="tb"></i></div><button class="btn" id="said">Сказал</button>'+
         '<div style="height:10px"></div><button class="btn ghost" id="skip">Не получилось</button>'
@@ -3038,30 +3177,36 @@ function viewPat(){
         '<div style="height:16px"></div><button class="btn" id="next">Сказал так же</button>'+
         '<div style="height:10px"></div><button class="btn sec" id="wrong">Сказал не так</button>';
   }else{
+    head='<div class="prompt">'+esc(it[0])+'</div>'+
+      (pat.phase==="show"
+        ? '<div class="verdict '+(pat.ok?"ok":"no")+'" style="margin:0 0 16px"><div class="vh">'+
+          (pat.ok?ICON.check+"Похоже на эталон":ICON.x+"Не совпало")+'</div>'+
+          (pat.ok?"Так и звучит.":"Микрофон услышал другое. Иногда виноват шум, иногда произношение — послушай эталон и повтори.")+'</div>'
+        : "");
     body=(pat.phase==="ask")
       ? '<button class="btn mic" id="mic">'+ICON.sound+' Нажми и скажи</button>'+
         '<div style="height:10px"></div><button class="btn ghost" id="showit">Показать ответ</button>'+
         '<div id="rec" class="small" style="margin-top:12px"></div>'
-      : '<div class="target">'+esc(it[1])+'<button class="spk" style="position:static;margin-left:8px" id="spk">'+ICON.sound+'</button></div>'+
+      : '<div class="target">'+esc(it[1])+' <button class="spk" style="position:static;margin-left:6px" id="spk">'+ICON.sound+'</button></div>'+
         (pat.heard?'<div class="small" style="margin-top:8px">Услышано: '+esc(pat.heard)+'</div>':'')+
-        '<div style="height:14px"></div>'+
+        '<div style="height:16px"></div>'+
         (pat.ok?'':'<button class="btn sec" id="mark">Всё же засчитать</button><div style="height:10px"></div>')+
         '<button class="btn" id="next">Дальше</button>';
   }
+
   app.innerHTML=backBtn("lessons","Выйти")+patHeadline()+
-    '<div class="qtask">'+(pat.mode==="drill"?"Скажи вслух за пять секунд":"Скажи вслух в микрофон")+'</div>'+
-    '<div class="prompt">'+esc(it[0])+'</div>'+
-    (pat.phase==="show"&&pat.mode==="drill"&&pat.lastFast!==null
-      ? '<div class="verdict '+(pat.lastFast?"ok":"typo")+'" style="margin:0 0 16px"><div class="vh">'+
-        (pat.lastFast?ICON.check+"Успел":ICON.x+"Медленно")+'</div>'+
-        (pat.lastFast?"Конструкция уже на автомате.":"Пока собираешь по кирпичикам. Повтори эту фразу вслух ещё три раза.")+'</div>'
-      : "")+
-    (pat.phase==="show"&&pat.mode==="voice"
-      ? '<div class="verdict '+(pat.ok?"ok":"no")+'" style="margin:0 0 16px"><div class="vh">'+
-        (pat.ok?ICON.check+"Похоже на эталон":ICON.x+"Не совпало")+'</div>'+
-        (pat.ok?"Так и звучит.":"Микрофон услышал другое. Иногда виноват шум, иногда произношение — послушай эталон и повтори.")+'</div>'
-      : "")+
-    body;
+    '<div class="qtask">'+task+'</div>'+head+body;
+
+  if(pat.mode==="listen"&&pat.phase==="ask"){
+    say(it[1]);
+    document.getElementById("play").onclick=()=>say(it[1]);
+    app.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{
+      const chosen=pat.opts[+b.dataset.l];
+      pat.ok=chosen===it[0];
+      if(pat.ok)pat.hit++;else pat.miss++;
+      pat.phase="show";render();
+    });
+  }
   if(pat.mode==="drill"&&pat.phase==="ask"){
     pat.t0=Date.now();
     const tb=document.getElementById("tb");
@@ -3079,12 +3224,14 @@ function viewPat(){
     const wr=document.getElementById("wrong");
     if(wr)wr.onclick=()=>{
       if(pat.lastFast){pat.fast--;pat.slow++;}
-      pat.items.push(it);                       // фраза вернётся в конце подхода
-      pat.pos++;pat.phase="ask";pat.lastFast=null;render();
+      pat.items.push(it);
+      pat.pos++;pat.phase="ask";pat.lastFast=null;pat.opts=null;render();
     };
     const mk=document.getElementById("mark");if(mk)mk.onclick=()=>{pat.miss--;pat.hit++;pat.ok=true;render();};
-    document.getElementById("next").onclick=()=>{stopRec();pat.pos++;pat.phase="ask";pat.heard=null;pat.lastFast=null;render();};
-    say(it[1]);
+    document.getElementById("next").onclick=()=>{
+      stopRec();pat.pos++;pat.phase="ask";pat.heard=null;pat.lastFast=null;pat.opts=null;render();
+    };
+    if(pat.mode!=="listen")say(it[1]);
   }
 }
 function patReveal(fast){
@@ -3150,36 +3297,43 @@ function listen(){
   try{r.start();}catch(e){box.textContent="Не удалось включить микрофон.";}
 }
 function patDone(){
-  const P=PATTERNS[pat.id],n=pat.items.length;
-  const good=pat.mode==="drill"?pat.fast:pat.hit;
+  const n=pat.items.length,mode=pat.mode,id=pat.id,mixed=pat.mixed;
+  const good=mode==="drill"?pat.fast:pat.hit;
   const okAll=good/n>=0.7;
-  if(pat.mode==="drill"){
-    gradePat("pat",pat.id,okAll);
-    S.speed=S.speed||{};S.speed[pat.id]=Math.round(good/n*100);saveState();
-  }else gradePat("voc",pat.id,okAll);
-  setHead(byId(pat.id).t,"готово");
-  const nextVoice=pat.mode==="drill"&&PATTERNS[pat.id];
+  if(!mixed){
+    if(mode==="drill"){
+      gradePat("pat",id,okAll);
+      S.speed=S.speed||{};S.speed[id]=Math.round(good/n*100);saveState();
+    }else if(mode==="listen")gradePat("lis",id,okAll);
+    else gradePat("voc",id,okAll);
+  }
+  setHead(mixed?"Смешанный дрилл":byId(id).t,"готово");
+  const msg=mode==="drill"
+    ? (okAll?"Конструкция идёт на автомате. Дрилл вернётся через пару дней."
+           :"Пока медленно — это нормально на первом заходе. Дрилл придёт снова завтра.")
+    : mode==="listen"
+    ? (okAll?"Ухо ловит фразы целиком. Так и надо."
+           :"Половину не разобрал — это самое частое место провала в живом разговоре. Прослушай эталоны ещё раз.")
+    : (okAll?"Микрофон тебя понимает. Значит и человек поймёт."
+           :"Часть фраз не распозналась. Послушай эталоны и прогони дрилл ещё раз.");
+  let nextBtn="";
+  if(!mixed&&mode==="drill")nextBtn='<button class="btn" id="toNext">'+ICON.sound+' Дальше: на слух</button><div style="height:10px"></div>';
+  if(!mixed&&mode==="listen")nextBtn='<button class="btn" id="toNext">'+ICON.sound+' Дальше: сказать вслух</button><div style="height:10px"></div>';
   app.innerHTML='<div class="done"><div class="big">'+good+' из '+n+'</div>'+
-    '<p class="small" style="margin-top:8px">'+
-    (pat.mode==="drill"
-      ? (okAll?"Конструкция идёт на автомате. Дрилл вернётся через пару дней."
-             :"Пока медленно — это нормально на первом заходе. Дрилл придёт снова завтра.")
-      : (okAll?"Микрофон тебя понимает. Значит и человек поймёт."
-             :"Часть фраз не распозналась. Послушай эталоны и прогони дрилл ещё раз."))+
-    '</p></div>'+
-    (nextVoice?'<button class="btn" id="toVoice">'+ICON.sound+' Теперь то же вслух</button><div style="height:10px"></div>':"")+
+    '<p class="small" style="margin-top:8px">'+msg+'</p></div>'+nextBtn+
     '<button class="btn sec" id="again">Ещё раз</button><div style="height:10px"></div>'+
     '<button class="btn ghost" data-nav="lessons">К урокам</button>';
-  const tv=document.getElementById("toVoice");if(tv)tv.onclick=()=>startPat(pat.id,"voice");
-  document.getElementById("again").onclick=()=>startPat(pat.id,pat.mode);
+  const tn=document.getElementById("toNext");
+  if(tn)tn.onclick=()=>startPat(id,mode==="drill"?"listen":"voice");
+  document.getElementById("again").onclick=()=>mixed?startMixed():startPat(id,mode);
 }
 
 /* ================= повтор ================= */
 function viewReview(){
-  const d=dueCards(),dp=patDue(),dv=vocDue();
+  const d=dueCards(),dp=patDue(),dv=vocDue(),dl=lisDue(),dw=wordsDue(),mix=studiedPatterns();
   setHead("Повтор","интервальный");
   let h="";
-  if(!d.length&&!dp.length&&!dv.length){
+  if(!d.length&&!dp.length&&!dv.length&&!dl.length&&!dw.length){
     h+='<div class="card"><p style="margin:0 0 6px;font-weight:600">Сегодня повторять нечего</p>'+
        '<p class="small" style="margin:0">Карточки возвращаются по расписанию: на следующий день, через три дня, через неделю, через шестнадцать дней и через месяц. Ошибся — карточка падает в начало цепочки и приходит завтра.</p></div>'+
        '<button class="btn sec" data-nav="lessons">'+ICON.book+' К урокам</button>';
@@ -3193,15 +3347,30 @@ function viewReview(){
   }
   if(dp.length||dv.length){
     h+='<div class="label">Дриллы и голос</div>'+
-       '<p class="small" style="margin-bottom:12px">Конструкции, которые пора прогнать на скорость. Карточки держат знание, дриллы держат скорость — это две половины одного повтора.</p>';
+       '<p class="small" style="margin-bottom:12px">Конструкции, которые пора прогнать на скорость. Карточки держат знание, дриллы держат скорость — это две половины одного повтора.'+
+       (patWaiting()>0?' Ещё '+patWaiting()+' в очереди: за один день берём не больше трёх дриллов и двух голосовых заходов, иначе день распухает.':'')+'</p>';
     dp.forEach(id=>{h+='<button class="btn sec" data-pd="'+id+'" style="margin-bottom:8px">'+ICON.repeat+' Дрилл: '+esc(byId(id).t)+'</button>';});
+    dl.forEach(id=>{h+='<button class="btn sec" data-ld="'+id+'" style="margin-bottom:8px">'+ICON.sound+' На слух: '+esc(byId(id).t)+'</button>';});
     dv.forEach(id=>{h+='<button class="btn sec" data-vd="'+id+'" style="margin-bottom:8px">'+ICON.sound+' Голос: '+esc(byId(id).t)+'</button>';});
+  }
+  if(mix.length>=3){
+    h+='<div class="label">Смешанный дрилл</div>'+
+       '<p class="small" style="margin-bottom:12px">Десять фраз из разных пройденных уроков вперемешку. В уроке ты гоняешь одну конструкцию и мозг знает, что подставлять. Здесь он этого не знает — и как раз это переносится в живую речь.</p>'+
+       '<button class="btn" id="goMix">'+ICON.repeat+' Смешать '+mix.length+' '+plural(mix.length,"тему","темы","тем")+'</button>';
+  }
+  if(dw.length){
+    h+='<div class="label">Словарик</div>'+
+       '<p class="small" style="margin-bottom:12px">Слова, которые ты сам отложил, тапнув по ним в теории.</p>'+
+       '<button class="btn sec" id="goWords">'+ICON.layers+' Слова: '+dw.length+'</button>';
   }
   app.innerHTML=h;
   const b=document.getElementById("startRev");
   if(b)b.onclick=()=>startDrill(shuffle(d.slice()).slice(0,30),"review","Повтор");
   app.querySelectorAll("[data-pd]").forEach(x=>x.onclick=()=>startPat(x.dataset.pd,"drill"));
+  app.querySelectorAll("[data-ld]").forEach(x=>x.onclick=()=>startPat(x.dataset.ld,"listen"));
   app.querySelectorAll("[data-vd]").forEach(x=>x.onclick=()=>startPat(x.dataset.vd,"voice"));
+  const gm=document.getElementById("goMix");if(gm)gm.onclick=startMixed;
+  const gw=document.getElementById("goWords");if(gw)gw.onclick=startWords;
 }
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
@@ -3279,6 +3448,138 @@ function drillDone(){
   document.getElementById("again").onclick=()=>startDrill(shuffle(q),m,t);
 }
 
+/* ================= диалоги ================= */
+let dia=null;
+function startDia(id){
+  const D=DIALOGS.find(x=>x.id===id);
+  dia={id:id,d:D,pos:0,ok:0,phase:"ask",heard:null,rec:null};
+  go({n:"dia"});
+}
+function diaListen(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const box=document.getElementById("drec"),btn=document.getElementById("dmic");
+  if(dia.rec){try{dia.rec.stop();}catch(e){dia.rec=null;}if(btn)btn.classList.remove("on");return;}
+  if(!SR){box.textContent="Микрофон недоступен — напиши ответ текстом.";return;}
+  const r=new SR();r.lang="en-US";r.interimResults=false;r.maxAlternatives=3;
+  dia.rec=r;box.textContent="Слушаю…";
+  if(btn){btn.classList.add("on");btn.innerHTML=ICON.sound+" Слушаю…";}
+  const reset=()=>{dia.rec=null;const b=document.getElementById("dmic");
+    if(b){b.classList.remove("on");b.innerHTML=ICON.sound+" Ответить голосом";}};
+  r.onresult=e=>{
+    reset();
+    const line=dia.d.lines[dia.pos];
+    let best=e.results[0][0].transcript,ok=false;
+    for(let i=0;i<e.results[0].length;i++){
+      const alt=e.results[0][i].transcript;
+      if(check(alt,line.a)||looseSame(alt,line.ans)){best=alt;ok=true;break;}
+    }
+    dia.heard=best;dia.ok=ok;if(ok)dia.okCount=(dia.okCount||0)+1;
+    dia.phase="show";render();
+  };
+  r.onerror=ev=>{reset();const b=document.getElementById("drec");
+    if(b)b.textContent=ev.error==="aborted"?"":(ev.error==="not-allowed"?"Микрофон запрещён — разреши доступ в настройках сайта.":"Не расслышал. Попробуй ещё раз или напиши текстом.");};
+  r.onend=()=>reset();
+  try{r.start();}catch(e){box.textContent="Не удалось включить микрофон.";}
+}
+function viewDia(){
+  const D=dia.d;
+  if(dia.pos>=D.lines.length){
+    const n=D.lines.length,good=dia.okCount||0;
+    S.dia[D.id]={done:1,score:Math.round(good/n*100),due:dayNum(today())+7};saveState();
+    setHead(D.t,"готово");
+    app.innerHTML='<div class="done"><div class="big">'+good+' из '+n+'</div>'+
+      '<p class="small" style="margin-top:8px">'+(good/n>=0.7
+        ? "Диалог держишь. Такой же разговор в жизни ты уже вытянешь."
+        : "Часть реплик далась тяжело — прогони диалог ещё раз, ответы уже знакомы.")+'</p></div>'+
+      '<button class="btn sec" id="dagain">Ещё раз</button><div style="height:10px"></div>'+
+      '<button class="btn ghost" data-nav="lessons">К урокам</button>';
+    document.getElementById("dagain").onclick=()=>startDia(D.id);
+    return;
+  }
+  const line=D.lines[dia.pos];
+  setHead(D.t,(dia.pos+1)+" / "+D.lines.length);
+  app.innerHTML=backBtn("lessons","Выйти")+
+    '<div class="qmeta"><span>диалог</span><span>'+(dia.pos+1)+' / '+D.lines.length+'</span></div>'+
+    '<div class="qprog"><i style="width:'+Math.round(dia.pos/D.lines.length*100)+'%"></i></div>'+
+    '<div class="bubble"><div class="be">'+esc(line.q)+
+      ' <button class="spk" style="position:static;margin-left:6px" id="dsay">'+ICON.sound+'</button></div>'+
+      '<div class="br">'+esc(line.ru)+'</div></div>'+
+    '<div class="qtask" style="margin-top:16px">Ответь: '+esc(line.task)+'</div>'+
+    (dia.phase==="ask"
+      ? '<input class="ans" id="dinp" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="напиши ответ">'+
+        '<div style="height:10px"></div><button class="btn" id="dcheck">Проверить</button>'+
+        '<div style="height:10px"></div><button class="btn sec mic" id="dmic">'+ICON.sound+' Ответить голосом</button>'+
+        '<div id="drec" class="small" style="margin-top:12px"></div>'
+      : '<div class="verdict '+(dia.ok?"ok":"no")+'"><div class="vh">'+
+        (dia.ok?ICON.check+"Так и есть":ICON.x+"Можно было сказать так")+'</div>'+
+        (dia.heard?'Услышано: '+esc(dia.heard):"")+'</div>'+
+        '<div style="height:14px"></div><div class="target">'+esc(line.ans)+
+        ' <button class="spk" style="position:static;margin-left:6px" id="dans">'+ICON.sound+'</button></div>'+
+        '<div style="height:18px"></div><button class="btn" id="dnext">Дальше</button>');
+  document.getElementById("dsay").onclick=()=>say(line.q);
+  if(dia.phase==="ask"){
+    say(line.q);
+    const inp=document.getElementById("dinp");
+    const run=()=>{
+      const ok=check(inp.value,line.a)||looseSame(inp.value,line.ans);
+      dia.heard=null;dia.ok=ok;if(ok)dia.okCount=(dia.okCount||0)+1;
+      dia.phase="show";render();
+    };
+    document.getElementById("dcheck").onclick=run;
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")run();});
+    document.getElementById("dmic").onclick=diaListen;
+  }else{
+    document.getElementById("dans").onclick=()=>say(line.ans);
+    say(line.ans);
+    document.getElementById("dnext").onclick=()=>{
+      if(dia.rec){try{dia.rec.abort();}catch(e){}dia.rec=null;}
+      dia.pos++;dia.phase="ask";dia.heard=null;render();
+    };
+  }
+}
+
+/* ================= личный словарик ================= */
+function wordsDue(){const t=dayNum(today());return Object.keys(S.words).filter(w=>S.words[w].due<=t);}
+let wr=null;
+function startWords(){
+  const list=shuffle(wordsDue()).slice(0,20);
+  if(!list.length)return;
+  wr={list:list,pos:0,ok:0,shown:false};
+  go({n:"words"});
+}
+function viewWords(){
+  if(wr.pos>=wr.list.length){
+    setHead("Словарик","готово");
+    app.innerHTML='<div class="done"><div class="big">'+wr.ok+' из '+wr.list.length+'</div>'+
+      '<p class="small" style="margin-top:8px">Слова, которые не вспомнил, вернутся завтра.</p></div>'+
+      '<button class="btn" data-nav="review">'+ICON.repeat+' К повтору</button>';
+    return;
+  }
+  const w=wr.list[wr.pos],d=S.words[w];
+  setHead("Словарик",(wr.pos+1)+" / "+wr.list.length);
+  app.innerHTML=backBtn("review","Выйти")+
+    '<div class="qmeta"><span>вспомни слово</span><span>'+(wr.pos+1)+' / '+wr.list.length+'</span></div>'+
+    '<div class="qprog"><i style="width:'+Math.round(wr.pos/wr.list.length*100)+'%"></i></div>'+
+    '<div class="prompt">'+esc(d.ru||"без перевода")+'</div>'+
+    (wr.shown
+      ? '<div class="target">'+esc(w)+' <button class="spk" style="position:static;margin-left:6px" id="spk">'+ICON.sound+'</button></div>'+
+        '<div style="height:18px"></div><button class="btn" id="knew">Вспомнил</button>'+
+        '<div style="height:10px"></div><button class="btn sec" id="nope">Не вспомнил</button>'
+      : '<button class="btn" id="show">Показать слово</button>');
+  if(wr.shown){
+    document.getElementById("spk").onclick=()=>say(w);
+    const step=ok=>{
+      const st=S.words[w];st.box=ok?Math.min(4,(st.box||0)+1):0;
+      st.due=dayNum(today())+PINT[st.box];saveState();
+      if(ok)wr.ok++;wr.pos++;wr.shown=false;render();
+    };
+    document.getElementById("knew").onclick=()=>step(true);
+    document.getElementById("nope").onclick=()=>step(false);
+  }else{
+    document.getElementById("show").onclick=()=>{wr.shown=true;say(w);render();};
+  }
+}
+
 /* ================= банк ================= */
 function viewBank(){
   setHead("Банк","фразы и глаголы");
@@ -3330,6 +3631,28 @@ function viewProgress(){
       '<b style="display:block;height:100%;width:'+pct+'%;background:var(--ok);border-radius:99px;margin-top:-4px"></b></div></div>'+
       '<div class="small" style="font-size:11.5px;text-align:right;max-width:78px">'+state+'</div></div>';
   });
+  const weak=[];
+  Object.keys(S.err).forEach(k=>{
+    const e=S.err[k];if(e.t<2||e.w/e.t<0.34)return;
+    const p=k.split("#"),l=byId(p[0]);if(!l)return;
+    const c=l.cards[+p[1]];if(!c)return;
+    weak.push({k:k,l:l,i:+p[1],c:c,w:e.w,t:e.t});
+  });
+  weak.sort((a,b)=>(b.w/b.t)-(a.w/a.t)||b.w-a.w);
+  const top=weak.slice(0,8);
+  h+='<div class="label">Слабые места</div>';
+  if(!top.length){
+    h+='<p class="small">Пока пусто: сюда попадают задания, на которых ты ошибаешься чаще, чем в трети случаев. Нужно хотя бы два подхода к заданию, чтобы оно сюда попало.</p>';
+  }else{
+    h+='<p class="small" style="margin-bottom:12px">Задания, где ты ошибаешься чаще всего. Это и есть твои настоящие дыры — их полезнее прогнать, чем повторять то, что и так знаешь.</p>';
+    top.forEach(x=>{
+      h+='<div class="row" data-les="'+x.l.id+'" style="padding:12px 14px"><div class="body">'+
+        '<div class="t" style="font-size:14.5px">'+esc(x.c.q||x.c.ru||"")+'</div>'+
+        '<div class="small" style="font-size:12px;margin-top:3px">'+esc(x.l.t)+' · ошибок '+x.w+' из '+x.t+'</div>'+
+        '</div></div>';
+    });
+    h+='<div style="height:6px"></div><button class="btn" id="goWeak">'+ICON.repeat+' Прогнать слабые места · '+top.length+'</button>';
+  }
   h+='<div class="label">Режим дня</div>'+
     '<div class="card" style="padding:14px 16px">'+
     '<table style="margin:0"><tr><td style="white-space:nowrap;font-weight:600">Утро</td>'+
@@ -3357,7 +3680,9 @@ function viewProgress(){
     '<div style="height:8px"></div><button class="btn ghost" id="rst">Сбросить прогресс</button><div style="height:16px"></div>';
   app.innerHTML=h;
   app.querySelectorAll("[data-les]").forEach(el=>el.onclick=()=>go({n:"lesson",id:el.dataset.les}));
-  document.getElementById("rst").onclick=()=>{if(confirm("Стереть весь прогресс?")){S.srs={};S.total=0;S.right=0;S.streak=0;S.day=today();saveState();render();}};
+  const gw2=document.getElementById("goWeak");
+  if(gw2)gw2.onclick=()=>startDrill(shuffle(top.map(x=>({l:x.l.id,i:x.i,c:x.c}))),"weak","Слабые места");
+  document.getElementById("rst").onclick=()=>{if(confirm("Стереть весь прогресс?")){S.srs={};S.pat={};S.voc={};S.lis={};S.err={};S.dia={};S.speed={};S.total=0;S.right=0;S.streak=0;S.day=today();saveState();render();}};
 }
 
 /* ================= старт ================= */
