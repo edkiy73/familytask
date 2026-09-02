@@ -89,7 +89,8 @@ b,strong{font-weight:600}
   display:flex;align-items:center;justify-content:center;
   font-size:12px;line-height:1;color:var(--muted);font-weight:500;
 }
-.mark .tick{font-size:14px;line-height:1;font-weight:700}
+.mark{font-size:13px}
+.mark.done{font-size:14px;font-weight:700}
 .mark.done{background:var(--ok);border-color:var(--ok);color:#fff}
 .mark.cur{background:var(--primary);border-color:var(--primary);color:var(--primary-fg)}
 .tags{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap}
@@ -2250,7 +2251,7 @@ function dictLook(w){
 
 /* ================= иконки ================= */
 const I=(p,extra)=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>';
-const MARKST='width:26px;height:26px;min-width:26px;min-height:26px;max-width:26px;max-height:26px;flex:0 0 26px;align-self:center;border-radius:50%;display:flex;align-items:center;justify-content:center;box-sizing:border-box;overflow:hidden';
+const MARKST='width:26px;height:26px;min-width:26px;min-height:26px;max-width:26px;max-height:26px;flex:0 0 26px;align-self:center;border-radius:50%;display:flex;align-items:center;justify-content:center;box-sizing:border-box;overflow:hidden;aspect-ratio:1/1;padding:0';
 const CHECK14='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="display:block;width:14px;height:14px;flex:0 0 14px"><polyline points="20 6 9 17 4 12"/></svg>';
 const ICON={
  book:I('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'),
@@ -2478,7 +2479,7 @@ function tagLine(id){const t=TAGS[id]||[];return t.length?'<div class="tags">'+t
 function lessonRow(l){
   const st=lessonStat(l),pct=Math.round(st.learned/st.total*100),done=st.learned===st.total;
   return '<div class="row" data-les="'+l.id+'">'+
-   '<div class="mark '+(done?"done":"")+'" style="'+MARKST+'">'+(done?CHECK14:"")+'</div>'+
+   '<div class="mark '+(done?"done":"")+'" style="'+MARKST+'">'+(done?"\u2713":"")+'</div>'+
    '<div class="body"><div class="t">'+esc(l.t)+'</div><div class="s">'+esc(l.s)+'</div>'+tagLine(l.id)+
    (st.started?'<div class="bar"><i style="width:'+pct+'%"></i></div>':'')+'</div>'+
    '<div class="chev">'+ICON.chevR+'</div></div>';
@@ -2504,7 +2505,7 @@ function viewLessons(){
       const done=dayDone(x),cur=x===p;
       const names=x.ids.length?x.ids.map(id=>esc(byId(id).t)).join(", "):"повтор и разговор";
       h+='<div class="row" data-day="'+idx+'" style="padding:11px 14px">'+
-        '<div class="mark '+(done?"done":(cur?"cur":""))+'" style="'+MARKST+'">'+(done?CHECK14:(idx+1))+'</div>'+
+        '<div class="mark '+(done?"done":(cur?"cur":""))+'" style="'+MARKST+'">'+(done?"\u2713":(idx+1))+'</div>'+
         '<div class="body"><div class="t" style="font-size:14.5px;font-weight:500">'+names+'</div></div>'+
         (x.ids.length?'<div class="chev">'+ICON.chevR+'</div>':'')+'</div>';
     });
