@@ -237,7 +237,7 @@ nav .dot{
   border-radius:18px 18px 0 0;border-top:1px solid var(--border);
   padding:18px 18px calc(22px + env(safe-area-inset-bottom));
   transform:translateY(102%);transition:transform .22s cubic-bezier(.32,.72,0,1);
-  max-width:680px;margin:0 auto;
+  max-width:680px;margin:0 auto;max-height:82vh;overflow-y:auto;
 }
 #sheet.on{transform:none}
 #sheet .grab{width:36px;height:4px;background:var(--border-strong);border-radius:99px;margin:0 auto 16px}
@@ -246,6 +246,11 @@ nav .dot{
 #sheet .rus{font-size:15px;color:var(--muted)}
 #sheet .tr{font-size:17px;margin-top:12px}
 #sheet .miss{font-size:14px;color:var(--muted);margin-top:10px}
+#sheet .sx{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+#sheet .sxi{margin-bottom:12px}
+#sheet .sxi:last-child{margin-bottom:0}
+#sheet .sxe{font-size:15.5px;font-weight:500;line-height:1.4;display:flex;align-items:center;flex-wrap:wrap}
+#sheet .sxr{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.4}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -2090,6 +2095,42 @@ Object.keys(MORE_CARDS3).forEach(id=>{
   if(l)l.cards=l.cards.concat(MORE_CARDS3[id]);
 });
 
+/* ============ правки по итогам вычитки ============ */
+const FIX={
+"about-me#0":{ru:"Я работаю в IT, у меня своя небольшая студия.",
+ a:["i work in it. i have my own small studio","i work in it, i have my own small studio","i work in it and i have a small studio","i work in it. i have a small studio","i work in it, i run a small studio","i work in it. i run a small studio"],
+ ex:"Have — просто «у меня есть». Run — «веду, управляю», чуть точнее про своё дело: I run a small studio.\nOwn означает «собственный»: my own studio."},
+
+"pres-simple#0":{q:"He ___ work at nine every day.",ru:"Он начинает работать в девять каждый день.",o:["starts","start","is starting"],a:0,
+ ex:"Регулярное действие, каждый день — значит Present Simple. Подлежащее «он», поэтому starts с окончанием.\nIs starting означало бы «начинает прямо сейчас, в эту секунду»."},
+
+"pres-simple#15":{ru:"Обычно я работаю из дома.",a:["i usually work from home","usually i work from home"],
+ ex:"Usually стоит перед глаголом — это стандартное место для always, usually, often, never, sometimes.\nЕщё: I always check my email in the morning. I never work on Sunday."},
+
+"supposed#9":{ex:"Be used to + форма с -ing означает «для меня это уже нормально, привык».\nСравни: I used to get up early — раньше вставал, сейчас нет.\nGet up значит «вставать»: это глагол с маленьким словом, вся их семья разбирается в уроке про get."},
+
+"colloc#12":{ru:"Мы отлично провели выходные.",a:["we had a great weekend","we had a good weekend"],
+ ex:"Про время и события говорят have: have a great weekend, have a good time, have fun.\nSpend здесь не подходит — оно про потраченное время или деньги: I spent two hours on it."},
+
+"questions#3":{ex:"Период начался в прошлом и продолжается сейчас, поэтому have + третья форма been.\nПодробно эта конструкция разбирается позже, в уроке Present Perfect. Пока запомни вопрос целиком — он звучит при каждом знакомстве."},
+
+"questions#13":{ex:"Ever означает «когда-либо, хоть раз в жизни», и с ним идёт have + третья форма.\nЭто тоже Present Perfect, его отдельный урок будет позже. Сейчас достаточно запомнить схему: Have you ever + третья форма.\nОтвет: Yes, I have. / No, never."},
+
+"survival#4":{ex:"Короткий ответ повторяет тот же помощник, которым был задан вопрос.\nHave you been? — Yes, I have. Did you go? — Yes, I did. Are you coming? — Yes, I am.\nСаму конструкцию have + третья форма разберём позже, здесь важен принцип ответа."},
+
+"survival#6":{task:"Спроси",ru:"Как пишется это слово?",a:["how do you spell it","how do you spell that","how do you spell this word"],
+ ex:"Spell — произносить или писать по буквам. Вопрос выручает, когда слово услышал, но не понял.\nВ ответ тебе продиктуют буквы, поэтому алфавит стоит знать."},
+
+"survival#11":{ex:"Три равнозначных варианта, could звучит вежливее.\nЕсли просто не расслышал, хватит одного слова: Sorry?\nCould — вежливая форма can, её отдельный урок будет позже."},
+
+"linkers#11":{ex:"Anyway закрывает тему или возвращает разговор к главному.\nActually — «на самом деле», also — «ещё, тоже».\nHave to здесь значит «мне надо»: разбираем это в отдельном уроке, пока запомни фразу I have to go целиком."}
+};
+Object.keys(FIX).forEach(k=>{
+  const p=k.split("#"),l=LESSONS.find(x=>x.id===p[0]);
+  if(l&&l.cards[+p[1]])Object.assign(l.cards[+p[1]],FIX[k]);
+});
+
+
 
 
 
@@ -2238,6 +2279,89 @@ const DICT={
 "nothing":["ничего","ˈnʌθɪŋ","нафиŋ"],"something":["что-то","ˈsʌmθɪŋ","самфиŋ"],"everything":["всё","ˈevriθɪŋ","эврифиŋ"],
 "anything":["что-нибудь","ˈeniθɪŋ","энифиŋ"],"someone":["кто-то","ˈsʌmwʌn"," самуан"],"everyone":["все","ˈevriwʌn","эвриуан"]
 };
+
+/* ============ расширение словаря ============ */
+Object.assign(DICT,{
+"if":["если","ɪf","иф"],"unless":["если не","ənˈles","анлэс"],"although":["хотя","ɔːlˈðəʊ","олзоу"],"since":["с тех пор; так как","sɪns","синс"],
+"than":["чем (при сравнении)","ðæn","зэн"],"then":["потом, тогда","ðen","зэн"],"or":["или","ɔːr","о"],"well":["ну; хорошо","wel","уэл"],
+"lot":["много (a lot of)","lɒt","лот"],"bit":["немного (a bit)","bɪt","бит"],"little":["маленький; немного","ˈlɪtəl","литл"],"each":["каждый","iːtʃ","ич"],
+"every":["каждый","ˈevri","эври"],"all":["всё, все","ɔːl","ол"],"another":["другой, ещё один","əˈnʌðər","эназэ"],"one":["один; тот самый","wʌn","уан"],
+"two":["два","tuː","ту"],"three":["три","θriː","фри"],"four":["четыре","fɔːr","фо"],"five":["пять","faɪv","файв"],"six":["шесть","sɪks","сикс"],
+"seven":["семь","ˈsevən","сэвэн"],"eight":["восемь","eɪt","эйт"],"nine":["девять","naɪn","найн"],"ten":["десять","ten","тэн"],
+"twenty":["двадцать","ˈtwenti","твэнти"],"twice":["дважды","twaɪs","твайс"],"once":["один раз; когда-то","wʌns","уанс"],"couple":["пара, парочка","ˈkʌpəl","капл"],
+"first":["первый","fɜːrst","фёрст"],"second":["второй; секунда","ˈsekənd","сэкэнд"],"last":["последний; прошлый","lɑːst","ласт"],"next":["следующий","nekst","нэкст"],
+"can't":["не могу","kɑːnt","кант"],"cannot":["не могу","ˈkænɒt","кэнот"],"won't":["не буду, не станет","wəʊnt","уоунт"],
+"let":["позволить, дать","let","лэт"],"use":["использовать","juːz","юз"],"check":["проверить","tʃek","чек"],"fix":["починить","fɪks","фикс"],
+"explain":["объяснить","ɪkˈspleɪn","иксплэйн"],"catch":["поймать; расслышать","kætʃ","кэч"],"care":["заботиться; забота","keər","кэа"],
+"hear":["слышать","hɪər","хиэ"],"watch":["смотреть; часы","wɒtʃ","уоч"],"wake":["просыпаться","weɪk","уэйк"],"stop":["остановить","stɒp","стоп"],
+"move":["двигать, переезжать","muːv","мув"],"change":["менять; сдача","tʃeɪndʒ","чэйндж"],"argue":["спорить","ˈɑːrɡjuː","аргью"],
+"believe":["верить","bɪˈliːv","билив"],"trust":["доверять","trʌst","траст"],"promise":["обещать","ˈprɒmɪs","промис"],"decide":["решать","dɪˈsaɪd","дисайд"],
+"prefer":["предпочитать","prɪˈfɜːr","прифёр"],"miss":["скучать; пропустить","mɪs","мис"],"worry":["волноваться","ˈwʌri","уори"],
+"study":["учиться, изучать","ˈstʌdi","стади"],"travel":["путешествовать","ˈtrævəl","трэвэл"],"play":["играть","pleɪ","плэй"],
+"swim":["плавать","swɪm","суим"],"ride":["ехать (на байке)","raɪd","райд"],"drop":["ронять; высадить","drɒp","дроп"],"pick":["выбрать; поднять","pɪk","пик"],
+"wear":["носить (одежду)","weər","уэа"],"sit":["сидеть","sɪt","сит"],"stand":["стоять","stænd","стэнд"],"join":["присоединиться","dʒɔɪn","джойн"],
+"sign":["подписать; знак","saɪn","сайн"],"invite":["пригласить","ɪnˈvaɪt","инвайт"],"cut":["резать, стричь","kʌt","кат"],"wash":["мыть","wɒʃ","уош"],
+"clean":["чистый; убирать","kliːn","клин"],"carry":["нести","ˈkæri","кэри"],"choose":["выбирать","tʃuːz","чуз"],"hold":["держать","həʊld","хоулд"],
+"hope":["надеяться","həʊp","хоуп"],"hurt":["болеть; ранить","hɜːrt","хёрт"],"laugh":["смеяться","lɑːf","лаф"],"smile":["улыбаться","smaɪl","смайл"],
+"cry":["плакать","kraɪ","край"],"sell":["продавать","sel","сэл"],"share":["делиться","ʃeər","шэа"],"show":["показывать","ʃəʊ","шоу"],
+"follow":["следовать","ˈfɒləʊ","фолоу"],"repeat":["повторить","rɪˈpiːt","рипит"],"return":["вернуть(ся)","rɪˈtɜːrn","ритёрн"],"rest":["отдых; отдыхать","rest","рэст"],
+"fly":["летать","flaɪ","флай"],"arrive":["прибывать","əˈraɪv","эрайв"],"manage":["справиться, успеть","ˈmænɪdʒ","мэнидж"],"marry":["жениться","ˈmæri","мэри"],
+"married":["женат, замужем","ˈmærid","мэрид"],"teach":["учить кого-то","tiːtʃ","тич"],"spend":["тратить, проводить","spend","спэнд"],
+"way":["путь; способ","weɪ","уэй"],"end":["конец","end","энд"],"past":["прошлое; мимо","pɑːst","паст"],"own":["собственный","əʊn","оун"],
+"right":["правильный; направо","raɪt","райт"],"wrong":["неправильный","rɒŋ","роŋ"],"true":["правда","truː","тру"],"truth":["правда","truːθ","труф"],
+"sense":["смысл; чувство","sens","сэнс"],"decision":["решение","dɪˈsɪʒən","дисижэн"],"information":["информация","ˌɪnfərˈmeɪʃən","инфомэйшэн"],
+"word":["слово","wɜːrd","уёрд"],"language":["язык","ˈlæŋɡwɪdʒ","лэŋгуидж"],"english":["английский","ˈɪŋɡlɪʃ","инглиш"],"russian":["русский","ˈrʌʃən","рашэн"],
+"spanish":["испанский","ˈspænɪʃ","спэниш"],"minute":["минута","ˈmɪnɪt","минит"],"hour":["час","ˈaʊər","ауэ"],"month":["месяц","mʌnθ","манф"],
+"moment":["момент","ˈməʊmənt","моумэнт"],"midnight":["полночь","ˈmɪdnaɪt","миднайт"],"tonight":["сегодня вечером","təˈnaɪt","тунайт"],
+"summer":["лето","ˈsʌmər","самэ"],"winter":["зима","ˈwɪntər","уинтэ"],"monday":["понедельник","ˈmʌndeɪ","мандэй"],"friday":["пятница","ˈfraɪdeɪ","фрайдэй"],
+"sunday":["воскресенье","ˈsʌndeɪ","сандэй"],"saturday":["суббота","ˈsætərdeɪ","сэтэдэй"],"weekend":["выходные","ˈwiːkend","уикэнд"],
+"july":["июль","dʒʊˈlaɪ","джулай"],"holiday":["отпуск, праздник","ˈhɒlədeɪ","холидэй"],"ago":["назад (о времени)","əˈɡəʊ","эгоу"],
+"lately":["в последнее время","ˈleɪtli","лэйтли"],"earlier":["раньше","ˈɜːrliər","ёрлиэ"],"again":["снова","əˈɡen","эгэн"],"together":["вместе","təˈɡeðər","тугэзэ"],
+"anywhere":["где-нибудь, никуда","ˈeniweər","эниуэа"],"somewhere":["где-то","ˈsʌmweər","самуэа"],"nearby":["рядом","ˌnɪərˈbaɪ","ниэбай"],
+"near":["рядом с","nɪər","ниэ"],"far":["далеко","fɑːr","фар"],"outside":["снаружи, на улице","ˌaʊtˈsaɪd","аутсайд"],"inside":["внутри","ˌɪnˈsaɪd","инсайд"],
+"city":["город","ˈsɪti","сити"],"office":["офис","ˈɒfɪs","офис"],"school":["школа","skuːl","скул"],"shop":["магазин","ʃɒp","шоп"],
+"cafe":["кафе","ˈkæfeɪ","кэфэй"],"restaurant":["ресторан","ˈrestrɒnt","рэстронт"],"airport":["аэропорт","ˈeərpɔːrt","эапорт"],
+"party":["вечеринка","ˈpɑːrti","пати"],"door":["дверь","dɔːr","до"],"window":["окно","ˈwɪndəʊ","уиндоу"],"floor":["пол; этаж","flɔːr","фло"],
+"drawer":["ящик стола","drɔːr","дро"],"bag":["сумка","bæɡ","бэг"],"towel":["полотенце","ˈtaʊəl","тауэл"],"salt":["соль","sɔːlt","солт"],
+"milk":["молоко","mɪlk","милк"],"dish":["блюдо; тарелка","dɪʃ","диш"],"laundry":["стирка, бельё","ˈlɔːndri","лондри"],"shower":["душ","ˈʃaʊər","шауэ"],
+"hair":["волосы","heər","хэа"],"seat":["место, сиденье","siːt","сит"],"ticket":["билет","ˈtɪkɪt","тикит"],"cash":["наличные","kæʃ","кэш"],
+"password":["пароль","ˈpɑːswɜːrd","пасуёрд"],"charger":["зарядка","ˈtʃɑːrdʒər","чаджэ"],"laptop":["ноутбук","ˈlæptɒp","лэптоп"],
+"file":["файл","faɪl","файл"],"website":["сайт","ˈwebsaɪt","уэбсайт"],"design":["дизайн","dɪˈzaɪn","дизайн"],"designer":["дизайнер","dɪˈzaɪnər","дизайнэ"],
+"project":["проект","ˈprɒdʒekt","проджект"],"product":["продукт","ˈprɒdʌkt","продакт"],"client":["клиент","ˈklaɪənt","клайэнт"],
+"studio":["студия","ˈstjuːdiəʊ","стьюдиоу"],"homework":["домашка","ˈhəʊmwɜːrk","хоумуёрк"],"break":["перерыв; сломать","breɪk","брэйк"],
+"book":["книга; бронировать","bʊk","бук"],"film":["фильм","fɪlm","филм"],"music":["музыка","ˈmjuːzɪk","мьюзик"],"tool":["инструмент","tuːl","тул"],
+"screw":["винт, шуруп","skruː","скру"],"bike":["байк, велосипед","baɪk","байк"],"motorbike":["мотобайк","ˈməʊtərbaɪk","моутэбайк"],
+"umbrella":["зонт","ʌmˈbrelə","амбрэла"],"cloud":["облако, туча","klaʊd","клауд"],"power":["электричество; сила","ˈpaʊər","пауэ"],
+"dog":["собака","dɒɡ","дог"],"beard":["борода","bɪərd","биэд"],"brother":["брат","ˈbrʌðər","бразэ"],"sister":["сестра","ˈsɪstər","систэ"],
+"somebody":["кто-то","ˈsʌmbədi","самбэди"],"myself":["сам, себя","maɪˈself","майсэлф"],"mine":["мой (без сущ.)","maɪn","майн"],
+"neither":["ни тот ни другой; тоже нет","ˈnaɪðər","найзэ"],"both":["оба","bəʊθ","боуф"],"either":["любой из двух","ˈaɪðər","айзэ"],
+"interested":["заинтересованный","ˈɪntrestɪd","интрэстид"],"interesting":["интересный","ˈɪntrestɪŋ","интрэстиŋ"],"bored":["скучающий","bɔːrd","борд"],
+"boring":["скучный","ˈbɔːrɪŋ","бориŋ"],"honest":["честный","ˈɒnɪst","онист"],"special":["особенный","ˈspeʃəl","спэшэл"],
+"ready":["готовый","ˈredi","рэди"],"fine":["нормально, хорошо","faɪn","файн"],"fast":["быстрый","fɑːst","фаст"],"slow":["медленный","sləʊ","слоу"],
+"slower":["медленнее","ˈsləʊər","слоуэ"],"faster":["быстрее","ˈfɑːstər","фастэ"],"cheaper":["дешевле","ˈtʃiːpər","чипэ"],
+"cheapest":["самый дешёвый","ˈtʃiːpɪst","чипист"],"worst":["худший","wɜːrst","уёрст"],"worth":["стоящий (of value)","wɜːrθ","уёрф"],
+"warm":["тёплый","wɔːrm","уорм"],"hotter":["жарче","ˈhɒtər","хотэ"],"quieter":["тише","ˈkwaɪətər","куайэтэ"],"easier":["легче","ˈiːziər","изиэ"],
+"angry":["злой","ˈæŋɡri","эŋгри"],"happy":["счастливый","ˈhæpi","хэпи"],"sad":["грустный","sæd","сэд"],"shy":["стеснительный","ʃaɪ","шай"],
+"hungry":["голодный","ˈhʌŋɡri","хаŋгри"],"thirsty":["хочется пить","ˈθɜːrsti","фёрсти"],"sick":["больной","sɪk","сик"],"lucky":["везучий","ˈlʌki","лаки"],
+"funny":["смешной","ˈfʌni","фани"],"rude":["грубый","ruːd","руд"],"polite":["вежливый","pəˈlaɪt","полайт"],"strong":["сильный","strɒŋ","строŋ"],
+"safe":["безопасный","seɪf","сэйф"],"dangerous":["опасный","ˈdeɪndʒərəs","дэйнджэрэс"],"difficult":["трудный","ˈdɪfɪkəlt","дификэлт"],
+"simple":["простой","ˈsɪmpəl","симпл"],"important":["важный","ɪmˈpɔːrtənt","импотэнт"],"possible":["возможный","ˈpɒsəbəl","посэбл"],
+"young":["молодой","jʌŋ","яŋ"],"old":["старый","əʊld","оулд"],"rich":["богатый","rɪtʃ","рич"],"poor":["бедный","pʊər","пуэ"],
+"tall":["высокий","tɔːl","тол"],"short":["короткий, невысокий","ʃɔːrt","шорт"],"heavy":["тяжёлый","ˈhevi","хэви"],"empty":["пустой","ˈempti","эмпти"],
+"full":["полный","fʊl","фул"],"dirty":["грязный","ˈdɜːrti","дёрти"],"loud":["громкий","laʊd","лауд"],"careful":["осторожный","ˈkeərfəl","кэафэл"],
+"suddenly":["вдруг","ˈsʌdənli","садэнли"],"totally":["полностью","ˈtəʊtəli","тоутэли"],"absolutely":["абсолютно","ˌæbsəˈluːtli","эбсэлютли"],
+"exactly":["точно","ɪɡˈzæktli","игзэктли"],"almost":["почти","ˈɔːlməʊst","олмоуст"],"already":["уже","ɔːlˈredi","олрэди"],
+"crowd":["толпа","kraʊd","крауд"],"favour":["одолжение","ˈfeɪvər","фэйвэ"],"fun":["веселье","fʌn","фан"],"holidays":["каникулы","ˈhɒlədeɪz","холидэйз"],
+"dollar":["доллар","ˈdɒlər","долэ"],"remotely":["удалённо","rɪˈməʊtli","римоутли"],"online":["онлайн","ˌɒnˈlaɪn","онлайн"],
+"yeah":["ага, да","jeə","йеа"],"kinda":["типа (разг.)","ˈkaɪndə","кайнда"],"ok":["ладно, ок","ˌəʊˈkeɪ","оукэй"],
+"tough":["тяжёлый, суровый","tʌf","таф"],"sound":["звучать; звук","saʊnd","саунд"],"proud":["гордый","praʊd","прауд"],
+"smoke":["курить; дым","sməʊk","смоук"],"park":["парковаться; парк","pɑːrk","парк"],"drive":["водить","draɪv","драйв"],
+"eaten":["съеденный (3-я форма)","ˈiːtən","итэн"],"forgotten":["забытый (3-я форма)","fərˈɡɒtən","фэготэн"],"sent":["отправил","sent","сэнт"],
+"missed":["пропустил","mɪst","мист"],"moved":["переехал","muːvd","мувд"],"watched":["смотрел","wɒtʃt","уочт"],"fixed":["починил","fɪkst","фикст"],
+"tried":["пробовал","traɪd","трайд"],"arrived":["приехал","əˈraɪvd","эрайвд"],"stopped":["остановился","stɒpt","стопт"],
+"ate":["съел","eɪt","эйт"],"cost":["стоить","kɒst","кост"],"costs":["стоит","kɒsts","костс"],"decided":["решил","dɪˈsaɪdɪd","дисайдид"]
+});
+
 function dictLook(w){
   const k=w.toLowerCase().replace(/[\u2019]/g,"'");
   if(DICT[k])return DICT[k];
@@ -2307,9 +2431,19 @@ function grade(l,i,ok){
 }
 function norm(s){return String(s).toLowerCase().replace(/[\u2019\u02BC]/g,"'").replace(/[.,!?;:"()\u2014\u2013-]/g," ").replace(/\s+/g," ").trim();}
 function expand(s){return (" "+s+" ").replace(/n't\b/g," not").replace(/'ll\b/g," will").replace(/'re\b/g," are").replace(/'ve\b/g," have").replace(/'d\b/g," would").replace(/'m\b/g," am").replace(/\bcannot\b/g,"can not").replace(/\s+/g," ").trim();}
-function check(input,list){const a=norm(input),ae=expand(a);return list.some(x=>{const b=norm(x);return a===b||ae===expand(b);});}
+function bare(s){return String(s).replace(/'/g,"");}
+function check(input,list){
+  const a=norm(input),ae=expand(a),ab=bare(a);
+  return list.some(x=>{const b=norm(x);return a===b||ab===bare(b)||ae===expand(b);});
+}
 function lev(a,b){
   if(a===b)return 0;
+  // перестановка соседних букв считается одной опечаткой
+  if(a.length===b.length){
+    let dif=[];
+    for(let i=0;i<a.length;i++)if(a[i]!==b[i])dif.push(i);
+    if(dif.length===2&&dif[1]===dif[0]+1&&a[dif[0]]===b[dif[1]]&&a[dif[1]]===b[dif[0]])return 1;
+  }
   const m=a.length,n=b.length;if(!m)return n;if(!n)return m;
   let prev=new Array(n+1),cur=new Array(n+1);
   for(let j=0;j<=n;j++)prev[j]=j;
@@ -2323,17 +2457,59 @@ function lev(a,b){
   }
   return prev[n];
 }
-function nearMiss(input,list){
-  const a=norm(input);if(!a)return false;
-  let best=99,len=0;
-  list.forEach(x=>{
-    const b=norm(x);
-    const d=Math.min(lev(a,b),lev(expand(a),expand(b)));
-    if(d<best){best=d;len=b.length;}
-  });
-  const allow=len<=12?1:(len<=28?2:3);
-  return best>0&&best<=allow;
+/* служебные слова: разница в них — грамматика, а не опечатка */
+const GRAM={};
+("do does did don't doesn't didn't is are am was were isn't aren't wasn't weren't be been being "+
+ "have has had haven't hasn't hadn't will won't would wouldn't can can't cannot could couldn't "+
+ "should shouldn't must mustn't might may shall let's "+
+ "a an the to of in on at for from with by about into over under "+
+ "not no nor never ever yet already just still since than then so and but or if when while because "+
+ "i you he she it we they me him her them us my your his its our their mine yours "+
+ "this that these those there here who what where why how which whose "+
+ "some any much many more most less few little too enough very really quite pretty "+
+ "am're ve ll d s m re").split(" ").forEach(w=>{if(w)GRAM[w]=1;});
+
+/* пара вида work / works / worked / working — это форма слова, а не промах пальцем */
+function isFormPair(a,b){
+  const sh=a.length<b.length?a:b, ln=a.length<b.length?b:a;
+  if(ln.indexOf(sh)===0){
+    const suf=ln.slice(sh.length);
+    if(/^(s|es|d|ed|ing|ies|er|est|ly|'s|'re|'ve|'ll|'d|'m|n't)$/.test(suf))return true;
+  }
+  if(ln===sh.replace(/y$/,"ies")||ln===sh.replace(/y$/,"ied")||
+     ln===sh.replace(/e$/,"ing")||ln===sh.replace(/e$/,"ed")||
+     ln===sh.replace(/e$/,"er")||ln===sh.replace(/e$/,"est"))return true;
+  return false;
 }
+function nearMiss(input,list){
+  const a=norm(input);
+  if(!a)return false;
+  for(const x of list){
+    const b=norm(x);
+    if(a===b)return false;
+    const aw=a.split(" "),bw=b.split(" ");
+    if(aw.length!==bw.length)continue;          // пропущено или лишнее слово — это ошибка
+    const diff=[];
+    for(let i=0;i<aw.length;i++)if(aw[i]!==bw[i])diff.push([aw[i],bw[i]]);
+    if(diff.length!==1)continue;                // расходится больше одного слова — ошибка
+    let u=diff[0][0],v=diff[0][1];
+    if(bare(u)===bare(v))return false;          // разница только в апострофе — это верно
+    if(isFormPair(u,v))continue;                // окончание глагола или степень — грамматика
+    const uG=!!GRAM[u],vG=!!GRAM[v];
+    if(uG&&vG)continue;                         // перепутаны служебные слова — грамматика
+    let minLen=4;
+    if(uG||vG){
+      const other=uG?v:u;
+      if(GRAM[other]||dictLook(other))continue; // реальное другое слово — не опечатка
+      minLen=3;                                 // опечатка внутри служебного слова
+    }
+    if(Math.max(u.length,v.length)<minLen)continue;
+    const d=lev(u,v);
+    if(d===1||(d===2&&Math.max(u.length,v.length)>=8))return true;
+  }
+  return false;
+}
+
 
 /* ================= тема ================= */
 function sysDark(){return window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;}
@@ -2404,6 +2580,42 @@ function addSpeakers(root){
 }
 function decorate(){ttsify(app);addSpeakers(app);}
 let sheetOpen=false;
+let EXPOOL=null;
+function buildExamples(){
+  if(EXPOOL)return EXPOOL;
+  const pool=[];
+  PHRASES.forEach(g=>g.items.forEach(i=>pool.push([i[0],i[1]])));
+  LESSONS.forEach(l=>{
+    l.cards.forEach(c=>{
+      if(c.q&&c.ru&&/[A-Za-z]{2}/.test(c.q)&&/[\u0400-\u04FF]/.test(c.ru)&&c.q.indexOf("___")<0)
+        pool.push([c.q,c.ru]);
+    });
+    try{
+      const d=document.createElement("div");d.innerHTML=l.theory;
+      d.querySelectorAll(".ex").forEach(el=>{
+        const ruEl=el.querySelector(".ru");if(!ruEl)return;
+        const ru=ruEl.textContent.replace(/\s+/g," ").trim();
+        const c2=el.cloneNode(true);c2.querySelectorAll(".ru").forEach(x=>x.remove());
+        const en=c2.textContent.replace(/\s+/g," ").trim();
+        if(en&&ru&&/[A-Za-z]{2}/.test(en)&&en.length<90)pool.push([en,ru]);
+      });
+    }catch(e){}
+  });
+  EXPOOL=pool;return pool;
+}
+function findExamples(word,max){
+  const w=word.toLowerCase().replace(/[\u2019]/g,"'").replace(/[^a-z']/g,"");
+  if(w.length<2)return [];
+  const forms={};forms[w]=1;
+  [w+"s",w+"es",w+"ed",w+"ing",w.replace(/y$/,"ies"),w.replace(/e$/,"ing")].forEach(f=>forms[f]=1);
+  const base=w.replace(/(ies|es|ed|ing|s)$/,"");if(base.length>2)forms[base]=1;
+  let re;try{re=new RegExp("\\b("+Object.keys(forms).join("|")+")\\b","i");}catch(e){return [];}
+  const hits=buildExamples().filter(p=>re.test(p[0]));
+  hits.sort((a,b)=>Math.abs(a[0].length-38)-Math.abs(b[0].length-38));
+  const out=[],seen={};
+  for(const h of hits){const k=h[0].toLowerCase();if(seen[k])continue;seen[k]=1;out.push(h);if(out.length>=(max||2))break;}
+  return out;
+}
 function closeSheet(){sheetOpen=false;sheet.classList.remove("on");scrim.classList.remove("on");}
 function dismissSheet(){
   const top=stack[stack.length-1];
@@ -2413,12 +2625,17 @@ function dismissSheet(){
 scrim.onclick=dismissSheet;
 function openWord(word){
   const d=dictLook(word);
+  const exs=findExamples(word,2);
   sheet.innerHTML='<div class="grab"></div><div class="word">'+esc(word)+'</div>'+
     (d?'<div class="ipa">['+esc(d[1])+']</div><div class="rus">'+esc(d[2])+'</div><div class="tr">'+esc(d[0])+'</div>'
       :'<div class="miss">Этого слова нет в мини-словаре, но произношение работает.</div>')+
+    (exs.length?'<div class="sx">'+exs.map((e,i)=>
+      '<div class="sxi"><div class="sxe">'+esc(e[0])+'<button class="spk" style="position:static;margin-left:8px" data-sx="'+i+'">'+ICON.sound+'</button></div>'+
+      '<div class="sxr">'+esc(e[1])+'</div></div>').join("")+'</div>':"")+
     '<div style="height:16px"></div><button class="btn" id="sayBtn">'+ICON.sound+' Произнести ещё раз</button>'+
     '<div style="height:8px"></div><button class="btn ghost" id="clsBtn">Закрыть</button>';
   document.getElementById("sayBtn").onclick=()=>say(word);
+  sheet.querySelectorAll("[data-sx]").forEach(b=>b.onclick=e=>{e.stopPropagation();say(exs[+b.dataset.sx][0]);});
   document.getElementById("clsBtn").onclick=dismissSheet;
   if(!sheetOpen)pushHist({sheet:true});
   sheetOpen=true;
