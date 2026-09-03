@@ -168,7 +168,7 @@ tr:last-child td{border-bottom:0}
 .qmeta{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted);margin:4px 0 10px}
 .qprog{height:3px;background:var(--elev);border-radius:99px;overflow:hidden;margin-bottom:20px}
 .qprog i{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .25s ease}
-.qtask{font-size:13px;color:var(--muted);margin-bottom:10px}
+.qtask{font-size:15px;font-weight:600;color:var(--accent);letter-spacing:-.01em;margin-bottom:12px}
 .prompt{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.3;margin:4px 0 22px}
 .playbox{margin-bottom:18px}
 .bubble{background:var(--card);border:1px solid var(--border);border-radius:16px 16px 16px 4px;padding:14px 16px}
@@ -2674,14 +2674,22 @@ function stripTime(ws){
   let a=ws.slice(),ch=true;
   while(ch){
     ch=false;
-    if(a.length>1&&TIME1[a[0]]){a.shift();ch=true;}
-    if(a.length>1&&TIME1[a[a.length-1]]){a.pop();ch=true;}
-    if(a.length>2&&TIME2A[a[0]]&&TIME2B[a[1]]){a.splice(0,2);ch=true;}
-    if(a.length>2&&TIME2A[a[a.length-2]]&&TIME2B[a[a.length-1]]){a.splice(-2,2);ch=true;}
-    if(a.length>2&&a[0]==="right"&&a[1]==="now"){a.splice(0,2);ch=true;}
-    if(a.length>2&&a[a.length-2]==="right"&&a[a.length-1]==="now"){a.splice(-2,2);ch=true;}
+    // сначала двухсловные обстоятельства, иначе от «right now» остаётся «right»
+    if(a.length>2&&a[0]==="right"&&a[1]==="now"){a.splice(0,2);ch=true;continue;}
+    if(a.length>2&&a[a.length-2]==="right"&&a[a.length-1]==="now"){a.splice(-2,2);ch=true;continue;}
+    if(a.length>2&&TIME2A[a[0]]&&TIME2B[a[1]]){a.splice(0,2);ch=true;continue;}
+    if(a.length>2&&TIME2A[a[a.length-2]]&&TIME2B[a[a.length-1]]){a.splice(-2,2);ch=true;continue;}
+    if(a.length>1&&TIME1[a[0]]){a.shift();ch=true;continue;}
+    if(a.length>1&&TIME1[a[a.length-1]]){a.pop();ch=true;continue;}
   }
   return a;
+}
+const SOFT={now:1,right:1,currently:1,today:1,already:1};
+function softDiffOk(a,b){
+  const A=a?a.split(" "):[],B=b?b.split(" "):[],cnt={};
+  A.forEach(w=>cnt[w]=(cnt[w]||0)+1);
+  B.forEach(w=>cnt[w]=(cnt[w]||0)-1);
+  return Object.keys(cnt).every(w=>cnt[w]===0||SOFT[w]);
 }
 function splitCore(t){
   const ws=bare(expand(norm(t))).split(" ").filter(Boolean);
@@ -2698,8 +2706,9 @@ function check(input,list){
     const b=norm(x);
     if(a===b||ab===bare(b)||ae===expand(b))return true;
     const B=splitCore(x);
-    // порядок обстоятельства времени свободный, но само оно должно быть на месте
-    return A.c.split(" ").length>2&&A.c===B.c&&A.t===B.t;
+    // порядок обстоятельства времени свободный; now и today можно добавить или опустить,
+    // а yesterday или next week пропускать нельзя — они несут смысл
+    return A.c.split(" ").length>2&&A.c===B.c&&(A.t===B.t||softDiffOk(A.t,B.t));
   });
 }
 function lev(a,b){
@@ -2879,7 +2888,8 @@ function buildExamples(){
       if(c.t!=="mc"&&c.ru&&Array.isArray(c.a)&&c.a[0]&&/[\u0400-\u04FF]/.test(c.ru)&&!c.q){
         let en=c.a[0].replace(/\bi\b/g,"I").replace(/\bi'/g,"I'").replace(/\bin it\b/g,"in IT").replace(/\bbali\b/gi,"Bali").replace(/\benglish\b/gi,"English").replace(/\brussia\b/gi,"Russia").replace(/\bjapan\b/gi,"Japan").replace(/\bfriday\b/gi,"Friday").replace(/\bmonday\b/gi,"Monday").replace(/\bspanish\b/gi,"Spanish").replace(/\bubud\b/gi,"Ubud");
         en=en.charAt(0).toUpperCase()+en.slice(1);
-        if(!/[.!?]$/.test(en))en+=/\?\s*$/.test(c.ru)?"?":".";
+        const isQ=/\?/.test(c.ru)||/^(do|does|did|are|is|am|have|has|can|could|will|would|should|what|where|when|why|how|who|which)\b/i.test(c.a[0]);
+        if(!/[.!?]$/.test(en))en+=isQ?"?":".";
         splitPair(en,c.ru,pool);
       }
     });
@@ -3008,16 +3018,33 @@ function backBtn(to,label){return '<button class="back" data-nav="'+to+'">'+ICON
 
 /* ================= уроки ================= */
 function dayIndex(p){return PLAN.indexOf(p)+1;}
-function dayDone(p){return p.ids.length>0&&p.ids.every(id=>{const st=lessonStat(byId(id));return st.started===st.total;});}
+function lessonComplete(id){
+  const st=lessonStat(byId(id));
+  if(st.started<st.total)return false;
+  if(!PATTERNS[id])return true;
+  return !!(S.pat[id]&&S.pat[id].box>0)&&!!(S.lis[id]&&S.lis[id].box>0)&&!!(S.voc[id]&&S.voc[id].box>0);
+}
+function lessonSteps(id){
+  const st=lessonStat(byId(id)),n=PATTERNS[id]?4:1;
+  let done=(st.started===st.total?1:0);
+  if(PATTERNS[id]){
+    if(S.pat[id]&&S.pat[id].box>0)done++;
+    if(S.lis[id]&&S.lis[id].box>0)done++;
+    if(S.voc[id]&&S.voc[id].box>0)done++;
+  }
+  return {done:done,n:n};
+}
+function dayDone(p){return p.ids.length>0&&p.ids.every(lessonComplete);}
 function currentPlan(){for(const p of PLAN){if(p.ids.length&&!dayDone(p))return p;}return PLAN[PLAN.length-1];}
 function tagLine(id){const t=TAGS[id]||[];return t.length?'<div class="tags">'+t.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>':"";}
 function lessonRow(l){
-  const st=lessonStat(l),pct=Math.round(st.learned/st.total*100),done=st.learned===st.total;
+  const sp=lessonSteps(l.id),done=lessonComplete(l.id),pct=Math.round(sp.done/sp.n*100);
   return '<div class="row" data-les="'+l.id+'">'+
    '<div class="mark '+(done?"done":"")+'" style="'+MARKST+'">'+(done?"\u2713":"")+'</div>'+
    '<div class="body"><div class="t">'+esc(l.t)+'</div><div class="s">'+esc(l.s)+'</div>'+tagLine(l.id)+
-   (st.started?'<div class="bar"><i style="width:'+pct+'%"></i></div>':'')+'</div>'+
-   '<div class="chev">'+ICON.chevR+'</div></div>';
+   (sp.done?'<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+     (sp.n>1&&!done?'<div class="small" style="font-size:11.5px;margin-top:4px">шагов пройдено '+sp.done+' из '+sp.n+'</div>':''):'')+
+   '</div><div class="chev">'+ICON.chevR+'</div></div>';
 }
 function viewLessons(){
   const d=dueCards().length,p=currentPlan(),dn=dayIndex(p);
@@ -3352,8 +3379,8 @@ function patDone(){
     : (okAll?"Микрофон тебя понимает. Значит и человек поймёт."
            :"Часть фраз не распозналась. Послушай эталоны и прогони дрилл ещё раз.");
   let nextBtn="";
-  if(!mixed&&mode==="drill")nextBtn='<button class="btn" id="toNext">'+ICON.sound+' Дальше: на слух</button><div style="height:10px"></div>';
-  if(!mixed&&mode==="listen")nextBtn='<button class="btn" id="toNext">'+ICON.sound+' Дальше: сказать вслух</button><div style="height:10px"></div>';
+  if(!mixed&&mode==="drill"&&okAll)nextBtn='<button class="btn" id="toNext">'+ICON.sound+' Дальше: на слух</button><div style="height:10px"></div>';
+  if(!mixed&&mode==="listen"&&okAll)nextBtn='<button class="btn" id="toNext">'+ICON.sound+' Дальше: сказать вслух</button><div style="height:10px"></div>';
   app.innerHTML='<div class="done"><div class="big">'+good+' из '+n+'</div>'+
     '<p class="small" style="margin-top:8px">'+msg+'</p></div>'+nextBtn+
     '<button class="btn sec" id="again">Ещё раз</button><div style="height:10px"></div>'+
