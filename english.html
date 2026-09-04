@@ -172,6 +172,25 @@ tr:last-child td{border-bottom:0}
 .prompt{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.3;margin:4px 0 22px}
 .playbox{margin-bottom:18px}
 .bubble{background:var(--card);border:1px solid var(--border);border-radius:16px 16px 16px 4px;padding:14px 16px}
+.steprow{
+  display:flex;align-items:center;gap:11px;padding:11px 2px;
+  border-top:1px solid var(--border);cursor:pointer;
+}
+.steprow:active{opacity:.6}
+.stepmark{
+  width:21px;height:21px;min-width:21px;flex:0 0 21px;border-radius:50%;
+  border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;
+  font-size:12px;line-height:1;color:var(--muted);box-sizing:border-box;
+}
+.stepmark.ok{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:700}
+.stept{font-size:14.5px;font-weight:500;letter-spacing:-.01em}
+.steps2{font-size:12px;color:var(--muted);margin-top:1px}
+.promptbox{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:14px 15px;margin:14px 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:13px;line-height:1.55;color:var(--fg);white-space:pre-wrap;word-break:break-word;
+  max-height:340px;overflow-y:auto;
+}
 .bubble .be{font-size:18px;font-weight:600;line-height:1.4;letter-spacing:-.01em}
 .bubble .br{font-size:13.5px;color:var(--muted);margin-top:5px}
 .tbar{height:6px;background:var(--elev);border-radius:99px;overflow:hidden;margin-bottom:18px}
@@ -2141,6 +2160,33 @@ Object.keys(FIX).forEach(k=>{
   if(l&&l.cards[+p[1]])Object.assign(l.cards[+p[1]],FIX[k]);
 });
 
+/* ============ дополнительные допустимые варианты ответа ============ */
+const ALT={
+"get#1":["give me a call when you get home","call me when you get back home"],
+"survival#1":["let me think about it"],
+"put#0":["put this on the table"],
+"put#4":["cover this with a towel"],
+"put#9":["put this back","put it back in place"],
+"put#14":["put this under the table"],
+"there#9":["the room has two windows"],
+"relative#12":["the guy that called you is waiting"],
+"cancould#11":["we could try a different place"],
+"cancould#2":["we could meet up tomorrow"],
+"pres-simple#10":["we're living in bali"],
+"should#2":["you should try that place"],
+"caus#3":["i want him to give me a call"],
+"colloc#5":["take your time, no rush"],
+"prep-verb#12":["don't worry about that"],
+"questions#9":["where do you work at"],
+"mistakes#13":["explain it to me"]
+};
+Object.keys(ALT).forEach(k=>{
+  const p=k.split("#"),l=LESSONS.find(x=>x.id===p[0]);
+  if(!l)return;
+  const c=l.cards[+p[1]];
+  if(c&&Array.isArray(c.a))ALT[k].forEach(v=>{if(c.a.indexOf(v)<0)c.a.push(v);});
+});
+
 
 
 
@@ -2343,6 +2389,73 @@ const DIALOGS=[
 {q:"Let me know if you need help.",ru:"Дай знать, если понадобится помощь.",task:"Поблагодари и скажи, что напишешь",a:["thanks, i'll let you know","thank you, i'll let you know","thanks, i'll text you"],ans:"Thanks, I'll let you know."},
 {q:"Good luck with the project!",ru:"Удачи с проектом!",task:"Поблагодари",a:["thanks a lot","thank you","thanks"],ans:"Thanks a lot!"}]}
 ];
+
+
+/* ============ разговор с ИИ: промпт для Gemini, копипаст-практика ============ */
+const AI_TALKS=[
+{id:"ai1",day:6,title:"Расскажи о себе",
+ topic:"small talk: introduce yourself, where you're from, what you do, why you live in Bali",
+ chips:["Present Simple","Present Continuous","вопросы и отрицания"],
+ focus:["Present Simple for facts, routines and opinions","Present Continuous for what's happening right now or temporarily","basic questions with do / does"]},
+{id:"ai2",day:15,title:"Вчера и планы",
+ topic:"what you did yesterday, your plans for this week, and asking for something politely",
+ chips:["Past Simple","will / going to","should","cancould"],
+ focus:["Past Simple for finished actions","will and going to for plans and predictions","should for giving or asking advice","polite requests with can / could"]},
+{id:"ai3",day:23,title:"Опыт и обязанности",
+ topic:"things you've done in your life, things you have to do, and politely asking for things",
+ chips:["Present Perfect","have to","used to","would"],
+ focus:["Present Perfect for life experience (have you ever...)","have to / need to for obligation","used to for past habits","polite I'd like / would you mind"]},
+{id:"ai4",day:31,title:"Дом и распорядок",
+ topic:"describing your home, your daily routine, and your neighborhood",
+ chips:["there is / are","a / the","get / put","have, take, make, do"],
+ focus:["there is / there are for what exists somewhere","a / the articles","phrasal verbs with get and put","collocations with have, take, make, do"]},
+{id:"ai5",day:35,title:"Свободный разговор",
+ topic:"a free conversation about your work, your daily life, and your opinions — like meeting someone new",
+ chips:["связки because/so","сравнения","истории в прошлом","смягчение"],
+ focus:["linking words because, so, though, actually","comparisons (cheaper, more expensive, as...as)","telling a short story with while / then / it turned out","softening phrases like kind of, to be honest, I guess"]}
+];
+function buildAiPrompt(t){
+  return "You are my English conversation partner. I'm a Russian-speaking learner, level A2\u2013B1.\n\n"+
+"Topic for this conversation: "+t.topic+".\n\n"+
+"Please:\n"+
+"- Ask me one question at a time, in simple English. Wait for my answer before asking the next one.\n"+
+"- If I make a clear grammar or word-choice mistake, correct it in one short line (for example: \"Small correction: it's 'I have been' not 'I have be'.\"), then continue the conversation naturally \u2014 don't stop for a full grammar lecture.\n"+
+"- If my answer is fine, just react naturally and move on.\n"+
+"- Keep your own sentences short and simple, A2\u2013B1 level.\n"+
+"- Ask about 6\u20138 questions total, then wrap up with a short, encouraging summary IN RUSSIAN: what went well, and 1\u20132 things to pay attention to next time.\n\n"+
+"Try to naturally use these constructions in your questions, since I've been practicing them:\n"+t.focus.map(f=>"\u2022 "+f).join("\n")+"\n\n"+
+"Let's start \u2014 greet me and ask your first question.";
+}
+async function copyPrompt(text,btn){
+  const done=()=>{const old=btn.innerHTML;btn.innerHTML=ICON.check+" Скопировано";setTimeout(()=>{btn.innerHTML=old;},1600);};
+  try{await navigator.clipboard.writeText(text);done();return;}catch(e){}
+  try{
+    const ta=document.createElement("textarea");
+    ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);ta.select();document.execCommand("copy");
+    document.body.removeChild(ta);done();
+  }catch(e){btn.innerHTML="Не удалось скопировать — выдели текст вручную";}
+}
+function viewAi(id){
+  const t=AI_TALKS.find(x=>x.id===id),prompt=buildAiPrompt(t),done=!!S.ai[id];
+  setHead("Разговор с ИИ",t.title);
+  app.innerHTML=backBtn("lessons","Уроки")+
+    '<h2 style="margin-top:10px">'+esc(t.title)+'</h2>'+
+    '<div class="tags" style="margin-bottom:16px">'+t.chips.map(c=>'<span>'+esc(c)+'</span>').join("")+'</div>'+
+    '<p class="small">Скопируй промпт ниже и вставь в Gemini — текстом или в голосовом режиме. Дальше говоришь с ним по-английски: он будет задавать вопросы, мягко поправлять и продолжать разговор.</p>'+
+    '<p class="small">Это открытая практика без автопроверки — как «Слабые места» и дриллы, честность здесь важнее галочки.</p>'+
+    '<div class="promptbox" id="pbox">'+esc(prompt)+'</div>'+
+    '<div style="height:14px"></div>'+
+    '<button class="btn" id="copyBtn">'+ICON.layers+' Скопировать промпт</button>'+
+    '<div style="height:10px"></div>'+
+    '<a class="btn sec" href="https://gemini.google.com/app" target="_blank" rel="noopener" style="text-decoration:none;box-sizing:border-box">'+ICON.chevR+' Открыть Gemini</a>'+
+    '<div style="height:10px"></div>'+
+    '<button class="btn '+(done?"sec":"ghost")+'" id="doneBtn">'+(done?ICON.check+" Пройдено \\u2014 отметить заново":"Отметить как пройдено")+'</button>';
+  document.getElementById("copyBtn").onclick=e=>copyPrompt(prompt,e.currentTarget);
+  document.getElementById("doneBtn").onclick=()=>{
+    S.ai[id]={date:today()};saveState();viewAi(id);
+  };
+}
 
 /* ============ теги и план по дням ============ */
 const TAGS={
@@ -2667,20 +2780,55 @@ function grade(l,i,ok){
 function norm(s){return String(s).toLowerCase().replace(/[\u2019\u02BC]/g,"'").replace(/[.,!?;:"()\u2014\u2013-]/g," ").replace(/\s+/g," ").trim();}
 function expand(s){return (" "+s+" ").replace(/n't\b/g," not").replace(/'ll\b/g," will").replace(/'re\b/g," are").replace(/'ve\b/g," have").replace(/'d\b/g," would").replace(/'m\b/g," am").replace(/\bcannot\b/g,"can not").replace(/\s+/g," ").trim();}
 function bare(s){return String(s).replace(/'/g,"");}
+/* приведение к общему виду: разговорные формы, числа, британское написание */
+const COLLOQ=[
+ [/\bgonna\b/g,"going to"],[/\bwanna\b/g,"want to"],[/\bgotta\b/g,"got to"],
+ [/\bkinda\b/g,"kind of"],[/\bsorta\b/g,"sort of"],[/\blemme\b/g,"let me"],
+ [/\bgimme\b/g,"give me"],[/\bdunno\b/g,"do not know"],[/\bcuz\b|\bcos\b/g,"because"],
+ [/\b(yeah|yep|yup|yea)\b/g,"yes"],[/\b(nope|nah)\b/g,"no"],[/\bokay\b/g,"ok"],
+ [/\bfavour\b/g,"favor"],[/\bcolour\b/g,"color"],[/\brealise\b/g,"realize"],
+ [/\bapologise\b/g,"apologize"],[/\bpractise\b/g,"practice"],[/\btravelling\b/g,"traveling"],
+ [/\bo clock\b/g,""],[/\boclock\b/g,""]
+];
+const NUMW={zero:"0",one:"1",two:"2",three:"3",four:"4",five:"5",six:"6",seven:"7",eight:"8",
+ nine:"9",ten:"10",eleven:"11",twelve:"12",fifteen:"15",twenty:"20",thirty:"30",forty:"40",fifty:"50",sixty:"60"};
+/* формы, написанные без апострофа: im, dont, cant — их пишут постоянно */
+const NOAPOS={im:"i am",ive:"i have",ill:"i will",dont:"do not",doesnt:"does not",didnt:"did not",
+ cant:"can not",cannot:"can not",wont:"will not",wouldnt:"would not",shouldnt:"should not",
+ couldnt:"could not",isnt:"is not",arent:"are not",wasnt:"was not",werent:"were not",
+ hasnt:"has not",havent:"have not",hadnt:"had not",theyre:"they are",youre:"you are",
+ youve:"you have",youll:"you will",weve:"we have",theyve:"they have",thats:"that is",
+ whats:"what is",lets:"let us",hes:"he is",shes:"she is"};
+function canon(t){
+  let x=expand(norm(t));
+  COLLOQ.forEach(([re,to])=>{x=x.replace(re,to);});
+  x=bare(x);
+  x=x.split(" ").map(w=>NOAPOS[w]||w).join(" ");
+  // have got to / got to / gotta — одно и то же
+  x=x.replace(/\bhave got to\b|\bhas got to\b|\bhad got to\b/g,"got to").replace(/\bhave got\b/g,"have");
+  x=x.split(" ").map(w=>NUMW[w]||w).filter(Boolean).join(" ");
+  return x.replace(/\s+/g," ").trim();
+}
+/* «please» и вежливые довески можно ставить или не ставить */
+const OPTIONAL={please:1};
+function dropOptional(t){return t.split(" ").filter(w=>!OPTIONAL[w]).join(" ");}
 const TIME1={yesterday:1,today:1,tomorrow:1,tonight:1,now:1,then:1,later:1,soon:1,always:1,usually:1,often:1,sometimes:1};
 const TIME2A={last:1,next:1,this:1,every:1},TIME2B={week:1,year:1,month:1,weekend:1,morning:1,evening:1,night:1,day:1,summer:1,winter:1,monday:1,friday:1,sunday:1};
 /* убираем обстоятельство времени с начала и конца — его можно ставить и туда, и туда */
 function stripTime(ws){
   let a=ws.slice(),ch=true;
+  // однословные и двухсловные обстоятельства времени свободно двигаются по всей фразе,
+  // не только к началу или концу — «I called him yesterday at noon» не хуже, чем «Yesterday I called him»
   while(ch){
     ch=false;
-    // сначала двухсловные обстоятельства, иначе от «right now» остаётся «right»
-    if(a.length>2&&a[0]==="right"&&a[1]==="now"){a.splice(0,2);ch=true;continue;}
-    if(a.length>2&&a[a.length-2]==="right"&&a[a.length-1]==="now"){a.splice(-2,2);ch=true;continue;}
-    if(a.length>2&&TIME2A[a[0]]&&TIME2B[a[1]]){a.splice(0,2);ch=true;continue;}
-    if(a.length>2&&TIME2A[a[a.length-2]]&&TIME2B[a[a.length-1]]){a.splice(-2,2);ch=true;continue;}
-    if(a.length>1&&TIME1[a[0]]){a.shift();ch=true;continue;}
-    if(a.length>1&&TIME1[a[a.length-1]]){a.pop();ch=true;continue;}
+    for(let i=0;i<a.length-1;i++){
+      if(a[i]==="right"&&a[i+1]==="now"){a.splice(i,2);ch=true;break;}
+      if(TIME2A[a[i]]&&TIME2B[a[i+1]]){a.splice(i,2);ch=true;break;}
+    }
+    if(ch)continue;
+    for(let i=0;i<a.length;i++){
+      if(a.length>1&&TIME1[a[i]]){a.splice(i,1);ch=true;break;}
+    }
   }
   return a;
 }
@@ -2692,7 +2840,7 @@ function softDiffOk(a,b){
   return Object.keys(cnt).every(w=>cnt[w]===0||SOFT[w]);
 }
 function splitCore(t){
-  const ws=bare(expand(norm(t))).split(" ").filter(Boolean);
+  const ws=canon(t).split(" ").filter(Boolean);
   const core=stripTime(ws),cnt={};
   ws.forEach(w=>cnt[w]=(cnt[w]||0)+1);
   core.forEach(w=>cnt[w]--);
@@ -2701,10 +2849,10 @@ function splitCore(t){
   return {c:core.join(" "),t:moved.sort().join(" ")};
 }
 function check(input,list){
-  const a=norm(input),ae=expand(a),ab=bare(a),A=splitCore(input);
+  const a=norm(input),ae=expand(a),ab=bare(a),ac=canon(input),ao=dropOptional(ac),A=splitCore(input);
   return list.some(x=>{
-    const b=norm(x);
-    if(a===b||ab===bare(b)||ae===expand(b))return true;
+    const b=norm(x),bc=canon(x);
+    if(a===b||ab===bare(b)||ae===expand(b)||ac===bc||ao===dropOptional(bc))return true;
     const B=splitCore(x);
     // порядок обстоятельства времени свободный; now и today можно добавить или опустить,
     // а yesterday или next week пропускать нельзя — они несут смысл
@@ -2757,10 +2905,10 @@ function isFormPair(a,b){
   return false;
 }
 function nearMiss(input,list){
-  const a=norm(input);
+  const a=canon(input);
   if(!a)return false;
   for(const x of list){
-    const b=norm(x);
+    const b=canon(x);
     if(a===b)return false;
     const aw=a.split(" "),bw=b.split(" ");
     if(aw.length!==bw.length)continue;          // пропущено или лишнее слово — это ошибка
@@ -2802,7 +2950,7 @@ document.getElementById("themeBtn").onclick=()=>{S.theme=themeNow()==="dark"?"li
 /* ================= озвучка ================= */
 let VOICE=null;
 function pickVoice(){try{const v=speechSynthesis.getVoices()||[];VOICE=v.find(x=>/en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;}catch(e){}}
-if(window.speechSynthesis){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+try{if(window.speechSynthesis){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}}catch(e){}
 function say(t){
   if(!window.speechSynthesis)return false;
   t=String(t).replace(/[\u0400-\u04FF]+/g," ").trim();
@@ -2993,6 +3141,39 @@ window.addEventListener("popstate",()=>{
 });
 function setHead(t,s){document.getElementById("hTitle").textContent=t;document.getElementById("hSub").textContent=s||"";}
 function render(){
+  try{
+    renderInner();
+  }catch(e){
+    console.error(e);
+    renderCrash(e);
+  }
+}
+function renderCrash(e){
+  setHead("English Trainer","сбой");
+  app.innerHTML=
+    '<div class="card"><p style="margin:0 0 8px;font-weight:600">Что-то пошло не так</p>'+
+    '<p class="small" style="margin:0">Экран не смог отрисоваться. Прогресс не пострадал — он хранится отдельно. Попробуй обновить страницу.</p></div>'+
+    '<button class="btn" id="crReload">Обновить страницу</button><div style="height:10px"></div>'+
+    '<button class="btn sec" id="crHome">Вернуться к урокам</button><div style="height:10px"></div>'+
+    '<button class="btn ghost" id="crDetails">Показать текст ошибки</button>'+
+    '<div id="crBox" style="display:none;margin-top:10px" class="small">'+esc(String(e&&e.stack||e))+'</div>';
+  navEl.innerHTML="";
+  document.getElementById("crReload").onclick=()=>location.reload();
+  document.getElementById("crHome").onclick=()=>{view={n:"lessons"};render();};
+  document.getElementById("crDetails").onclick=()=>{
+    const b=document.getElementById("crBox");b.style.display=b.style.display==="none"?"block":"none";
+  };
+}
+function sanitizeState(){
+  ["srs","pat","voc","lis","err","words","dia","ai","speed"].forEach(k=>{
+    if(!S[k]||typeof S[k]!=="object")S[k]={};
+  });
+  if(typeof S.streak!=="number")S.streak=0;
+  if(typeof S.total!=="number")S.total=0;
+  if(typeof S.right!=="number")S.right=0;
+}
+function renderInner(){
+  sanitizeState();
   markDay();
   const n=view.n;
   if(n==="lessons")viewLessons();
@@ -3001,6 +3182,7 @@ function render(){
   else if(n==="pat")viewPat();
   else if(n==="words")viewWords();
   else if(n==="dia")viewDia();
+  else if(n==="ai")viewAi(view.id);
   else if(n==="review")viewReview();
   else if(n==="bank")viewBank();
   else if(n==="progress")viewProgress();
@@ -3046,6 +3228,47 @@ function lessonRow(l){
      (sp.n>1&&!done?'<div class="small" style="font-size:11.5px;margin-top:4px">шагов пройдено '+sp.done+' из '+sp.n+'</div>':''):'')+
    '</div><div class="chev">'+ICON.chevR+'</div></div>';
 }
+/* сегодняшний урок: все шаги видны и запускаются в один тап */
+function todayCard(id){
+  const l=byId(id),st=lessonStat(l),pat=PATTERNS[id],CH=10;
+  const steps=[];
+  steps.push({go:"lesson",t:"Теория",s:"разобрать правило",done:st.started>0});
+  if(l.cards.length<=12){
+    steps.push({go:"blk:0",t:"Разбор · "+l.cards.length+" заданий",s:"медленно, с объяснениями",done:st.started===st.total});
+  }else{
+    for(let k=0;k<l.cards.length;k+=CH){
+      const part=l.cards.slice(k,k+CH);
+      const seen=part.every((c,j)=>S.srs[key(id,k+j)]);
+      steps.push({go:"blk:"+k,t:"Разбор · блок "+(k/CH+1),s:"задания "+(k+1)+"–"+Math.min(k+CH,l.cards.length),done:seen});
+    }
+  }
+  if(pat){
+    steps.push({go:"drill",t:"Дрилл на скорость",s:pat.items.length+" фраз по пять секунд",done:!!(S.pat[id]&&S.pat[id].box>0)});
+    steps.push({go:"listen",t:"На слух",s:"6 фраз без текста",done:!!(S.lis[id]&&S.lis[id].box>0)});
+    steps.push({go:"voice",t:"Голос",s:"6 фраз в микрофон",done:!!(S.voc[id]&&S.voc[id].box>0)});
+  }
+  const done=steps.filter(x=>x.done).length;
+  const pct=Math.round(done/steps.length*100);
+  let h='<div class="card" style="padding:16px 16px 8px">'+
+    '<div style="display:flex;align-items:flex-start;gap:12px">'+
+      '<div class="mark '+(done===steps.length?"done":"cur")+'" style="'+MARKST+'">'+
+        (done===steps.length?"\u2713":"")+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div class="t" style="font-size:16px;font-weight:600;letter-spacing:-.01em">'+esc(l.t)+'</div>'+
+        '<div class="s" style="font-size:13px;color:var(--muted);margin-top:2px">'+esc(l.s)+'</div>'+
+        '<div class="bar" style="margin-top:8px"><i style="width:'+pct+'%"></i></div>'+
+        '<div class="small" style="font-size:11.5px;margin-top:4px">шагов пройдено '+done+' из '+steps.length+'</div>'+
+      '</div>'+
+    '</div><div style="height:12px"></div>';
+  steps.forEach(x=>{
+    h+='<div class="steprow" data-go="'+x.go+'" data-lid="'+id+'">'+
+       '<div class="stepmark'+(x.done?" ok":"")+'">'+(x.done?"\u2713":"")+'</div>'+
+       '<div style="flex:1;min-width:0"><div class="stept">'+esc(x.t)+'</div>'+
+       '<div class="steps2">'+esc(x.s)+'</div></div>'+
+       '<div class="chev">'+ICON.chevR+'</div></div>';
+  });
+  return h+'</div>';
+}
 function viewLessons(){
   const d=dueCards().length,p=currentPlan(),dn=dayIndex(p);
   setHead("English Trainer",(S.streak||0)+" дн. подряд");
@@ -3057,7 +3280,7 @@ function viewLessons(){
   }
   if(d>0)h+='<button class="btn" id="goRev">'+ICON.repeat+' Повтор: '+d+' '+plural(d,"карточка","карточки","карточек")+'</button><div style="height:18px"></div>';
   h+='<div class="label">День '+dn+' из '+PLAN.length+'</div>';
-  h+=p.ids.length?p.ids.map(id=>lessonRow(byId(id))).join(""):'<p class="small">Новых уроков сегодня нет — только повтор.</p>';
+  h+=p.ids.length?p.ids.map(id=>todayCard(id)).join(""):'<p class="small">Новых уроков сегодня нет — только повтор.</p>';
   h+='<div class="goal"><b>Задание вслух.</b> '+esc(p.g)+
      (p.ex?'<div class="gex">'+p.ex.map(x=>'<div>'+esc(x)+'</div>').join("")+'</div>':"")+'</div>';
   const cd2=dayIndex(currentPlan());
@@ -3070,6 +3293,16 @@ function viewLessons(){
       '<div class="body"><div class="t">'+esc(D.t)+'</div>'+
       '<div class="s">'+(open?D.lines.length+' реплик'+(done&&S.dia[D.id].score!==undefined?' · '+S.dia[D.id].score+'%':''):'откроется на '+D.day+'-й день')+'</div></div>'+
       (open?'<div class="chev">'+ICON.chevR+'</div>':'')+'</div>';
+  });
+  h+='<div class="label">Разговор с ИИ</div>'+
+     '<p class="small" style="margin-bottom:12px">Живой диалог с Gemini на английском — без сценария, с настоящей непредсказуемостью. Открывается по мере прохождения курса, всегда на дне без нового урока.</p>';
+  AI_TALKS.forEach(t=>{
+    const openA=cd2>=t.day,doneA=!!S.ai[t.id];
+    h+='<div class="row"'+(openA?' data-ai="'+t.id+'"':' style="opacity:.5"')+'>'+
+      '<div class="mark '+(doneA?"done":"")+'" style="'+MARKST+'">'+(doneA?"\u2713":"")+'</div>'+
+      '<div class="body"><div class="t">'+esc(t.title)+'</div>'+
+      '<div class="s">'+(openA?"промпт — копируй и говори с Gemini":"откроется на "+t.day+"-й день")+'</div></div>'+
+      (openA?'<div class="chev">'+ICON.chevR+'</div>':'')+'</div>';
   });
   h+='<div class="seg"><button data-h="plan" class="'+(homeMode==="plan"?"on":"")+'">План</button>'+
      '<button data-h="tags" class="'+(homeMode==="tags"?"on":"")+'">Темы</button></div>';
@@ -3091,7 +3324,17 @@ function viewLessons(){
   const gr=document.getElementById("goRev");if(gr)gr.onclick=()=>go({n:"review"});
   app.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{homeMode=b.dataset.h;render();});
   app.querySelectorAll("[data-les]").forEach(el=>el.onclick=()=>go({n:"lesson",id:el.dataset.les}));
+  app.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>{
+    const what=el.dataset.go,lid=el.dataset.lid,l=byId(lid);
+    if(what==="lesson")return go({n:"lesson",id:lid});
+    if(what.indexOf("blk:")===0){
+      const k=+what.slice(4),cards=l.cards.map((c,i)=>({l:lid,i:i,c:c}));
+      return startDrill(l.cards.length<=12?cards:cards.slice(k,k+10),"lesson",l.t);
+    }
+    startPat(lid,what);
+  });
   app.querySelectorAll("[data-dia]").forEach(el=>el.onclick=()=>startDia(el.dataset.dia));
+  app.querySelectorAll("[data-ai]").forEach(el=>el.onclick=()=>go({n:"ai",id:el.dataset.ai}));
   app.querySelectorAll("[data-day]").forEach(el=>el.onclick=()=>{const x=PLAN[+el.dataset.day];if(x&&x.ids.length)go({n:"lesson",id:x.ids[0]});});
 }
 function stepMark(done,cur,n){
@@ -3669,6 +3912,55 @@ function viewBank(){
   app.querySelectorAll("[data-say]").forEach(b=>b.onclick=e=>{e.stopPropagation();say(b.dataset.say);});
 }
 
+/* ================= сохранение и перенос прогресса ================= */
+function exportProgress(){
+  const data=JSON.stringify({app:"english-trainer",version:1,saved:today(),state:S},null,2);
+  const name="english-trainer-"+today()+".json";
+  try{
+    const blob=new Blob([data],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;a.download=name;
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},400);
+    return true;
+  }catch(e){
+    // если скачивание недоступно — показываем текст, чтобы скопировать вручную
+    openSheetHTML(
+      '<div class="word" style="font-size:20px">Прогресс в виде текста</div>'+
+      '<p class="small" style="margin-top:8px">Скачивание недоступно. Скопируй этот текст и сохрани в заметки — из него можно восстановиться.</p>'+
+      '<div class="promptbox">'+esc(data)+'</div>'+
+      '<button class="btn" id="expCopy">Скопировать</button>'+
+      '<div style="height:8px"></div><button class="btn ghost" id="expCls">Закрыть</button>',
+      ()=>{
+        document.getElementById("expCopy").onclick=e=>copyPrompt(data,e.currentTarget);
+        document.getElementById("expCls").onclick=dismissSheet;
+      });
+    return false;
+  }
+}
+function applyImported(obj){
+  const st=(obj&&obj.state&&typeof obj.state==="object")?obj.state:obj;
+  if(!st||typeof st!=="object"||(!st.srs&&!st.pat&&!st.words))return false;
+  S=st;sanitizeState();
+  if(!S.day)S.day=today();
+  saveState();
+  return true;
+}
+function importProgress(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    let obj=null;
+    try{obj=JSON.parse(String(r.result));}catch(e){}
+    if(!obj)return alert("Не удалось прочитать файл: это не похоже на сохранение прогресса.");
+    if(!confirm("Заменить текущий прогресс данными из файла? Отменить это будет нельзя."))return;
+    if(applyImported(obj)){go({n:"progress"});}
+    else alert("В файле нет данных прогресса.");
+  };
+  r.onerror=()=>alert("Не удалось прочитать файл.");
+  r.readAsText(file);
+}
+
 /* ================= прогресс ================= */
 function viewProgress(){
   setHead("Прогресс","");
@@ -3739,18 +4031,34 @@ function viewProgress(){
     '<li>Дни без урока не пропускай: в них разгребается очередь и закрепляется прошлый блок.</li>'+
     '<li>Минимальная версия дня — повтор плюс задание вслух, десять минут. Курс растянется, но не развалится.</li>'+
     '</ul><p class="small" style="margin:10px 0 0">Тренажёр ставит грамматику в голову, но рот тренируется только ртом.</p></div>'+
-    '<div style="height:8px"></div><button class="btn ghost" id="rst">Сбросить прогресс</button><div style="height:16px"></div>';
+    '<div class="label">Перенос прогресса</div>'+
+    '<p class="small" style="margin-bottom:12px">Прогресс живёт в памяти браузера и привязан к адресу сайта. Сохрани его в файл перед сменой телефона, переустановкой или чисткой браузера.</p>'+
+    '<button class="btn sec" id="expBtn">'+ICON.layers+' Сохранить в файл</button>'+
+    '<div style="height:10px"></div>'+
+    '<button class="btn sec" id="impBtn">'+ICON.repeat+' Загрузить из файла</button>'+
+    '<input type="file" id="impFile" accept="application/json,.json" style="display:none">'+
+    '<div style="height:18px"></div><button class="btn ghost" id="rst">Сбросить прогресс</button><div style="height:16px"></div>';
   app.innerHTML=h;
   app.querySelectorAll("[data-les]").forEach(el=>el.onclick=()=>go({n:"lesson",id:el.dataset.les}));
   const gw2=document.getElementById("goWeak");
   if(gw2)gw2.onclick=()=>startDrill(shuffle(top.map(x=>({l:x.l.id,i:x.i,c:x.c}))),"weak","Слабые места");
-  document.getElementById("rst").onclick=()=>{if(confirm("Стереть весь прогресс?")){S.srs={};S.pat={};S.voc={};S.lis={};S.err={};S.dia={};S.speed={};S.total=0;S.right=0;S.streak=0;S.day=today();saveState();render();}};
+  document.getElementById("expBtn").onclick=()=>exportProgress();
+  const impF=document.getElementById("impFile");
+  document.getElementById("impBtn").onclick=()=>impF.click();
+  impF.onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)importProgress(f);e.target.value="";};
+  document.getElementById("rst").onclick=()=>{if(confirm("Стереть весь прогресс?")){S.srs={};S.pat={};S.voc={};S.lis={};S.err={};S.dia={};S.ai={};S.speed={};S.total=0;S.right=0;S.streak=0;S.day=today();saveState();render();}};
 }
 
 /* ================= старт ================= */
 (async function(){
   try{history.replaceState({d:1},"");}catch(e){}
-  S=await loadState();applyTheme();render();
+  try{
+    S=await loadState();applyTheme();
+  }catch(e){
+    console.error(e);
+    S={srs:{},pat:{},voc:{},lis:{},err:{},words:{},dia:{},ai:{},speed:{},day:null,streak:0,total:0,right:0,theme:null};
+  }
+  render();
 })();
 </script>
 </body>
