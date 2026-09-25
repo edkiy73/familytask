@@ -3538,6 +3538,7 @@ function repHistoryHTML(t){
   let c = occUpTo(r, today);
   while(c && set.size < 14){ set.add(c); c = occUpTo(r, _ds(_dn(c)-1)); }
   if(cur) set.add(cur);
+  if(cur && occStatus(t, cur, cur)==='over'){ const nx = occNext(r, cur); if(nx) set.add(nx); }   // раз просрочен — показать, когда следующий
   Object.keys(t.occ||{}).forEach(k=>{ if(k > today && occMark(t,k)) set.add(k); });   // отмеченные заранее
   const list = [...set].sort();
   if(!list.length) return '';
@@ -3595,9 +3596,10 @@ function renderDetail(){
     const dl = displayDeadline(t);
     const r = dl ? relDeadline(dl) : null;
     const rr = repRule(t);
+    const nextOcc = (rr && r?.over) ? occNext(rr, splitLocal(dl).date) : null;
     info = `<div class="info-grid">
       <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?`<span class="ava-acc-wrap">${avaHTML(asg,'ava-xs')}${t.accepted?`<i class="acc-badge">${ICON.check(9)}</i>`:''}</span>`+esc(asg.name)+(t.accepted?' <span class="acc-note">принял</span>':''):generalAvaHTML('ava-xs')+'Общее'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
-      <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">${rr?'Ближайший раз':'Запланировано'}</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text)+(r.over&&rr?' · '+fmtOcc(splitLocal(dl).date):'') : (rr&&t.completed?'Серия завершена':'—')}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
+      <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">${rr?'Ближайший раз':'Запланировано'}</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text)+(r.over&&rr?' · '+fmtOcc(splitLocal(dl).date):'')+(nextOcc?` <span style="color:var(--mut);font-weight:600">· след. ${fmtOcc(nextOcc)}</span>`:'') : (rr&&t.completed?'Серия завершена':'—')}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
       <div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${rr?repLabel(t.repeat)+' · с '+fmtOcc(rr.start)+(rr.until?' по '+fmtOcc(rr.until):'')+(rr.time?' · '+rr.time:''):'Без повтора'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
     </div>`;
   } else {
