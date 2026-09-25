@@ -920,8 +920,8 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .occ-strip::-webkit-scrollbar{display:none}
 .occ{flex:0 0 auto;width:44px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 5px;border-radius:12px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--line);transition:transform .18s var(--spring)}
 .occ:active{transform:scale(.9)}
-.occ i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:800;box-shadow:inset 0 0 0 1.5px var(--ring,var(--line))}
-.occ b{font-size:13px;font-weight:800;line-height:1.1}
+.occ i{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10px;font-weight:800;box-shadow:inset 0 0 0 1.5px var(--ring,var(--line))}
+.occ b{font-size:11px;font-weight:500;line-height:1.1}
 .occ span{font-size:10px;color:var(--mut);font-weight:600}
 .occ-done i{background:var(--acc);color:#fff;box-shadow:none}
 .occ-skip i{background:var(--soft);color:var(--mut)}
@@ -3548,7 +3548,7 @@ function repHistoryHTML(t){
     const st = occStatus(t, ds, cur), mk = occMark(t, ds);
     const who = mk ? (member(mk.by)?.name || '') : '';
     return `<button type="button" class="occ occ-${st} ${ds===cur?'cur':''}" data-occ="${ds}" title="${fmtOcc(ds,{weekday:'short',day:'numeric',month:'long'})}: ${TXT[st]}${who?' — '+esc(who):''}">
-      <i>${ICO[st]}</i><b>${Number(ds.slice(8))}</b><span>${fmtOcc(ds,{weekday:'short'})}</span></button>`;
+      <i>${ICO[st]}</i><b>${fmtOcc(ds,{day:'2-digit',month:'2-digit'})}</b><span>${fmtOcc(ds,{weekday:'short'})}</span></button>`;
   }).join('');
   // статистика за 30 дней: выполнено из «должно было быть» (пропущенные намеренно не в счёт)
   const from = _ds(_dn(today)-29);
@@ -3599,7 +3599,7 @@ function renderDetail(){
     const nextOcc = (rr && r?.over) ? occNext(rr, splitLocal(dl).date) : null;
     info = `<div class="info-grid">
       <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?`<span class="ava-acc-wrap">${avaHTML(asg,'ava-xs')}${t.accepted?`<i class="acc-badge">${ICON.check(9)}</i>`:''}</span>`+esc(asg.name)+(t.accepted?' <span class="acc-note">принял</span>':''):generalAvaHTML('ava-xs')+'Общее'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
-      <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">${rr?'Ближайший раз':'Запланировано'}</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text)+(r.over&&rr?' · '+fmtOcc(splitLocal(dl).date):'')+(nextOcc?` <span style="color:var(--mut);font-weight:600">· след. ${fmtOcc(nextOcc)}</span>`:'') : (rr&&t.completed?'Серия завершена':'—')}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
+      <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">${rr?'Ближайший раз':'Запланировано'}</div><div class="v" ${r?.over&&!nextOcc?'style="color:var(--rose)"':''}>${nextOcc ? esc(fmtOcc(nextOcc)) : (r ? esc(r.text) : (rr&&t.completed?'Серия завершена':'—'))}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
       <div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${rr?repLabel(t.repeat)+' · с '+fmtOcc(rr.start)+(rr.until?' по '+fmtOcc(rr.until):'')+(rr.time?' · '+rr.time:''):'Без повтора'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
     </div>`;
   } else {
