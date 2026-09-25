@@ -3538,6 +3538,7 @@ function repHistoryHTML(t){
   let c = occUpTo(r, today);
   while(c && set.size < 14){ set.add(c); c = occUpTo(r, _ds(_dn(c)-1)); }
   if(cur) set.add(cur);
+  if(cur && occStatus(t, cur, cur)==='over'){ const nx = occNext(r, cur); if(nx) set.add(nx); }   // раз просрочен — показать, когда следующий
   Object.keys(t.occ||{}).forEach(k=>{ if(k > today && occMark(t,k)) set.add(k); });   // отмеченные заранее
   const list = [...set].sort();
   if(!list.length) return '';
