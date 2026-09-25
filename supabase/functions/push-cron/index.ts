@@ -40,6 +40,64 @@ async function readState(fid: string, state: any): Promise<any> {
   } catch (_) { return null; }
 }
 
+// ---- повторы: то же ядро, что в index.html (repRule / occFrom / occUpTo / repCurrent) ----
+// правило не меняется при выполнении; отметки — в журнале t.occ[дата] = {s:'done'|'skip'|'none'}
+type Rule = { freq: string; iv: number; days: number[]; start: string; time: string; until: string };
+const dn = (ds: string) => { const [y, m, d] = ds.split('-').map(Number); return Math.round(Date.UTC(y, m - 1, d) / 864e5); };
+const dsOf = (n: number) => new Date(n * 864e5).toISOString().slice(0, 10);
+const dow = (n: number) => ((n + 4) % 7 + 7) % 7;
+function addMonths(ds: string, k: number): string {
+  const [y, m, d] = ds.split('-').map(Number);
+  const tm = m - 1 + k, ny = y + Math.floor(tm / 12), nm = ((tm % 12) + 12) % 12;
+  const mx = new Date(Date.UTC(ny, nm + 1, 0)).getUTCDate();
+  return `${ny}-${String(nm + 1).padStart(2, '0')}-${String(Math.min(d, mx)).padStart(2, '0')}`;
+}
+function repRule(t: any, today: string): Rule | null {
+  const rp = t?.repeat; if (!rp) return null;
+  const m = String(t.deadline || '').match(/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}))?/);
+  return {
+    freq: rp.freq || 'daily', iv: Math.max(1, rp.interval || 1),
+    days: Array.isArray(rp.days) && rp.days.length ? rp.days : [1, 2, 3, 4, 5],
+    start: rp.start || m?.[1] || today, time: rp.time != null ? rp.time : (m?.[2] || ''), until: rp.until || '',
+  };
+}
+function occFrom(r: Rule, ds: string): string | null {
+  if (ds < r.start) ds = r.start;
+  const x = dn(ds), s = dn(r.start);
+  let out: string | null = null;
+  if (r.freq === 'daily' || r.freq === 'custom' || r.freq === 'weekly') {
+    const step = r.iv * (r.freq === 'weekly' ? 7 : 1);
+    out = dsOf(s + Math.ceil((x - s) / step) * step);
+  } else if (r.freq === 'weekdays' || r.freq === 'bydays') {
+    const set = r.freq === 'weekdays' ? [1, 2, 3, 4, 5] : r.days;
+    for (let i = 0; i < 7; i++) if (set.includes(dow(x + i))) { out = dsOf(x + i); break; }
+  } else if (r.freq === 'monthly' || r.freq === 'yearly') {
+    const step = r.iv * (r.freq === 'yearly' ? 12 : 1);
+    const [sy, sm] = r.start.split('-').map(Number), [xy, xm] = ds.split('-').map(Number);
+    let k = Math.max(0, Math.floor(((xy - sy) * 12 + (xm - sm)) / step));
+    for (let g = 0; g < 4; g++, k++) { const c = addMonths(r.start, k * step); if (c >= ds) { out = c; break; } }
+  }
+  if (out && r.until && out > r.until) return null;
+  return out;
+}
+const occNext = (r: Rule, ds: string) => occFrom(r, dsOf(dn(ds) + 1));
+function occUpTo(r: Rule, ds: string): string | null {
+  if (ds < r.start) return null;
+  const back = ({ daily: r.iv, custom: r.iv, weekly: 7 * r.iv, weekdays: 4, bydays: 8, monthly: 32 * r.iv, yearly: 367 * r.iv } as Record<string, number>)[r.freq] ?? 32;
+  let c = occFrom(r, dsOf(dn(ds) - back)), last: string | null = null;
+  while (c && c <= ds) { last = c; c = occNext(r, c); }
+  return last;
+}
+const occMarked = (t: any, ds: string) => { const e = t.occ?.[ds]; return !!e && e.s !== 'none'; };
+// текущий раз: последний наступивший, если не отмечен (он «просрочен» до следующего), иначе ближайший неотмеченный
+function repCurrent(t: any, r: Rule, today: string): string | null {
+  const c = occUpTo(r, today);
+  if (c && !occMarked(t, c)) return c;
+  let n = c ? occNext(r, c) : occFrom(r, today), g = 0;
+  while (n && occMarked(t, n) && g++ < 500) n = occNext(r, n);
+  return n;
+}
+
 // member=null и members=null → всем в семье; member='id' → одному участнику;
 // members=[...] → списку участников («кто видит» дело/заметку)
 async function sendToFamily(
@@ -76,6 +134,7 @@ Deno.serve(async (req) => {
     if (!state) continue;                                // не удалось прочитать — пропускаем семью
     const tasks = (state.tasks ?? []) as any[];
     const overdue: Record<string, { titles: string[]; target: string | null; targetList: string[] | null }> = {};
+    const famToday = new Date(now - (typeof state.tz === 'number' ? state.tz : 0) * 60e3).toISOString().slice(0, 10);
     for (const t of tasks) {
       if (t.deleted || t.isDraft || t.completed || t.type !== 'tasks' || !t.deadline) continue;
       // «кто видит» ограничивает и дела, и заметки — пустой список значит «видит вся семья»
@@ -86,18 +145,27 @@ Deno.serve(async (req) => {
 
       // дедлайны хранятся как локальное время семьи; state.tz = getTimezoneOffset() пишущего устройства
       // «весь день» (только дата, без времени) → уведомляем в 09:00 локального времени семьи
-      const allDay = !/[T ]\d\d:\d\d/.test(t.deadline);
-      const local = allDay ? (t.deadline.slice(0, 10) + 'T09:00') : t.deadline;
+      // у повтора срок — текущий раз по правилу, а не сохранённая когда-то дата
+      let dl: string = t.deadline, occ: string | null = null;
+      if (t.repeat) {
+        const r = repRule(t, famToday);
+        occ = r && repCurrent(t, r, famToday);
+        if (!r || !occ) continue;                          // серия закончилась
+        dl = r.time ? occ + 'T' + r.time : occ;
+      }
+      const allDay = !/[T ]\d\d:\d\d/.test(dl);
+      const local = allDay ? (dl.slice(0, 10) + 'T09:00') : dl;
       const hasTZ = /[Zz]$|[+-]\d\d:?\d\d$/.test(local);
       const off = typeof state.tz === 'number' ? state.tz : 0;
       const d = Date.parse(hasTZ ? local : local + 'Z') + (hasTZ ? 0 : off * 60e3);
       if (isNaN(d)) continue;
 
-      // копим просроченные для обеденной сводки — повторяющееся дело
-      // логически не может быть «просроченным», у него всегда есть следующий раз.
+      // копим просроченные для обеденной сводки. Повтор просрочен, пока его
+      // текущий раз не отмечен и не наступил следующий (весь день — со следующего дня).
       // ключ группы = получатель(и): либо исполнитель, либо конкретный состав видящих —
       // так дела с разной видимостью никогда не попадут в одну рассылку.
-      if (now > d && !t.repeat) {
+      const isOver = occ ? (allDay ? occ < famToday : now > d) : now > d;
+      if (isOver) {
         const groupKey = target ? ('u:' + target) : ('v:' + (visibleTo.length ? [...visibleTo].sort().join(',') : 'ALL'));
         const bucket = (overdue[groupKey] ??= { titles: [], target, targetList });
         bucket.titles.push(t.title);
@@ -106,9 +174,9 @@ Deno.serve(async (req) => {
       const events: [string, string, string][] = [];
       const time = allDay ? 'сегодня' : local.slice(11, 16);
       if (d - now > 0 && d - now <= 30 * 60e3)
-        events.push(['s' + t.id + '|' + t.deadline, 'Скоро дедлайн', `${t.title} — в ${time}`]);
+        events.push(['s' + t.id + '|' + dl, 'Скоро дедлайн', `${t.title} — в ${time}`]);
       if (now >= d && now - d <= 10 * 60e3)
-        events.push(['d' + t.id + '|' + t.deadline, 'Дедлайн наступил', t.title]);
+        events.push(['d' + t.id + '|' + dl, 'Дедлайн наступил', t.title]);
 
       for (const [key, title, body] of events) {
         // атомарный анти-дубль: вставилось — значит ещё не слали (ключ уникален на семью+событие)

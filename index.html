@@ -916,6 +916,25 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
 .dow-pick button{flex:1;min-width:38px;height:38px;border-radius:10px;background:var(--card);box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);font-size:11px;font-weight:700;color:var(--mut);transition:all .18s var(--spring)}
 .dow-pick button:active{transform:scale(.9)}
 .dow-pick button.on{color:#fff;background:var(--acc);box-shadow:0 3px 10px color-mix(in srgb,var(--acc) 35%,transparent)}
+.occ-strip{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 2px;margin-top:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.occ-strip::-webkit-scrollbar{display:none}
+.occ{flex:0 0 auto;width:44px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 5px;border-radius:12px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--line);transition:transform .18s var(--spring)}
+.occ:active{transform:scale(.9)}
+.occ i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:800;box-shadow:inset 0 0 0 1.5px var(--ring,var(--line))}
+.occ b{font-size:13px;font-weight:800;line-height:1.1}
+.occ span{font-size:10px;color:var(--mut);font-weight:600}
+.occ-done i{background:var(--acc);color:#fff;box-shadow:none}
+.occ-skip i{background:var(--soft);color:var(--mut)}
+.occ-missed i,.occ-over i{background:var(--rose-soft);color:var(--rose);box-shadow:none}
+.occ-over{box-shadow:inset 0 0 0 1.5px var(--rose)}
+.occ.cur:not(.occ-over){box-shadow:inset 0 0 0 1.5px var(--acc)}
+.occ-due{background:transparent}
+.rep-stat{margin-left:auto;font-size:11px;font-weight:700;color:var(--mut)}
+.rep-preview{font-size:11.5px;color:var(--mut);margin-top:9px;line-height:1.45}
+.rep-preview b{color:var(--ink);font-weight:700}
+.rep-until{display:flex;align-items:center;gap:9px;margin-top:9px;font-size:12px;font-weight:600;color:var(--mut)}
+.rep-until .dt-field{flex:1}
+.cal-day.alldone.has{background:var(--acc-soft)}
 .rep-stepper{display:flex;align-items:center;gap:10px;margin-top:9px;background:var(--card);border-radius:26px;padding:5px;box-shadow:var(--shadow), inset 0 0 0 1px var(--ring);width:max-content}
 .rep-stepper button{width:32px;height:32px;border-radius:50%;background:var(--soft);font-size:16px;font-weight:800;color:var(--mut);transition:transform .18s var(--spring)}
 .rep-stepper button:active{transform:scale(.85);color:var(--acc)}
@@ -1130,7 +1149,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
       <div id="f-task-fields">
         <div class="fgroup">
           <div style="display:flex;align-items:center;justify-content:space-between">
-            <span class="label-cap" style="margin:0">Запланировано</span>
+            <span class="label-cap" style="margin:0" id="f-plan-cap">Запланировано</span>
             <button type="button" class="plan-clear hidden" id="f-plan-clear">Очистить</button>
           </div>
           <div class="dt-grid" style="margin-top:8px">
@@ -1139,7 +1158,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
           </div>
           <div class="quick-dl" id="f-plan-dates"></div>
         </div>
-        <div class="fgroup hidden" id="f-repeat-group">
+        <div class="fgroup" id="f-repeat-group">
           <span class="label-cap">Повтор</span>
           <div class="pool" id="f-repeat"></div>
           <div class="rep-stepper hidden" id="f-rep-stepper">
@@ -1148,6 +1167,11 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
             <button type="button" data-repstep="1">+</button>
           </div>
           <div class="dow-pick hidden" id="f-dow"></div>
+          <div class="rep-until hidden" id="f-until-row">
+            <span>До</span>
+            <div class="dt-field"><input type="date" class="dt-input" id="f-until"><span class="dt-ph">Без окончания</span></div>
+          </div>
+          <div class="rep-preview hidden" id="f-rep-prev"></div>
         </div>
       </div>
 
@@ -1371,7 +1395,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
   <div class="overlay sheet-mode hidden" id="date-overlay">
     <div class="sheet">
       <div class="sheet-grip"></div>
-      <div class="sheet-title">Запланировано на</div>
+      <div class="sheet-title" id="date-sheet-title">Запланировано на</div>
       <div class="sheet-form">
         <div class="dt-grid">
           <div class="dt-field"><input type="date" class="dt-input" id="q-date"><span class="dt-ph">Дата</span></div>
@@ -1630,8 +1654,7 @@ textarea.field{min-height:110px;max-height:800px;resize:none;line-height:1.5;bor
     <div class="modal">
       <h3>Повторяющееся дело</h3>
       <p id="rep-done-msg"></p>
-      <button class="btn btn-acc" data-repdone="next" style="margin-bottom:9px">${ICON.check(16)} Готово до следующего раза</button>
-      <button class="btn btn-dark" data-repdone="all" style="margin-bottom:9px">Завершить насовсем</button>
+      <div id="rep-done-btns"></div>
       <button class="btn btn-soft" data-close="repeat-overlay">Отмена</button>
     </div>
   </div>
@@ -2183,28 +2206,112 @@ function fmtLocal(d){
   const p = n=>String(n).padStart(2,'0');
   return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
-function nextOccurrence(dlStr, rp){
-  const allDay = isAllDay(dlStr);
-  let d = new Date(deadlineMs(dlStr)); if(isNaN(d)) d = new Date();
-  const now = new Date();
-  const iv = Math.max(1, rp.interval||1);
-  const step = ()=>{
-    if(rp.freq==='bydays'){
-      const set = (rp.days&&rp.days.length) ? rp.days : [1,2,3,4,5];
-      let g2=0; do{ d.setDate(d.getDate()+1); g2++; }while(!set.includes(d.getDay()) && g2<14);
-    }
-    else if(rp.freq==='weekdays'){ do{ d.setDate(d.getDate()+1); }while(d.getDay()===0 || d.getDay()===6); }
-    else if(rp.freq==='weekly') d.setDate(d.getDate()+7*iv);
-    else if(rp.freq==='monthly'){ const day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+iv);
-      const mx=new Date(d.getFullYear(), d.getMonth()+1, 0).getDate(); d.setDate(Math.min(day,mx)); }
-    else if(rp.freq==='yearly') d.setFullYear(d.getFullYear()+iv);
-    else d.setDate(d.getDate()+iv);   // daily / custom
-  };
-  let g = 0;
-  do{ step(); g++; }while(d <= now && g < 800);
-  const full = fmtLocal(d);
-  return allDay ? full.slice(0,10) : full;   // сохранить формат «весь день»
+/* ============ ПОВТОРЫ: ЕДИНОЕ ЯДРО ============
+   Правило (t.repeat) не меняется при выполнении: {freq, interval, days, start, time, until}.
+   Каждый «раз» — локальная дата 'YYYY-MM-DD'. Отметки лежат в журнале
+   t.occ[дата] = {s:'done'|'skip'|'none', by, at} ('none' — снятая отметка, нужна для слияния).
+   Текущий раз: последний наступивший (не позже сегодня), если он не отмечен, —
+   он «просрочен», пока не наступит следующий; затем уходит в историю как «пропущено».
+   t.deadline у повторяющегося дела = текущий раз (для сортировок, старых версий и сервера). */
+const _dn = ds => { const [y,m,d] = ds.split('-').map(Number); return Math.round(Date.UTC(y,m-1,d)/864e5); };
+const _ds = n => new Date(n*864e5).toISOString().slice(0,10);
+const _dow = n => ((n+4)%7+7)%7;   // 1970-01-01 — четверг; 0 = вс
+function todayStr(){ return fmtLocal(new Date()).slice(0,10); }
+function _addMonths(ds, k){
+  const [y,m,d] = ds.split('-').map(Number);
+  const tm = m-1+k, ny = y+Math.floor(tm/12), nm = ((tm%12)+12)%12;
+  const mx = new Date(Date.UTC(ny, nm+1, 0)).getUTCDate();
+  return `${ny}-${String(nm+1).padStart(2,'0')}-${String(Math.min(d,mx)).padStart(2,'0')}`;
 }
+function repRule(t){
+  const rp = t && t.repeat; if(!rp) return null;
+  const sp = splitLocal(t.deadline);   // старые записи: начало и время берём из срока
+  return {
+    freq: rp.freq || 'daily',
+    iv: Math.max(1, rp.interval||1),
+    days: (rp.days && rp.days.length) ? rp.days : [1,2,3,4,5],
+    start: rp.start || sp.date || todayStr(),
+    time: rp.time != null ? rp.time : sp.time,
+    until: rp.until || '',
+  };
+}
+// первый раз не раньше даты ds (null — серия закончилась)
+function occFrom(r, ds){
+  if(ds < r.start) ds = r.start;
+  const x = _dn(ds), s = _dn(r.start);
+  let out = null;
+  if(r.freq==='daily' || r.freq==='custom' || r.freq==='weekly'){
+    const step = r.iv * (r.freq==='weekly' ? 7 : 1);
+    out = _ds(s + Math.ceil((x-s)/step)*step);
+  } else if(r.freq==='weekdays' || r.freq==='bydays'){
+    const set = r.freq==='weekdays' ? [1,2,3,4,5] : r.days;
+    for(let i=0;i<7;i++) if(set.includes(_dow(x+i))){ out = _ds(x+i); break; }
+  } else if(r.freq==='monthly' || r.freq==='yearly'){
+    const step = r.iv * (r.freq==='yearly' ? 12 : 1);
+    const [sy,sm] = r.start.split('-').map(Number), [xy,xm] = ds.split('-').map(Number);
+    let k = Math.max(0, Math.floor(((xy-sy)*12 + (xm-sm))/step));
+    for(let g=0; g<4; g++, k++){ const c = _addMonths(r.start, k*step); if(c >= ds){ out = c; break; } }
+  }
+  if(out && r.until && out > r.until) return null;
+  return out;
+}
+const occNext = (r, ds) => occFrom(r, _ds(_dn(ds)+1));
+// последний раз не позже даты ds
+function occUpTo(r, ds){
+  if(ds < r.start) return null;
+  const back = {daily:r.iv, custom:r.iv, weekly:7*r.iv, weekdays:4, bydays:8, monthly:32*r.iv, yearly:367*r.iv}[r.freq] || 32;
+  let c = occFrom(r, _ds(_dn(ds)-back)), last = null;
+  while(c && c <= ds){ last = c; c = occNext(r, c); }
+  return last;
+}
+function occList(r, from, to, max=400){
+  const out = []; let c = occFrom(r, from);
+  while(c && c <= to && out.length < max){ out.push(c); c = occNext(r, c); }
+  return out;
+}
+function occMark(t, ds){ const e = t.occ && t.occ[ds]; return (e && e.s !== 'none') ? e : null; }
+function repCurrent(t){
+  const r = repRule(t); if(!r) return null;
+  const c = occUpTo(r, todayStr());
+  if(c && !occMark(t, c)) return c;
+  let n = c ? occNext(r, c) : occFrom(r, todayStr()), g = 0;
+  while(n && occMark(t, n) && g++ < 500) n = occNext(r, n);
+  return n;
+}
+// момент, с которого раз считается просроченным (у «весь день» — со следующего дня)
+function occOverMs(r, ds){
+  if(!r.time){ const [y,m,d] = ds.split('-').map(Number); return new Date(y, m-1, d+1).getTime(); }
+  return deadlineMs(joinLocal(ds, r.time));
+}
+// статус раза: done | skip | over (текущий, просрочен) | due (текущий или будущий) | missed
+function occStatus(t, ds, cur = repCurrent(t)){
+  const m = occMark(t, ds); if(m) return m.s;
+  const r = repRule(t);
+  if(ds === cur) return Date.now() >= occOverMs(r, ds) ? 'over' : 'due';
+  return (!cur || ds < cur) ? 'missed' : 'due';
+}
+// срок, который видит интерфейс: у повторов — текущий раз
+function effDeadline(t){
+  if(!t.repeat) return t.deadline;
+  const r = repRule(t), c = repCurrent(t);
+  return c ? joinLocal(c, r.time) : '';
+}
+// после любых изменений повтора: закрепить правило и пересчитать срок
+function repSync(t){
+  const r = repRule(t); if(!r) return;
+  t.repeat = {...t.repeat, start:r.start, time:r.time};
+  const c = repCurrent(t);
+  if(c){
+    t.deadline = joinLocal(c, r.time);
+    if(t.seriesEnded){ t.completed = false; delete t.seriesEnded; }
+  } else if(!t.completed){ t.completed = true; t.seriesEnded = true; }   // «до» наступило, все разы закрыты
+}
+function occSet(t, ds, s){
+  t.occ = {...(t.occ||{}), [ds]: {s, by:S.currentUser, at:Date.now()}};
+  repSync(t);
+  t.updatedBy = S.currentUser; touch(t);
+}
+const fmtOcc = (ds, o={day:'numeric', month:'short'}) => new Date(ds+'T12:00').toLocaleDateString('ru-RU', o);
 
 /* ============ УВЕДОМЛЕНИЯ ============ */
 const NOTIFIED = new Set(JSON.parse(localStorage.getItem('hub_notified')||'[]'));
@@ -2230,9 +2337,10 @@ function checkDeadlines(){
     // локальный фолбэк: показываем только свои дела и общие (без исполнителя)
     if(t.assignedTo && t.assignedTo !== S.currentUser) return;
     if(!canSee(t)) return;   // дело скрыто от меня «кто видит» — уведомления быть не должно
-    const d = deadlineMs(t.deadline); if(isNaN(d)) return;
-    const kS = 's'+t.id+'|'+t.deadline, kD = 'd'+t.id+'|'+t.deadline;
-    const time = isAllDay(t.deadline) ? 'сегодня' : new Date(d).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    const dl = effDeadline(t);   // у повторов — текущий раз, а не когда-то сохранённая дата
+    const d = deadlineMs(dl); if(isNaN(d)) return;
+    const kS = 's'+t.id+'|'+dl, kD = 'd'+t.id+'|'+dl;
+    const time = isAllDay(dl) ? 'сегодня' : new Date(d).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
     if(d-now > 0 && d-now <= 30*60e3 && !NOTIFIED.has(kS)){
       markNotified(kS); notify('Скоро дедлайн', `${t.title} — в ${time}`, kS);
     }
@@ -2402,16 +2510,26 @@ function setSyncStatus(s){
 function normSnap(st){ return { members:st.members||[], labels:st.labels||[], tasks:st.tasks||[], chat:st.chat||[], geo:st.geo||{}, fin:st.fin||[], generalAvatarId:st.generalAvatarId||null, metaUpdatedAt:st.metaUpdatedAt||0, tz:(typeof st.tz==='number'?st.tz:new Date().getTimezoneOffset()) }; }
 function mergeStates(local, remote){
   local = normSnap(local); remote = normSnap(remote);
-  const map = new Map(), seen = new Map();
+  const map = new Map(), seen = new Map(), occs = new Map();
   [...remote.tasks, ...local.tasks].forEach(t=>{
     // отметки просмотра объединяем: их ставят разные устройства без правки записи
     const s = seen.get(t.id) || new Set();
     (t.seenBy||[]).forEach(id=>s.add(id));
     seen.set(t.id, s);
+    // журнал повторов: по каждой дате побеждает более поздняя отметка — два устройства не затирают друг друга
+    if(t.occ){
+      const o = occs.get(t.id) || {};
+      for(const [k,v] of Object.entries(t.occ)) if(!o[k] || (v?.at||0) > (o[k].at||0)) o[k] = v;
+      occs.set(t.id, o);
+    }
     const ex = map.get(t.id);
     if(!ex || (t.updatedAt||0) > (ex.updatedAt||0)) map.set(t.id, t);
   });
-  map.forEach((t,id)=>{ const s = seen.get(id); if(s && s.size) t.seenBy = [...s]; });
+  map.forEach((t,id)=>{
+    const s = seen.get(id); if(s && s.size) t.seenBy = [...s];
+    const o = occs.get(id);
+    if(o && JSON.stringify(o) !== JSON.stringify(t.occ||{})){ t.occ = o; if(t.repeat) repSync(t); }
+  });
   const takeLocal = (local.metaUpdatedAt||0) >= (remote.metaUpdatedAt||0);
   return {
     members: takeLocal ? local.members : remote.members,
@@ -2706,15 +2824,7 @@ function relDeadline(ds){
   if(diff<7)   return {text:d.toLocaleDateString('ru-RU',{weekday:'short'}) + (allDay?'':` ${time}`)};
   return {text:d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})};
 }
-function displayDeadline(t){
-  if(!t.deadline || !t.repeat) return t.deadline;
-  const ms = deadlineMs(t.deadline); if(isNaN(ms)) return t.deadline;
-  const allDay = isAllDay(t.deadline);
-  const d = new Date(ms);
-  const overMs = allDay ? new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).getTime() : ms;
-  if(Date.now() < overMs) return t.deadline;   // срок ещё не прошёл — как есть
-  return nextOccurrence(t.deadline, t.repeat); // повторяющееся не может быть «просрочено»
-}
+function displayDeadline(t){ return effDeadline(t); }   // у повторов — текущий раз
 // список тех, кому запись видна, кроме автора действия — единая точка адресации push
 function visAudience(t, excludeSelf=true){
   const all = (t.visibleTo && t.visibleTo.length) ? t.visibleTo : S.members.map(m=>m.id);
@@ -2928,7 +3038,7 @@ function matchesFilters(t, {ignoreDone}={}){
 const SORTS = {
   smart:'Умная', deadline:'По сроку', created:'Новые сначала', alpha:'По алфавиту', assignee:'По исполнителю'
 };
-function dlMs(t){ const d = deadlineMs(t.deadline); return isNaN(d)?Infinity:d; }
+function dlMs(t){ const d = deadlineMs(effDeadline(t)); return isNaN(d)?Infinity:d; }
 function sortList(list){
   const P = prefs();
   const pin = t => (t.pinnedBy||[]).includes(S.currentUser)?0:1;
@@ -2950,15 +3060,27 @@ function visibleList(){
   return sortList(liveTasks().filter(t=>matchesFilters(t)));
 }
 
-function cardHTML(t){
+// чип статуса конкретного раза (календарь, история)
+function occChipHTML(t, ds){
+  const st = occStatus(t, ds);
+  if(st==='done')   return `<span class="chip soft-green">${ICON.check(11)} Выполнено</span>`;
+  if(st==='skip')   return `<span class="chip soft-gray">Пропущено</span>`;
+  if(st==='missed') return `<span class="chip soft-rose">Не выполнено</span>`;
+  if(st==='over')   return `<span class="chip soft-rose">Просрочено</span>`;
+  const r = relDeadline(joinLocal(ds, repRule(t).time));
+  return r ? `<span class="chip ${r.soon?'soft-amber':'soft-gray'}">${r.text}</span>` : '';
+}
+function cardHTML(t, opt={}){
   const pinned = (t.pinnedBy||[]).includes(S.currentUser);
   const asg = member(t.assignedTo);
   const lbl = t.label ? `<span class="chip lbl lbl-${t.labelColor||'green'}">${cap(t.label)}</span>` : '';
   let chips = lbl;
   if(t.isDraft) chips += `<span class="chip soft-gray">Черновик</span>`;
-  if(t.type==='tasks' && t.deadline && !t.completed){
-    const r = relDeadline(displayDeadline(t));
-    if(r) chips += `<span class="chip ${r.over?'soft-rose':r.soon?'soft-amber':'soft-gray'}">${r.text}</span>`;
+  if(t.type==='tasks' && t.repeat && opt.occ) chips += occChipHTML(t, opt.occ);
+  else if(t.type==='tasks' && t.deadline && !t.completed){
+    const dl = displayDeadline(t), r = relDeadline(dl);
+    // у повтора просрочен конкретный раз — показываем, какой именно
+    if(r) chips += `<span class="chip ${r.over?'soft-rose':r.soon?'soft-amber':'soft-gray'}">${r.text}${r.over&&t.repeat?' · '+fmtOcc(splitLocal(dl).date):''}</span>`;
   }
   if(t.type==='tasks' && t.repeat && !t.completed) chips += `<span class="chip soft-green">${ICON.repeat(11)} ${repShort(t.repeat)}</span>`;
   let meta = '', excerpt = '';
@@ -3044,26 +3166,37 @@ function renderCalendar(){
   const y = base.getFullYear(), m = base.getMonth();
   const monthName = base.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
 
-  const tasks = liveTasks().filter(t=>matchesFilters(t,{ignoreDone:true}) && t.deadline);
+  const tasks = liveTasks().filter(t=>matchesFilters(t,{ignoreDone:true}) && (t.deadline || t.repeat));
+  // byDay[дата] = [{t, occ}] — повторяющееся дело попадает в каждый свой день видимой сетки
   const byDay = {};
-  tasks.forEach(t=>{ const k = splitLocal(t.deadline).date; if(k){ (byDay[k]=byDay[k]||[]).push(t); } });
-  const noDate = sortList(liveTasks().filter(t=>matchesFilters(t) && !t.deadline));
+  const p2 = n=>String(n).padStart(2,'0');
+  const gridFrom = `${y}-${p2(m+1)}-01`;
+  const gFrom = _ds(_dn(gridFrom) - 7), gTo = _ds(_dn(gridFrom) + 44);
+  tasks.forEach(t=>{
+    if(t.repeat){ occList(repRule(t), gFrom, gTo).forEach(ds=>(byDay[ds]=byDay[ds]||[]).push({t, occ:ds})); return; }
+    const k = splitLocal(t.deadline).date; if(k) (byDay[k]=byDay[k]||[]).push({t});
+  });
+  // просрочено: у повтора — статус раза; у обычного — тот же расчёт, что в списке (весь день — со следующего дня)
+  const isOver = it => it.occ ? ['over','missed'].includes(occStatus(it.t, it.occ))
+                              : (!it.t.completed && !!relDeadline(it.t.deadline)?.over);
+  const isDone = it => it.occ ? ['done','skip'].includes(occStatus(it.t, it.occ)) : !!it.t.completed;
+  const noDate = sortList(liveTasks().filter(t=>matchesFilters(t) && !t.deadline && !t.repeat));
 
   const first = new Date(y, m, 1);
   let startDow = (first.getDay()+6)%7; // пн=0
   const daysInMonth = new Date(y, m+1, 0).getDate();
   const prevDays = new Date(y, m, 0).getDate();
   const todayK = splitLocal(fmtLocal(new Date())).date;
-  const nowMs = Date.now();
 
   const cell = (dd, mm, yy, dim)=>{
     const p = n=>String(n).padStart(2,'0');
     const k = `${yy}-${p(mm+1)}-${p(dd)}`;
     const items = byDay[k]||[];
-    const over = items.some(t=>!t.completed && Date.parse(t.deadline) < nowMs);
-    const colors = [...new Set(items.map(t=>member(t.assignedTo)?.color || '#9B9CA4'))].slice(0,3);
+    const over = items.some(isOver);
+    const alldone = items.length && items.every(isDone);
+    const colors = [...new Set(items.map(it=>member(it.t.assignedTo)?.color || '#9B9CA4'))].slice(0,3);
     const dots = items.length ? `<div class="cal-dots">${colors.map(c=>`<i style="--mc:${c}"></i>`).join('')}</div>` : '<div class="cal-dots"></div>';
-    return `<div class="cal-day ${dim?'dim':''} ${k===todayK?'today':''} ${items.length?'has':''} ${over?'over':''}" ${items.length?`data-calday="${k}"`:''}>
+    return `<div class="cal-day ${dim?'dim':''} ${k===todayK?'today':''} ${items.length?'has':''} ${over?'over':alldone?'alldone':''}" ${items.length?`data-calday="${k}"`:''}>
       <span>${dd}</span>${dots}${items.length>3?`<span class="cal-more">${items.length}</span>`:''}</div>`;
   };
 
@@ -3099,15 +3232,16 @@ function calShiftMonth(delta){
   persist(); renderCalendar();
 }
 function openCalDay(key){
-  const items = sortList(liveTasks().filter(t=>matchesFilters(t,{ignoreDone:true}) && splitLocal(t.deadline).date===key));
+  const items = sortList(liveTasks().filter(t=>matchesFilters(t,{ignoreDone:true})
+    && (t.repeat ? occFrom(repRule(t), key)===key : splitLocal(t.deadline).date===key)));
   const d = new Date(key+'T00:00');
   $('calday-title').textContent = d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
-  $('calday-list').innerHTML = items.length ? items.map(cardHTML).join('') : '<div class="empty" style="padding:30px"><span>На этот день дел нет</span></div>';
+  $('calday-list').innerHTML = items.length ? items.map(t=>cardHTML(t, t.repeat?{occ:key}:{})).join('') : '<div class="empty" style="padding:30px"><span>На этот день дел нет</span></div>';
   hydrateImages($('calday-list'));
   $('calday-overlay').classList.remove('hidden');
 }
 function openNoDate(){
-  const items = sortList(liveTasks().filter(t=>matchesFilters(t) && !t.deadline));
+  const items = sortList(liveTasks().filter(t=>matchesFilters(t) && !t.deadline && !t.repeat));
   $('calday-title').textContent = 'Дела без даты';
   $('calday-list').innerHTML = items.length ? items.map(cardHTML).join('') : '<div class="empty" style="padding:30px"><span>Таких дел нет</span></div>';
   hydrateImages($('calday-list'));
@@ -3325,21 +3459,42 @@ function openTrashSheet(){
   $('view-sheet').innerHTML = h;
   $('view-overlay').classList.remove('hidden');
 }
-let repDoneId = null;
-function openRepeatDone(id){
-  const t = task(id); if(!t) return;
-  repDoneId = id;
-  $('rep-done-msg').textContent = `«${t.title}» повторяется (${repLabel(t.repeat).toLowerCase()}). Выполнить только на этот раз — или закрыть серию, чтобы напоминания прекратились?`;
+let repDoneId = null, repDoneDate = null;
+// диалог отметки раза: по умолчанию — текущий; из истории — любой прошедший
+function openRepeatDone(id, ds){
+  const t = task(id); if(!t || !t.repeat) return;
+  const cur = repCurrent(t);
+  ds = ds || cur; if(!ds) return;
+  repDoneId = id; repDoneDate = ds;
+  const mk = occMark(t, ds), st = occStatus(t, ds, cur);
+  const when = fmtOcc(ds, {weekday:'short', day:'numeric', month:'long'});
+  let msg = `«${t.title}» — ${repLabel(t.repeat).toLowerCase()}. Раз на ${when}`;
+  if(mk){
+    const who = member(mk.by)?.name || '';
+    const at = mk.at ? new Date(mk.at).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+    msg += `: ${mk.s==='done'?'выполнено':'пропущено'}${who?' — '+who:''}${at?', '+at:''}.`;
+  } else msg += st==='missed' ? ': не выполнено.' : st==='over' ? ': просрочено.' : '.';
+  $('rep-done-msg').textContent = msg;
+  const b = (k, cls, label) => `<button class="btn ${cls}" data-repdone="${k}" style="margin-bottom:9px">${label}</button>`;
+  let h = '';
+  if(mk?.s !== 'done') h += b('done', 'btn-acc', `${ICON.check(16)} Выполнено (за ${fmtOcc(ds)})`);
+  if(mk?.s !== 'skip') h += b('skip', 'btn-soft', 'Пропустить этот раз');
+  if(mk) h += b('none', 'btn-soft', `${ICON.undo(16)} Снять отметку`);
+  if(!t.completed) h += b('all', 'btn-dark', 'Завершить серию');
+  $('rep-done-btns').innerHTML = h;
   $('repeat-overlay').classList.remove('hidden');
 }
-function completeOccurrence(id){
+function markOccurrence(id, ds, s){
   const t = task(id); if(!t || !t.repeat) return;
-  t.deadline = nextOccurrence(t.deadline, t.repeat);
-  (t.checklist||[]).forEach(c=>c.done=false);
-  t.updatedBy = S.currentUser; touch(t);
+  const wasCur = ds === repCurrent(t);
+  occSet(t, ds, s);
+  if(s==='done' && wasCur) (t.checklist||[]).forEach(c=>c.done=false);   // новый раз — чек-лист с нуля
   persist();
-  const r = relDeadline(t.deadline);
-  toast('Готово! Следующий раз: '+(r?r.text:new Date(t.deadline).toLocaleDateString('ru-RU')),'undo');
+  if(s==='done'){ const aud = visAudience(t); if(aud.length) pushEvent('Выполнено', `${t.title} (${fmtOcc(ds)}) — ${member(S.currentUser)?.name||''}`, 'evt-done-'+t.id+'-'+ds, aud); }
+  const nx = repCurrent(t);
+  const r = nx ? relDeadline(joinLocal(nx, repRule(t).time)) : null;
+  const what = {done:'Выполнено', skip:'Пропущено', none:'Отметка снята'}[s];
+  toast(t.completed ? 'Все разы закрыты — серия завершена' : what + (r ? ' · дальше: '+r.text.toLowerCase() : ''), s==='none' ? 'undo' : 'ok');
   activeScreen==='detail' ? renderDetail() : renderMain();
 }
 function markDone(id){
@@ -3355,7 +3510,14 @@ function toggleComplete(id){
   if(!t.completed){
     confirmDlg('Завершить дело?', `«${t.title}» переедет в выполненные.`, 'Готово', false, ()=>markDone(id));
   } else {
-    t.completed = false; t.updatedBy = S.currentUser; touch(t);
+    t.completed = false; t.updatedBy = S.currentUser;
+    if(t.repeat){
+      // серию закрыли вручную — возвращаем прежнее «до»; закончилась сама — продлевать нечего
+      if('untilWas' in t.repeat){ const {untilWas, ...rp} = t.repeat; t.repeat = {...rp, until:untilWas}; }
+      delete t.seriesEnded; repSync(t);
+      if(t.completed){ touch(t); persist(); toast('Все разы серии уже прошли — измените повтор','warn'); activeScreen==='detail' ? renderDetail() : renderMain(); return; }
+    }
+    touch(t);
     persist(); toast('Возвращено в работу','undo');
     activeScreen==='detail' ? renderDetail() : renderMain();
   }
@@ -3368,6 +3530,37 @@ function markSeen(t){
   if(t.seenBy.includes(S.currentUser)) return;
   t.seenBy.push(S.currentUser);
   persist();
+}
+// история повтора: последние разы до сегодня + текущий; тап — отметить/исправить
+function repHistoryHTML(t){
+  const r = repRule(t), cur = repCurrent(t), today = todayStr();
+  const set = new Set();
+  let c = occUpTo(r, today);
+  while(c && set.size < 14){ set.add(c); c = occUpTo(r, _ds(_dn(c)-1)); }
+  if(cur) set.add(cur);
+  Object.keys(t.occ||{}).forEach(k=>{ if(k > today && occMark(t,k)) set.add(k); });   // отмеченные заранее
+  const list = [...set].sort();
+  if(!list.length) return '';
+  const ICO = {done:ICON.check(12), skip:'–', missed:ICON.x(11), over:'!', due:''};
+  const TXT = {done:'выполнено', skip:'пропущено', missed:'не выполнено', over:'просрочено', due:'впереди'};
+  const cells = list.map(ds=>{
+    const st = occStatus(t, ds, cur), mk = occMark(t, ds);
+    const who = mk ? (member(mk.by)?.name || '') : '';
+    return `<button type="button" class="occ occ-${st} ${ds===cur?'cur':''}" data-occ="${ds}" title="${fmtOcc(ds,{weekday:'short',day:'numeric',month:'long'})}: ${TXT[st]}${who?' — '+esc(who):''}">
+      <i>${ICO[st]}</i><b>${Number(ds.slice(8))}</b><span>${fmtOcc(ds,{weekday:'short'})}</span></button>`;
+  }).join('');
+  // статистика за 30 дней: выполнено из «должно было быть» (пропущенные намеренно не в счёт)
+  const from = _ds(_dn(today)-29);
+  let done = 0, total = 0;
+  occList(r, from, today).forEach(ds=>{
+    const st = occStatus(t, ds, cur);
+    if(st==='done'){ done++; total++; } else if(st==='missed' || st==='over') total++;
+  });
+  const stat = total ? `<span class="rep-stat">${done} из ${total} за 30 дн.</span>` : '';
+  return `<div class="d-block">
+    <div class="d-sec in-block"><b>История</b>${stat}</div>
+    <div class="occ-strip in-block">${cells}</div>
+  </div>`;
 }
 function renderDetail(){
   const t = task(activeTaskId);
@@ -3399,11 +3592,13 @@ function renderDetail(){
   let info = '';
   if(t.type==='tasks'){
     const asg = member(t.assignedTo);
-    const r = t.deadline ? relDeadline(displayDeadline(t)) : null;
+    const dl = displayDeadline(t);
+    const r = dl ? relDeadline(dl) : null;
+    const rr = repRule(t);
     info = `<div class="info-grid">
       <div class="info-cell" data-d-act="assign" style="cursor:pointer"><div class="k">Исполнитель</div><div class="v">${asg?`<span class="ava-acc-wrap">${avaHTML(asg,'ava-xs')}${t.accepted?`<i class="acc-badge">${ICON.check(9)}</i>`:''}</span>`+esc(asg.name)+(t.accepted?' <span class="acc-note">принял</span>':''):generalAvaHTML('ava-xs')+'Общее'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
-      <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">Запланировано</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text) : '—'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
-      ${t.deadline?`<div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${t.repeat?repLabel(t.repeat):'Без повтора'}${t.repeat&&t.deadline?` · далее: ${new Date(deadlineMs(displayDeadline(t))).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}`:''}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>`:''}
+      <div class="info-cell" data-inline="date" style="cursor:pointer"><div class="k">${rr?'Ближайший раз':'Запланировано'}</div><div class="v" ${r?.over?'style="color:var(--rose)"':''}>${r ? esc(r.text)+(r.over&&rr?' · '+fmtOcc(splitLocal(dl).date):'') : (rr&&t.completed?'Серия завершена':'—')}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
+      <div class="info-cell wide" data-inline="repeat" style="cursor:pointer"><div class="k">Повтор</div><div class="v">${rr?repLabel(t.repeat)+' · с '+fmtOcc(rr.start)+(rr.until?' по '+fmtOcc(rr.until):'')+(rr.time?' · '+rr.time:''):'Без повтора'}<span class="edit-pencil">${ICON.edit(13)}</span></div></div>
     </div>`;
   } else {
     info = '';
@@ -3494,6 +3689,7 @@ function renderDetail(){
     <h1 class="d-title editable" data-inline="title">${esc(t.title)}</h1>
     <div class="d-history">${history}</div>
     ${info}
+    ${t.type==='tasks' && t.repeat ? repHistoryHTML(t) : ''}
     <div class="d-block editable" data-inline="desc">
       <div class="d-sec in-block"><b>Описание</b><span class="d-edit-hint">${ICON.edit(13)}</span></div>
       ${t.description
@@ -3503,6 +3699,7 @@ function renderDetail(){
     ${voiceHtml}${lockHtml}${chkHtml}${gal}${filesHtml}${visHtml}
     <div class="d-actions">${actions}</div>`;
     hydrateImages(body);
+    { const os = body.querySelector('.occ-strip'); if(os) os.scrollLeft = os.scrollWidth; }   // свежие разы — справа
     requestAnimationFrame(()=>{ layoutDetailActions(); });
   }catch(e){
     console.error('renderDetail упал на записи', t.id, e);
@@ -3568,7 +3765,6 @@ function saveVisSheet(){
 }
 let qRepeat = null;
 function openRepeatSheet(t){
-  if(!t.deadline){ toast('Сначала задайте дату','warn'); return; }
   qRepeat = t.repeat ? JSON.parse(JSON.stringify(t.repeat)) : null;
   renderRepeatSheet();
   $('rep-overlay').classList.remove('hidden');
@@ -3596,14 +3792,27 @@ function renderRepeatSheet(){
 }
 function saveRepeatSheet(){
   const t = task(activeTaskId); if(!t) return;
-  t.repeat = qRepeat;
+  if(qRepeat){
+    // начало, время и «до» не трогаем — меняется только частота
+    const prev = repRule(t), sp = splitLocal(t.deadline);
+    const {untilWas, ...q} = qRepeat;
+    t.repeat = {...q, start: prev?.start || sp.date || todayStr(), time: prev ? prev.time : sp.time, until: prev?.until || ''};
+    repSync(t);
+  } else {
+    t.deadline = effDeadline(t) || t.deadline;   // без повтора дело остаётся на ближайший раз
+    t.repeat = null;
+  }
   t.updatedBy = S.currentUser; touch(t); persist();
   $('rep-overlay').classList.add('hidden');
   renderDetail(); haptic('ok');
   toast(qRepeat ? 'Повтор изменён' : 'Повтор убран','edit');
 }
 function openDateSheet(t){
-  const s = t.deadline ? splitLocal(t.deadline) : { date:'', time:'' };
+  const rr = repRule(t);
+  // у повтора правим начало серии и время каждого раза
+  const s = rr ? {date:rr.start, time:rr.time} : t.deadline ? splitLocal(t.deadline) : { date:'', time:'' };
+  $('date-sheet-title').textContent = rr ? 'Начало повтора и время' : 'Запланировано на';
+  $('q-clear').textContent = rr ? 'Убрать срок и повтор' : 'Убрать срок';
   $('q-date').value = s.date || '';
   $('q-time').value = s.time || '';
   syncQPh();
@@ -3632,6 +3841,7 @@ function saveDateSheet(){
   const d = $('q-date').value, tm = $('q-time').value;
   t.deadline = d ? joinLocal(d, tm) : null;
   if(!t.deadline) t.repeat = null;
+  else if(t.repeat){ t.repeat = {...t.repeat, start:d, time:tm||''}; repSync(t); }
   t.updatedBy = S.currentUser; touch(t); persist();
   $('date-overlay').classList.add('hidden');
   renderDetail(); haptic('ok'); toast(d ? 'Срок изменён' : 'Срок убран','edit');
@@ -3793,7 +4003,7 @@ function newFormBuffer(){
   return { editingId:null, type:'tasks',
     label:null, labelColor:null,
     newLabelColor:'green', labelEdit:false, assignee:null, repeat:null,
-    date:'', time:'', imageIds:[], removedImageIds:[], files:[], removedFileIds:[], voice:null, removedVoiceIds:[], lockOn:false, lockKeep:false, lockHash:null,
+    date:'', time:'', until:'', imageIds:[], removedImageIds:[], files:[], removedFileIds:[], voice:null, removedVoiceIds:[], lockOn:false, lockKeep:false, lockHash:null,
     visibility:S.members.map(m=>m.id) };
 }
 function openForm(editId){
@@ -3809,6 +4019,8 @@ function openForm(editId){
     F.lockOn = !!t.lock; F.lockKeep = !!t.lock; F.lockHash = null;
     F.visibility = (t.visibleTo||[]).length ? [...t.visibleTo] : S.members.map(m=>m.id);
     const sp = splitLocal(t.deadline); F.date = sp.date; F.time = sp.time;
+    // у повтора в форме — начало серии и время каждого раза, а не текущий раз
+    const rr = repRule(t); if(rr){ F.date = rr.start; F.time = rr.time; F.until = rr.until; }
     $('f-title').value = t.title||'';
     $('f-desc').value = t.description||'';
     $('f-checklist').innerHTML = '';
@@ -3842,7 +4054,7 @@ function formSnapshot(){
   const chk = [...document.querySelectorAll('#f-checklist input')].map(i=>i.value).join('|');
   return JSON.stringify({
     ty:F.type, ti:$('f-title').value, de:$('f-desc').value,
-    d:F.date, t:F.time, rp:F.repeat, lbl:F.label, asg:F.assignee,
+    d:F.date, t:F.time, rp:F.repeat, un:F.until||'', lbl:F.label, asg:F.assignee,
     vis:[...(F.visibility||[])].sort(), img:[...(F.imageIds||[])], fls:(F.files||[]).map(f=>f.id), vc:F.voice?.id||'', chk
   });
 }
@@ -3874,7 +4086,8 @@ function renderPlan(){
   tEl.classList.toggle('empty', !F.time);
   const has = !!F.date;
   $('f-plan-clear').classList.toggle('hidden', !has && !F.time);
-  $('f-repeat-group').classList.toggle('hidden', !has);
+  // повтор не требует даты: без неё серия начнётся сегодня
+  $('f-plan-cap').textContent = F.repeat ? 'Начало повтора и время' : 'Запланировано';
   // быстрые пресеты дат (время подставляется автоматически)
   const p = n=>String(n).padStart(2,'0');
   const dstr = d => `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
@@ -3896,7 +4109,6 @@ function renderPlan(){
   renderRepeat();
 }
 function renderRepeat(){
-  if(!F.date){ F.repeat = null; }
   $('f-repeat').innerHTML = REPEAT_OPTS.map(o=>{
     const sel = (!F.repeat && o.k==='') || (F.repeat && F.repeat.freq===o.k);
     const label = (o.k==='custom' && F.repeat?.freq==='custom') ? 'Каждые '+F.repeat.interval+' дн.' : o.label;
@@ -3906,6 +4118,19 @@ function renderRepeat(){
   st.classList.toggle('hidden', F.repeat?.freq !== 'custom');
   if(F.repeat?.freq === 'custom') $('f-rep-n').textContent = F.repeat.interval;
   renderDowPick();
+  // «до» и превью ближайших раз — сразу видно, когда дело реально случится
+  $('f-until-row').classList.toggle('hidden', !F.repeat);
+  const ue = $('f-until'); ue.value = F.until || ''; ue.min = F.date || todayStr(); ue.classList.toggle('empty', !F.until);
+  const pv = $('f-rep-prev');
+  pv.classList.toggle('hidden', !F.repeat);
+  if(F.repeat){
+    const r = repRule({repeat:{...F.repeat, start:F.date||todayStr(), time:F.time, until:F.until||''}});
+    const next = occList(r, todayStr() > r.start ? todayStr() : r.start, '9999-12-31', 4);
+    pv.innerHTML = next.length
+      ? 'Ближайшие: ' + next.map(ds=>`<b>${fmtOcc(ds,{weekday:'short',day:'numeric',month:'short'})}</b>`).join(', ') + (r.time ? ` · в ${r.time}` : ' · весь день')
+      : 'В этом промежутке нет ни одного раза — проверьте «до»';
+    $('f-plan-cap').textContent = 'Начало повтора и время';
+  } else $('f-plan-cap').textContent = 'Запланировано';
 }
 function renderDowPick(){
   const box = $('f-dow'); if(!box) return;
@@ -4121,7 +4346,9 @@ async function saveForm(asDraft){
   });
   const desc = $('f-desc').value.trim();
   const dl = F.type==='tasks' ? joinLocal(F.date, F.time) : '';
-  const rp = (F.type==='tasks' && F.date) ? F.repeat : null;
+  const rp = (F.type==='tasks' && F.repeat)
+    ? {...F.repeat, start:F.date||todayStr(), time:F.time||'', until:(F.until && F.until >= (F.date||todayStr())) ? F.until : ''}
+    : null;
 
   // общие данные формы, чтобы не собирать дважды
   F._pending = { title, desc, dl, rp, checklist, asDraft };
@@ -4139,6 +4366,7 @@ async function saveForm(asDraft){
               ? (F.lockHash || (F.lockKeep ? t.lock : null))
               : null,
       checklist, updatedBy:S.currentUser, updatedAt:Date.now() });
+    if(t.repeat) repSync(t);   // срок = текущий раз по новому правилу
     persist(); toast('Сохранено','ok');
     activeTaskId = t.id; show('detail');
     return;
@@ -4162,6 +4390,7 @@ function finalizeCreate(assignee, asDraft){
     imageIds:[...F.imageIds], files:[...(F.files||[])], voice:F.voice||null, checklist:p.checklist,
     updatedAt:Date.now(),
   };
+  if(nt.repeat) repSync(nt);
   S.tasks.push(nt);
   S.currentTab = F.type;
   const P = prefs(); P.catFilter = null;
@@ -6362,13 +6591,18 @@ document.addEventListener('click', e=>{
     activeTaskId = _id; show('detail'); return; }
   if(x = el('[data-act]')){ ctxAction(x.dataset.act); return; }
   if(el('#ctx-overlay') && !el('.sheet')){ $('ctx-overlay').classList.add('hidden'); return; }
+  if(x = el('[data-occ]')){ openRepeatDone(activeTaskId, x.dataset.occ); haptic('tap'); return; }
   if(x = el('[data-repdone]')){
     $('repeat-overlay').classList.add('hidden');
-    const id = repDoneId; repDoneId = null;
+    const id = repDoneId, ds = repDoneDate; repDoneId = null; repDoneDate = null;
     const t = task(id); if(!t) return;
-    if(x.dataset.repdone === 'next') completeOccurrence(id);
+    if(x.dataset.repdone !== 'all') markOccurrence(id, ds, x.dataset.repdone);
     else {
-      t.completed = true; t.updatedBy = S.currentUser; touch(t);
+      // закрываем серию датой: будущие разы исчезают из календаря, история остаётся
+      const td = todayStr(), r = repRule(t);
+      const until = occMark(t, td) ? td : _ds(_dn(td)-1);
+      t.repeat = {...t.repeat, start:r.start, time:r.time, until: (r.until && r.until < until) ? r.until : until, untilWas: r.until || ''};
+      t.completed = true; delete t.seriesEnded; t.updatedBy = S.currentUser; touch(t);
       persist(); toast('Серия завершена — напоминаний больше не будет','ok');
       { const aud = visAudience(t); if(aud.length) pushEvent('Выполнено (серия завершена)', `${t.title} — ${member(S.currentUser)?.name||''}`, 'evt-done-'+t.id+'-'+(t.updatedAt||0), aud); }
       activeScreen==='detail' ? renderDetail() : renderMain();
@@ -6409,7 +6643,7 @@ document.addEventListener('click', e=>{
       const d = $('q-date') && $('q-date').value;
       let def = [];
       const t0 = task(activeTaskId);
-      if(t0?.deadline) def = [new Date(splitLocal(t0.deadline).date + 'T12:00').getDay()];
+      def = [new Date((repRule(t0)?.start || splitLocal(t0?.deadline).date || todayStr()) + 'T12:00').getDay()];
       qRepeat = {freq:'bydays', interval:1, days:(qRepeat?.freq==='bydays' && qRepeat.days?.length) ? qRepeat.days : def};
     }
     else qRepeat = {freq:k, interval:1};
@@ -6481,8 +6715,7 @@ document.addEventListener('click', e=>{
     else if(k==='custom') F.repeat = {freq:'custom', interval:F.repeat?.freq==='custom'?F.repeat.interval:2};
     else if(k==='bydays'){
       // по умолчанию — день недели выбранной даты
-      let def = [];
-      if(F.date){ const wd = new Date(F.date+'T12:00').getDay(); def = [wd]; }
+      const def = [new Date((F.date||todayStr())+'T12:00').getDay()];
       F.repeat = {freq:'bydays', interval:1, days:(F.repeat?.freq==='bydays'&&F.repeat.days?.length)?F.repeat.days:def};
     }
     else F.repeat = {freq:k, interval:1};
@@ -6505,7 +6738,7 @@ document.addEventListener('click', e=>{
     return; }
   if(x = el('[data-setdate]')){ F.date = x.dataset.setdate; if(!F.time) F.time = '09:00'; renderPlan(); return; }
   if(x = el('[data-settime]')){ F.time = F.time===x.dataset.settime ? '' : x.dataset.settime; renderPlan(); return; }
-  if(el('#f-plan-clear')){ F.date=''; F.time=''; F.repeat=null; renderPlan(); return; }
+  if(el('#f-plan-clear')){ F.date=''; F.time=''; renderPlan(); return; }   // повтор остаётся — начнётся сегодня
   if(el('#f-photo-btn')){ $('f-file').click(); return; }
   if(el('#f-doc-btn')){ $('f-doc-input').click(); return; }
   if(el('#f-voice-btn')){ toggleFormVoice(); return; }
@@ -6717,6 +6950,7 @@ $('chat-input').addEventListener('keydown', e=>{
 });
 $('f-date').addEventListener('change', e=>{ F.date = e.target.value; if(F.date && !F.time) F.time = '09:00'; renderPlan(); });
 $('f-time').addEventListener('change', e=>{ F.time = e.target.value; renderPlan(); });
+$('f-until').addEventListener('change', e=>{ F.until = e.target.value; renderRepeat(); });
 $('fam-ava-input').addEventListener('change', e=>{ handleAvatarFile(e.target.files[0]); e.target.value=''; });
 $('f-title').addEventListener('input', e=>e.target.classList.remove('err'));
 $('f-desc').addEventListener('input', autoGrowDesc);
