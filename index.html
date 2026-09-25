@@ -1838,6 +1838,15 @@ function renderMarkdown(src){
   }
   return out;
 }
+// защита от падения самописного парсера на непредвиденном сочетании символов:
+// если разметка почему-то не строится, показываем как обычный текст, а не роняем весь рендер карточки
+function safeRenderMarkdown(src){
+  try{ return renderMarkdown(src); }
+  catch(e){
+    console.error('renderMarkdown упал на:', JSON.stringify(src), e);
+    return `<p>${esc(String(src||'')).replace(/\n/g,'<br>')}</p>`;
+  }
+}
 const MD_SPEC = {
   bold:  {t:'Жирный текст',   a:'**', b:'**', line:false},
   italic:{t:'Курсив',         a:'*',  b:'*',  line:false},
@@ -1906,7 +1915,9 @@ function autoGrowDesc(){
 }
 function highlightDesc(){
   const ta = $('f-desc'), hl = $('md-hl'); if(!ta||!hl) return;
-  hl.innerHTML = highlightMarkdown(ta.value);
+  // выполняется на каждое нажатие клавиши — падение здесь не должно мешать печатать
+  try{ hl.innerHTML = highlightMarkdown(ta.value); }
+  catch(e){ console.error('highlightMarkdown упал на:', JSON.stringify(ta.value), e); hl.innerHTML = esc(ta.value); }
   hl.scrollTop = ta.scrollTop;
 }
 // подсветка markdown прямо в поле: маркеры приглушены, содержимое стилизовано
@@ -3474,7 +3485,11 @@ function renderDetail(){
   const actions = acts.map(x=>`<button class="btn ${x.cls}" data-d-act="${x.a}">${x.ic(16)} ${esc(x.label)}</button>`).join('');
 
   const body = $('detail-body');
-  body.innerHTML = `
+  // на случай непредвиденного сбоя где угодно внутри шаблона: не даём ему
+  // прервать выполнение у вызывающей стороны (иначе, например, тост об успешном
+  // сохранении после правки просто не долетит, хотя данные уже сохранены)
+  try{
+    body.innerHTML = `
     <div class="card-chips" style="margin:0">${chips}</div>
     <h1 class="d-title editable" data-inline="title">${esc(t.title)}</h1>
     <div class="d-history">${history}</div>
@@ -3482,28 +3497,45 @@ function renderDetail(){
     <div class="d-block editable" data-inline="desc">
       <div class="d-sec in-block"><b>Описание</b><span class="d-edit-hint">${ICON.edit(13)}</span></div>
       ${t.description
-        ? `<div class="d-desc md-render in-block">${renderMarkdown(t.description)}</div>`
+        ? `<div class="d-desc md-render in-block">${safeRenderMarkdown(t.description)}</div>`
         : `<div class="d-desc empty-desc in-block">Добавить описание</div>`}
     </div>
     ${voiceHtml}${lockHtml}${chkHtml}${gal}${filesHtml}${visHtml}
     <div class="d-actions">${actions}</div>`;
-  hydrateImages(body);
-  requestAnimationFrame(()=>{ layoutDetailActions(); });
+    hydrateImages(body);
+    requestAnimationFrame(()=>{ layoutDetailActions(); });
+  }catch(e){
+    console.error('renderDetail упал на записи', t.id, e);
+    // минимальный, гарантированно рабочий откат — хотя бы название и сырой текст описания видны
+    body.innerHTML = `
+    <h1 class="d-title editable" data-inline="title">${esc(t.title)}</h1>
+    <div class="d-block editable" data-inline="desc">
+      <div class="d-sec in-block"><b>Описание</b></div>
+      <div class="d-desc in-block">${esc(t.description||'').replace(/\n/g,'<br>')}</div>
+    </div>
+    <div class="d-actions">${actions}</div>`;
+    toast('Не удалось полностью отрисовать карточку — данные сохранены','warn');
+  }
 }
 // ---- правка по месту: каждая зона правит только себя ----
 function inlineEdit(kind){
   const t = task(activeTaskId); if(!t) return;
   if(isLocked(t)){ askUnlock(t.id, ()=>inlineEdit(kind)); return; }
+  const tid = t.id;   // сохраняем стабильный id, а не сам объект —
+                       // за время печати фоновая синхронизация может пересобрать S.tasks
+                       // новыми объектами, и старая ссылка «отвалится» от реального состояния
   if(kind === 'title'){
     inlineTextDlg('Название', t.title || '', false, v=>{
       if(!v.trim()) { toast('Название не может быть пустым','warn'); return; }
-      t.title = v.trim(); t.updatedBy = S.currentUser; touch(t); persist(); renderDetail(); toast('Название изменено','edit');
+      const cur = task(tid); if(!cur){ toast('Запись не найдена — возможно, удалена','warn'); return; }
+      cur.title = v.trim(); cur.updatedBy = S.currentUser; touch(cur); persist(); renderDetail(); toast('Название изменено','edit');
     });
     return;
   }
   if(kind === 'desc'){
     inlineTextDlg('Описание', t.description || '', true, v=>{
-      t.description = v; t.updatedBy = S.currentUser; touch(t); persist(); renderDetail(); toast('Описание изменено','edit');
+      const cur = task(tid); if(!cur){ toast('Запись не найдена — возможно, удалена','warn'); return; }
+      cur.description = v; cur.updatedBy = S.currentUser; touch(cur); persist(); renderDetail(); toast('Описание изменено','edit');
     });
     return;
   }
